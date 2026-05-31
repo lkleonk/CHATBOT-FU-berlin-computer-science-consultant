@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FU Berlin CS Consultant Agent Flow</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --ink: #1f2933;
+      --muted: #5c6670;
+      --line: #8a97a3;
+      --blue: #d9e8ff;
+      --blue-border: #4b7bec;
+      --green: #dff4e6;
+      --green-border: #2f9e62;
+      --yellow: #fff2c2;
+      --yellow-border: #c79000;
+      --red: #ffe2df;
+      --red-border: #d6453d;
+      --gray: #edf1f5;
+      --gray-border: #7b8794;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 20px 40px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .diagram {
+      width: 100%;
+      overflow-x: auto;
+      background: #ffffff;
+      border: 1px solid #d8dee6;
+      border-radius: 8px;
+    }
+
+    svg {
+      display: block;
+      min-width: 1080px;
+      width: 100%;
+      height: auto;
+    }
+
+    .node rect {
+      stroke-width: 2;
+      rx: 8;
+      ry: 8;
+    }
+
+    .node text {
+      font-size: 15px;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: middle;
+      letter-spacing: 0;
+    }
+
+    .start rect,
+    .end rect {
+      fill: var(--gray);
+      stroke: var(--gray-border);
+    }
+
+    .llm rect {
+      fill: var(--blue);
+      stroke: var(--blue-border);
+    }
+
+    .lookup rect {
+      fill: var(--yellow);
+      stroke: var(--yellow-border);
+    }
+
+    .det rect {
+      fill: var(--green);
+      stroke: var(--green-border);
+    }
+
+    .off rect {
+      fill: var(--red);
+      stroke: var(--red-border);
+    }
+
+    .edge {
+      stroke: var(--line);
+      stroke-width: 2;
+      fill: none;
+      marker-end: url(#arrow);
+    }
+
+    .label {
+      font-size: 13px;
+      fill: var(--muted);
+      text-anchor: middle;
+      dominant-baseline: middle;
+      letter-spacing: 0;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid;
+      flex: 0 0 auto;
+    }
+
+    .blue { background: var(--blue); border-color: var(--blue-border); }
+    .yellow { background: var(--yellow); border-color: var(--yellow-border); }
+    .green { background: var(--green); border-color: var(--green-border); }
+    .red { background: var(--red); border-color: var(--red-border); }
+    .gray { background: var(--gray); border-color: var(--gray-border); }
+
+    .callout {
+      margin-top: 18px;
+      padding: 14px 18px;
+      background: var(--yellow);
+      border-left: 4px solid var(--yellow-border);
+      border-radius: 6px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    code {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      background: rgba(0, 0, 0, 0.06);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>FU Berlin CS Consultant Agent Flow</h1>
+    <p>
+      Backend-only LangGraph flow. <strong>Course offerings use exact JSON bucket lookup</strong>;
+      degree rules live in the LLM system prompt, and study-plan validation is owned by
+      deterministic Python code.
+    </p>
+
+    <div class="diagram" aria-label="Agent flow diagram">
+      <svg viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
+        <title id="title">FU Berlin CS consultant agent flow</title>
+        <desc id="desc">A graph showing scope classification, off-topic routing, study-question course lookup, and plan-check parsing plus deterministic validation before answer composition.</desc>
+
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L8,3 z" fill="#8a97a3"></path>
+          </marker>
+        </defs>
+
+        <g class="node start" transform="translate(40 250)">
+          <rect width="90" height="60"></rect>
+          <text x="45" y="30">START</text>
+        </g>
+
+        <g class="node llm" transform="translate(180 230)">
+          <rect width="150" height="100"></rect>
+          <text x="75" y="38">Scope</text>
+          <text x="75" y="62">Classifier</text>
+        </g>
+
+        <g class="node off" transform="translate(410 70)">
+          <rect width="150" height="80"></rect>
+          <text x="75" y="31">Offtopic</text>
+          <text x="75" y="53">Reply</text>
+        </g>
+
+        <g class="node llm" transform="translate(410 230)">
+          <rect width="150" height="100"></rect>
+          <text x="75" y="31">Course Key</text>
+          <text x="75" y="53">Selector</text>
+          <text x="75" y="75">many keys OK</text>
+        </g>
+
+        <g class="node lookup" transform="translate(610 230)">
+          <rect width="150" height="100"></rect>
+          <text x="75" y="38">Course</text>
+          <text x="75" y="62">Lookup</text>
+        </g>
+
+        <g class="node llm" transform="translate(810 250)">
+          <rect width="150" height="90"></rect>
+          <text x="75" y="35">Answer</text>
+          <text x="75" y="58">Composer</text>
+        </g>
+
+        <g class="node llm" transform="translate(410 400)">
+          <rect width="150" height="90"></rect>
+          <text x="75" y="35">Study Plan</text>
+          <text x="75" y="58">Parser</text>
+        </g>
+
+        <g class="node det" transform="translate(610 400)">
+          <rect width="150" height="90"></rect>
+          <text x="75" y="35">Rule</text>
+          <text x="75" y="58">Checker</text>
+        </g>
+
+        <g class="node end" transform="translate(960 80)">
+          <rect width="80" height="60"></rect>
+          <text x="40" y="30">END</text>
+        </g>
+
+        <g class="node end" transform="translate(990 265)">
+          <rect width="70" height="60"></rect>
+          <text x="35" y="30">END</text>
+        </g>
+
+        <path class="edge" d="M130 280 H180"></path>
+        <path class="edge" d="M330 255 C365 170 375 110 410 110"></path>
+        <text class="label" x="370" y="172">off_topic</text>
+
+        <path class="edge" d="M330 280 H410"></path>
+        <text class="label" x="370" y="264">study_question</text>
+
+        <path class="edge" d="M330 305 C365 380 375 445 410 445"></path>
+        <text class="label" x="370" y="380">plan_check</text>
+
+        <path class="edge" d="M560 110 H960"></path>
+        <path class="edge" d="M560 280 H610"></path>
+        <path class="edge" d="M760 280 H810"></path>
+        <path class="edge" d="M560 445 H610"></path>
+        <path class="edge" d="M760 445 C805 445 785 295 810 295"></path>
+        <path class="edge" d="M960 295 H990"></path>
+
+        <text class="label" x="785" y="432">plan_check result</text>
+      </svg>
+    </div>
+
+    <div class="legend" aria-label="Legend">
+      <div class="legend-item"><span class="swatch blue"></span>LLM-backed node</div>
+      <div class="legend-item"><span class="swatch yellow"></span>Exact course-offering lookup</div>
+      <div class="legend-item"><span class="swatch green"></span>Deterministic Python validation</div>
+      <div class="legend-item"><span class="swatch red"></span>Off-topic redirect</div>
+      <div class="legend-item"><span class="swatch gray"></span>Graph boundary</div>
+    </div>
+
+    <div class="callout">
+      <strong>Lookup scope:</strong> active course-offering lookup reads
+      <code>backend/app/domain/data/course_offerings.json</code> through keys like
+      <code>sose26/technical/swp</code>. The old Qdrant retrieval code remains in the repository for
+      manual experiments, but it is not connected to the compiled graph. Degree-rule questions are
+      answered from <code>RULES_CONTEXT</code>, which is rendered from <code>program_rules.py</code>,
+      and the <code>plan_check</code> path runs parser, deterministic rule checker, then
+      <code>AnswerComposer</code>.
+    </div>
+  </main>
+</body>
+</html>

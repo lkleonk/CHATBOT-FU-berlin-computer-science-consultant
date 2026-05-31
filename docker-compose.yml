@@ -1,0 +1,47 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:5100
+    container_name: fu_cs_consultant_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:5100
+    depends_on:
+      backend:
+        condition: service_started
+
+  backend:
+    build: ./backend
+    container_name: fu_cs_consultant_backend
+    restart: unless-stopped
+    ports:
+      - "5100:5100"
+    env_file:
+      - path: .env
+        required: false
+      - path: .env.local
+        required: false
+    environment:
+      CONSULTANT_HOST: 0.0.0.0
+      CONSULTANT_PORT: 5100
+    volumes:
+      - ./ressources:/app/ressources:ro
+
+  qdrant:
+    profiles: ["legacy-rag"]
+    image: qdrant/qdrant:latest
+    container_name: fu_cs_consultant_qdrant
+    restart: unless-stopped
+    ports:
+      - "6335:6333"
+      - "6336:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  qdrant_data:
+    driver: local

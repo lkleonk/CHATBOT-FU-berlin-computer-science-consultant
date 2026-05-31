@@ -1,0 +1,27 @@
+Ablauf des Studiums gemäß Studien- und Prüfungsordnung ab WS 2014/15
+Die Regelstudienzeit beträgt 4 Semester.
+
+Im Masterstudium Informatik werden Module im Umfang von 90 Leistungspunkten (LP) in folgenden Teilgebieten studiert:
+
+Bereich Informatik mit 70-80 LP, geliedert in drei Studiengebiete:
+Praktische Informatik (mindestens 20 LP, bei Vertiefung mindestens 40 LP),
+Technische Informatik (mindestens 10 LP, bei Vertiefung mindestens 30 LP),
+Theoretische Informatik (mindestens 10 LP, bei Vertiefung mindestens 30 LP).
+Eines der drei Gebiete ist als Vertiefung zu wählen und um mindestens 20 LP zu erweitern.
+
+2.  Anwendungsbereich (früher "Nebenfach", mindestens 10 LP, höchstens 20 LP),
+
+In jedem der drei Studiengebiete Informatik gibt es zwei Module Wissenschaftliches Arbeiten in Form von Hauptseminaren mit je 5 LP und zwei Softwareprojekte mit je 10 LP, die sich jeweils im Schwerpunkt der Qualifikationsziele  und in der Zusatzbenennung (A oder B) unterscheiden. Das exakt gleiche Modul (z. B. Wissenschaftliches Arbeiten Technische Informatik A) kann nur einmal gewählt werden. Diese Module sind unbenotet, mit Ausnahme der Softwareprojekte A. (Achtung Verwirrungsgefahr: Im Bachelorstudium gibt es auch die Module Softwareprojekt A und B, aber dort ist es umgekehrt: A ist unbenotet und B ist benotet.)
+
+Es gibt keine Pflichtmodule.
+
+Randbedingungen
+Module Wissenschaftliches Arbeiten: Mindestens eins im Vertiefungsgebiet. Insgesamt mindestens 2, höchstens 4.
+
+Module Softwareprojekt: Mindestens eins, höchstens zwei.
+
+Der Anteil unbenoteter Module muss 25-30 LP betragen (§7, Abs. 10). Unbenotete Module sind alle Module Wissenschaftliches Arbeiten (5 LP Seminar), Softwareprojekt B (10 LP), die drei Module Grundlagen des Managements von IT-Projekten aus dem Bachelorstudiengang, Projektmanagement, und Projektmanagement–Vertiefung (je 5 LP) (von denen aber nur 1-2 zugleich gewählt werden können siehe §7, Abs. 9), Praktiken professioneller Softwareentwicklung (5 LP), und das Bachelor-Modul Existenzgründung in der IT-Industrie (5 LP). Mit der vorgeschriebenen Mindestzahl von zwei Hauptseminaren erreicht man schon 10 unbenotete LP. Mit einem weiteren Hauptseminar und einem Softwareprojekt B ist man über dem Berg. Man darf aber nicht darüber hinausschießen. Wer 2 Softwareprojekte B macht, hat schon die Obergrenze erreicht. Auch die Module aus dem Anwendungsbereich muss man in diese Rechnung einbeziehen.
+
+Module aus einem Bachelorstudiengang können nur bis zu einem Umfang von 15 LP eingebracht werden (§7, Abs. 9). Bachelor-Module sind Grundlagen des Managements von IT-Projekten und Existenzgründung in der IT-Industrie (je 5 LP). Dazu kommen in der Regel die Module des Anwendungsgebiets (früher "Nebenfach"), weil fortgeschrittene Master-Module in einem fremden Gebiet für Studierende, die das Fach nicht schwerpunktmäßig belegen, nur ausnahmsweise geeignet sind. Das Maximum von 20 LP im Anwendungsbereich kann man also nur dann ausschöpfen, wenn darunter auch Master-Module sind.
+
+Das gleiche Modul aus dem Masterstudium, das schon im Rahmen des Vertiefungsgebiets im vorangegangenen Bachelorstudium belegt wurde, kann natürlich nicht für das Masterstudium noch einmal verwendet werden.

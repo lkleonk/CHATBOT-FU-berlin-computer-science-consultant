@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FU Berlin CS Consultant — Project Overview</title>
+  <style>
+    :root {
+      --bg: #f3f8f5;
+      --panel: #ffffff;
+      --ink: #1a2a22;
+      --muted: #5a6f64;
+      --line: #d3e0d7;
+      --accent: #1f8a5c;
+      --accent-soft: #e0f2e7;
+      --accent-strong: #155d3e;
+      --accent-bright: #34b079;
+      --green: #1f8a5c;
+      --green-soft: #e0f2e7;
+      --yellow: #b87a00;
+      --yellow-soft: #fff2c2;
+      --red: #c63a32;
+      --red-soft: #ffe2df;
+      --code-bg: #0f1f17;
+      --code-ink: #e2f0e8;
+      --code-muted: #94b3a4;
+    }
+
+    /* Make backgrounds and colors actually print */
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    header.hero {
+      background: linear-gradient(135deg, #155d3e 0%, #1f8a5c 60%, #34b079 100%);
+      color: #fff;
+      padding: 56px 24px 72px;
+      position: relative;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    header.hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.10), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08), transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin: 0 0 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      max-width: 720px;
+      opacity: 0.92;
+      margin: 0 0 28px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: -40px auto 0;
+      padding: 0 24px 64px;
+      position: relative;
+    }
+
+    section.card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.04);
+    }
+
+    section.card h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      color: var(--accent-strong);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    section.card h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    section.card .lead {
+      color: var(--muted);
+      margin: 0 0 20px;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin: 20px 0 8px;
+      color: var(--ink);
+    }
+
+    p { margin: 0 0 12px; }
+
+    ul {
+      margin: 0 0 12px;
+      padding-left: 20px;
+    }
+
+    li { margin-bottom: 4px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 720px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      h1 { font-size: 30px; }
+      header.hero { padding: 40px 20px 60px; }
+      section.card { padding: 22px 20px; }
+    }
+
+    .tile {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      background: #fbfcfe;
+    }
+
+    .tile h4 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--accent-strong);
+      letter-spacing: 0.02em;
+    }
+
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    code {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 16px 18px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 0 0 12px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: 13px;
+    }
+
+    .comment { color: var(--code-muted); }
+
+    /* Agent flow diagram */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+      margin: 8px 0 4px;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .node {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1.5px solid;
+      font-size: 13px;
+      font-weight: 600;
+      background: #fff;
+    }
+
+    .node.start { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong); }
+    .node.decision { background: var(--yellow-soft); border-color: var(--yellow); color: var(--yellow); }
+    .node.process { background: #fff; border-color: var(--line); color: var(--ink); }
+    .node.end { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+    .node.off { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+
+    .arrow {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border: 1px dashed var(--line);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    /* Rules list */
+    .rule-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .rule-list li {
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      border-left: 3px solid var(--accent);
+    }
+
+    @media (max-width: 720px) {
+      .rule-list { grid-template-columns: 1fr; }
+    }
+
+    /* Principle highlight */
+    .principle {
+      background: linear-gradient(90deg, var(--accent-soft), #fff);
+      border-left: 4px solid var(--accent);
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 14px;
+      color: var(--accent-strong);
+      margin: 8px 0 4px;
+    }
+
+    /* Service table */
+    .svc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .svc-table th, .svc-table td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .svc-table th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .svc-table tr:last-child td { border-bottom: none; }
+
+    .svc-table code { font-size: 12px; }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Frontend/backend architecture diagram */
+    .architecture-graph {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.9fr) 34px minmax(230px, 1.2fr) 34px minmax(220px, 1fr);
+      gap: 12px;
+      align-items: stretch;
+      margin: 20px 0 12px;
+    }
+
+    .arch-box {
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #fff;
+    }
+
+    .arch-box strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--accent-strong);
+      font-size: 14px;
+    }
+
+    .arch-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .arch-frontend {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .arch-backend {
+      background: #ffffff;
+      border-color: var(--accent-strong);
+    }
+
+    .arch-data {
+      background: #fbfcfe;
+    }
+
+    .arch-optional {
+      background: var(--yellow-soft);
+      border-color: var(--yellow);
+    }
+
+    .arch-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .arch-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .arch-mini span {
+      font-size: 11px;
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+
+    .diagram-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 16px;
+    }
+
+    .pill {
+      font-size: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    .pill.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    footer {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 20px 24px 48px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    .note {
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--yellow-soft);
+      border-left: 3px solid var(--yellow);
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-top: 12px;
+    }
+
+    .screenshot {
+      margin: 6px 0 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .screenshot-caption {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      background: #fafdfb;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 860px) {
+      .architecture-graph {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-arrow {
+        min-height: 18px;
+        transform: rotate(90deg);
+      }
+    }
+
+    @media print {
+      body { background: #fff; }
+      header.hero {
+        background: linear-gradient(135deg, #155d3e 0%, #1f8a5c 60%, #34b079 100%) !important;
+        color: #fff !important;
+      }
+      header.hero h1,
+      header.hero .hero-sub,
+      header.hero .badge,
+      header.hero .chip { color: #fff !important; }
+      .chip, .badge {
+        background: rgba(255,255,255,0.18) !important;
+        border-color: rgba(255,255,255,0.32) !important;
+      }
+      section.card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+      pre {
+        background: var(--code-bg) !important;
+        color: var(--code-ink) !important;
+      }
+      pre, pre code {
+        background: var(--code-bg) !important;
+        color: var(--code-ink) !important;
+      }
+      pre .comment { color: var(--code-muted) !important; }
+      .rule-list li,
+      section.card h2 .num,
+      :not(pre) > code,
+      .principle {
+        background: var(--accent-soft) !important;
+        color: var(--accent-strong) !important;
+      }
+      .pill.accent {
+        background: var(--accent) !important;
+        color: #fff !important;
+      }
+      main { margin-top: -40px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="badge">Full-stack Prototype · Exact Lookup · LangGraph</span>
+    <h1>FU Berlin CS Consultant</h1>
+    <p class="hero-sub">
+      A study consultant for the <strong>FU Berlin Master Informatik</strong> programme.
+      It answers programme questions from local resources and validates proposed study
+      plans against the deterministic 2014 Master Informatik rules.
+    </p>
+    <div class="hero-meta">
+      <span class="chip">Next.js · React · TypeScript</span>
+      <span class="chip">FastAPI · Python</span>
+      <span class="chip">LangGraph</span>
+      <span class="chip">Exact Course Lookup</span>
+      <span class="chip">Docker Compose</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2><span class="num">1</span>What it does</h2>
+    <p class="lead">
+      A backend-first study consultant with a standalone Next.js frontend. The LLM
+      parses and explains; deterministic Python rules decide whether a study plan is valid.
+    </p>
+    <div class="grid-3">
+      <div class="tile">
+        <h4>Programme Q&amp;A</h4>
+        <p>Answers rule questions from the structured rule catalogue and course-offering questions from exact JSON buckets.</p>
+      </div>
+      <div class="tile">
+        <h4>Study-Plan Check</h4>
+        <p>Parses a proposed plan, validates LP totals and area rules, and explains issues.</p>
+      </div>
+      <div class="tile">
+        <h4>Degree Rules</h4>
+        <p>Structured, read-only catalogue of programme rules served via a dedicated API.</p>
+      </div>
+    </div>
+    <div class="note">
+      Advisory only — official FU Berlin documents and the examination office remain
+      authoritative for real study decisions.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">2</span>Chat in action</h2>
+    <p class="lead">
+      A real session in the consultant frontend — question, grounded answer, citations,
+      and the four-tab shell around it.
+    </p>
+    <figure class="screenshot">
+      <img src="../ressources/fu_berlin_cs_consultant_chat_example.png"
+           alt="Screenshot of the FU Berlin CS Consultant chat tab showing a question, the assistant's grounded answer and citations.">
+      <figcaption class="screenshot-caption">
+        Consultant chat tab - grounded answer with citations from local course data.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">3</span>Architecture</h2>
+    <p class="lead">Two services orchestrated by Docker Compose.</p>
+    <table class="svc-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Stack</th>
+          <th>Endpoint</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Frontend</strong></td>
+          <td>Next.js App Router · React · TypeScript · Material UI</td>
+          <td><code>http://localhost:3000/consultant</code></td>
+        </tr>
+        <tr>
+          <td><strong>Backend</strong></td>
+          <td>FastAPI · LangGraph · Pydantic</td>
+          <td><code>http://localhost:5100</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="architecture-graph" aria-label="Frontend backend architecture diagram">
+      <div class="arch-box arch-frontend">
+        <strong>Browser + Frontend</strong>
+        <p>Next.js UI at <code>:3000</code>. The browser calls the backend through the host-facing API URL.</p>
+        <div class="arch-mini">
+          <span>Chat</span>
+          <span>Study Plan</span>
+          <span>Degree Rules</span>
+          <span>Settings</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow" aria-hidden="true">&rarr;</div>
+
+      <div class="arch-box arch-backend">
+        <strong>FastAPI Backend</strong>
+        <p>Owns sessions, transcript upload, LangGraph routing, rule validation, and response composition.</p>
+        <div class="arch-mini">
+          <span>LangGraph</span>
+          <span>PDF parser</span>
+          <span>Rule checker</span>
+          <span>API</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow" aria-hidden="true">&rarr;</div>
+
+      <div class="arch-stack">
+        <div class="arch-box arch-data">
+          <strong>Local Sources</strong>
+          <p>Course buckets, program-rule catalogue, deterministic degree rules, and in-memory session state.</p>
+        </div>
+        <div class="arch-box">
+          <strong>LLM Provider</strong>
+          <p>AcademicCloud, FU Ollama over SSH, or local Ollama depending on <code>LLM_PROVIDER</code>.</p>
+        </div>
+      </div>
+    </div>
+    <p class="diagram-note">
+      Important Docker detail: <code>NEXT_PUBLIC_API_BASE_URL</code> points to <code>http://localhost:5100</code>
+      because frontend JavaScript runs in the user's browser, not inside the Docker network.
+    </p>
+
+    <h3>Backend API</h3>
+    <pre><code>GET  /health
+GET  /api/program-rules
+POST /api/sessions
+POST /api/sessions/{session_id}/message
+POST /api/sessions/{session_id}/transcript</code></pre>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">4</span>Agent Flow</h2>
+    <p class="lead">
+      A LangGraph state machine routes every user message to the right pipeline.
+      Off-topic messages short-circuit. Study questions go through exact course lookup when
+      needed; plan checks skip retrieval and go through deterministic validation.
+    </p>
+
+    <div class="flow">
+      <div class="flow-row">
+        <div class="node start">START</div>
+        <span class="arrow">→</span>
+        <div class="node decision">ScopeClassifier</div>
+      </div>
+
+      <div class="flow-row">
+        <span class="label">off_topic</span>
+        <span class="arrow">→</span>
+        <div class="node process">OfftopicReply</div>
+        <span class="arrow">→</span>
+        <div class="node end">END</div>
+      </div>
+
+      <div class="flow-row">
+        <span class="label">study_question</span>
+        <span class="arrow">→</span>
+        <div class="node process">CourseKeySelector</div>
+        <span class="arrow">→</span>
+        <div class="node process">CourseLookup</div>
+        <span class="arrow">→</span>
+        <div class="node process">AnswerComposer</div>
+        <span class="arrow">→</span>
+        <div class="node end">END</div>
+      </div>
+
+      <div class="flow-row">
+        <span class="label">plan_check</span>
+        <span class="arrow">→</span>
+        <div class="node process">StudyPlanParser</div>
+        <span class="arrow">→</span>
+        <div class="node process">RuleChecker</div>
+        <span class="arrow">→</span>
+        <div class="node process">AnswerComposer</div>
+        <span class="arrow">→</span>
+        <div class="node end">END</div>
+      </div>
+    </div>
+
+    <div class="principle">LLM parses &nbsp;→&nbsp; Python validates &nbsp;→&nbsp; LLM explains</div>
+    <div class="note">
+      CourseKeySelector may return zero, one, or many lookup buckets such as
+      <code>sose26/technical/swp</code>. CourseLookup then returns the complete selected buckets
+      from local JSON.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">5</span>Study-Plan Validation</h2>
+    <p class="lead">
+      The rule checker is plain Python — auditable, deterministic, and never delegated
+      to the LLM. It currently covers:
+    </p>
+    <ul class="rule-list">
+      <li>90 LP module area before thesis</li>
+      <li>30 LP Masterarbeit</li>
+      <li>70–80 LP Informatik area</li>
+      <li>10–20 LP Anwendungsbereich</li>
+      <li>Specialization minimums</li>
+      <li>Wissenschaftliches Arbeiten min/max</li>
+      <li>Softwareprojekt min/max</li>
+      <li>Wahlbereich seminar/project caveat</li>
+      <li>25–30 LP ungraded modules</li>
+      <li>Max 15 LP Bachelor modules</li>
+      <li>Duplicate module detection</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">6</span>Study Plan in action</h2>
+    <p class="lead">
+      The Study Plan tab renders the latest extracted plan with LP totals, the chosen
+      Vertiefung, Wahlbereich data, and the per-area module breakdown.
+    </p>
+    <figure class="screenshot">
+      <img src="../ressources/screenshot_study_plan.png"
+           alt="Screenshot of the FU Berlin CS Consultant study plan tab showing LP totals, Vertiefung, and modules grouped by area.">
+      <figcaption class="screenshot-caption">
+        Study Plan tab — extracted modules grouped by area with LP totals and Wahlbereich tags.
+      </figcaption>
+    </figure>
+    <div class="note">
+      A <strong>Save as PDF</strong> button in the top-right exports the current study plan
+      to a print-ready PDF for sharing with advisors or saving alongside official paperwork.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">7</span>LLM Providers</h2>
+    <p class="lead">Three interchangeable providers, selected via <code>LLM_PROVIDER</code>.</p>
+    <div class="grid-3">
+      <div class="tile">
+        <h4>AcademicCloud</h4>
+        <p>Hosted API, defaulting to <code>qwen3-235b-a22b</code>.</p>
+      </div>
+      <div class="tile">
+        <h4>FU Ollama</h4>
+        <p>FU <code>cuda01</code> reached automatically through an SSH tunnel.</p>
+      </div>
+      <div class="tile">
+        <h4>Local Ollama</h4>
+        <p>Ollama running on the host machine, reached via <code>host.docker.internal</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">8</span>Frontend</h2>
+    <p class="lead">
+      Next.js App Router with Material UI. The consultant app — not a marketing page — is
+      the first screen. Four tabs cover the full workflow.
+    </p>
+    <div class="grid-2">
+      <div class="tile">
+        <h4>Chat</h4>
+        <p>Session creation, message send, assistant response, citations and plan-check summaries.</p>
+      </div>
+      <div class="tile">
+        <h4>Study Plan</h4>
+        <p>Extracted modules, LP totals, Wahlbereich data and validation issues per student.</p>
+      </div>
+      <div class="tile">
+        <h4>Degree Rules</h4>
+        <p>Read-only rendering of <code>GET /api/program-rules</code>.</p>
+      </div>
+      <div class="tile">
+        <h4>Settings</h4>
+        <p>Dark mode plus developer tools — session ID, reset, backend health, API base URL.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">9</span>Getting Started</h2>
+    <p class="lead">Two commands to a running stack.</p>
+    <pre><code><span class="comment"># 1. Configure the provider you want</span>
+cp .env.example .env
+
+<span class="comment"># 2. Build and start everything</span>
+docker compose up --build</code></pre>
+
+    <h3>Then open</h3>
+    <div class="stack">
+      <span class="pill accent">Consultant — http://localhost:3000/consultant</span>
+      <span class="pill">API docs — http://localhost:5100/docs</span>
+      <span class="pill">Health — http://localhost:5100/health</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">10</span>Tech Stack</h2>
+    <div class="stack">
+      <span class="pill">Next.js 14</span>
+      <span class="pill">React 18</span>
+      <span class="pill">TypeScript</span>
+      <span class="pill">Material UI</span>
+      <span class="pill">FastAPI</span>
+      <span class="pill">Pydantic</span>
+      <span class="pill">LangGraph</span>
+      <span class="pill">Ollama</span>
+      <span class="pill">Docker Compose</span>
+      <span class="pill">pytest</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  FU Berlin CS Consultant · prototype project ·
+  see <a href="agent-flow.html">agent-flow.html</a> for the detailed routing diagram.
+</footer>
+
+</body>
+</html>
