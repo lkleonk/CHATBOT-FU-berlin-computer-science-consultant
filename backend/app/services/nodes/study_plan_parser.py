@@ -5,8 +5,15 @@ from app.domain.module_catalog import enrich_study_plan
 from app.domain.study_plan import PlannedModule, StudyPlan
 from app.prompts import STUDY_PLAN_PARSER_SYSTEM_PROMPT
 from app.services.model_service import ModelService
+from app.services.quota_service import DailyQuotaExceeded
 from app.services.nodes.utils import latest_user_message, parse_json_content
 from app.services.states.consultant_state import ConsultantState
+from app.services.wizardflow_service import (
+    log_llm_error,
+    log_llm_input,
+    log_llm_output,
+    log_node_output,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -76,29 +83,47 @@ def heuristic_parse_plan(message: str) -> StudyPlan:
     return enrich_study_plan(StudyPlan(specialization_area=specialization, modules=modules))
 
 
-async def parse_study_plan(text: str) -> StudyPlan:
+async def parse_study_plan(
+    text: str,
+    wizardflow_message_id: str | None = None,
+) -> StudyPlan:
     """Parse free-form text (chat message or extracted PDF) into a StudyPlan.
 
     The LLM only parses here; deterministic Python rules validate the result
     afterwards. Falls back to a heuristic parser if the LLM call fails.
     """
     fallback = heuristic_parse_plan(text)
+    llm_message = f"User message:\n{text}"
 
+    log_llm_input(
+        wizardflow_message_id,
+        "study_plan_parser",
+        STUDY_PLAN_PARSER_SYSTEM_PROMPT,
+        llm_message,
+    )
     try:
         response = await ModelService().invoke(
             prompt=STUDY_PLAN_PARSER_SYSTEM_PROMPT,
-            message=f"User message:\n{text}",
+            message=llm_message,
             format=PLAN_SCHEMA,
         )
-        data = parse_json_content(response.get("content", ""))
-        return enrich_study_plan(StudyPlan.model_validate(data))
-    except Exception:
+        response_content = response.get("content", "")
+        log_llm_output(wizardflow_message_id, "study_plan_parser", response_content)
+        data = parse_json_content(response_content)
+        plan = enrich_study_plan(StudyPlan.model_validate(data))
+    except DailyQuotaExceeded:
+        raise
+    except Exception as exc:
+        log_llm_error(wizardflow_message_id, "study_plan_parser", exc)
         logger.exception("Study plan parser failed; using heuristic parser.")
-        return fallback
+        plan = fallback
+
+    log_node_output(wizardflow_message_id, "study_plan_parser", plan.model_dump())
+    return plan
 
 
 async def study_plan_parser_node(state: ConsultantState) -> ConsultantState:
     logger.info("Study plan parser invoked")
     message = latest_user_message(state)
-    plan = await parse_study_plan(message)
+    plan = await parse_study_plan(message, state.get("wizardflow_message_id"))
     return {"parsed_study_plan": plan.model_dump()}

@@ -354,7 +354,7 @@
     /* Frontend/backend architecture diagram */
     .architecture-graph {
       display: grid;
-      grid-template-columns: minmax(170px, 0.9fr) 34px minmax(230px, 1.2fr) 34px minmax(220px, 1fr);
+      grid-template-columns: minmax(170px, 0.9fr) 34px minmax(280px, 1.35fr) 34px minmax(220px, 0.95fr);
       gap: 12px;
       align-items: stretch;
       margin: 20px 0 12px;
@@ -393,6 +393,12 @@
 
     .arch-data {
       background: #fbfcfe;
+    }
+
+    .arch-owned {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
     }
 
     .arch-optional {
@@ -637,7 +643,7 @@
     <div class="architecture-graph" aria-label="Frontend backend architecture diagram">
       <div class="arch-box arch-frontend">
         <strong>Browser + Frontend</strong>
-        <p>Next.js UI at <code>:3000</code>. The browser calls the backend through the host-facing API URL.</p>
+        <p>Next.js UI. The browser calls the backend through the host-facing API URL.</p>
         <div class="arch-mini">
           <span>Chat</span>
           <span>Study Plan</span>
@@ -650,26 +656,24 @@
 
       <div class="arch-box arch-backend">
         <strong>FastAPI Backend</strong>
-        <p>Owns sessions, transcript upload, LangGraph routing, rule validation, and response composition.</p>
+        <p>Owns sessions, transcript upload, LangGraph routing, rule validation, response composition, and backend-local data.</p>
         <div class="arch-mini">
           <span>LangGraph</span>
           <span>PDF parser</span>
           <span>Rule checker</span>
           <span>API</span>
         </div>
+        <div class="arch-owned">
+          <strong>Backend-owned local assets</strong>
+          <p>Course buckets, program-rule catalogue, deterministic degree rules, and in-memory session state live inside the backend container/runtime.</p>
+        </div>
       </div>
 
       <div class="arch-arrow" aria-hidden="true">&rarr;</div>
 
-      <div class="arch-stack">
-        <div class="arch-box arch-data">
-          <strong>Local Sources</strong>
-          <p>Course buckets, program-rule catalogue, deterministic degree rules, and in-memory session state.</p>
-        </div>
-        <div class="arch-box">
-          <strong>LLM Provider</strong>
-          <p>AcademicCloud, FU Ollama over SSH, or local Ollama depending on <code>LLM_PROVIDER</code>.</p>
-        </div>
+      <div class="arch-box">
+        <strong>LLM Provider</strong>
+        <p>AcademicCloud, FU Ollama over SSH, or local Ollama depending on <code>LLM_PROVIDER</code>.</p>
       </div>
     </div>
     <p class="diagram-note">
@@ -689,8 +693,8 @@ POST /api/sessions/{session_id}/transcript</code></pre>
     <h2><span class="num">4</span>Agent Flow</h2>
     <p class="lead">
       A LangGraph state machine routes every user message to the right pipeline.
-      Off-topic messages short-circuit. Study questions go through exact course lookup when
-      needed; plan checks skip retrieval and go through deterministic validation.
+      Off-topic messages short-circuit. Degree-rule questions skip lookup, course-offering
+      questions use exact local buckets, and plan checks go through deterministic validation.
     </p>
 
     <div class="flow">
@@ -709,7 +713,15 @@ POST /api/sessions/{session_id}/transcript</code></pre>
       </div>
 
       <div class="flow-row">
-        <span class="label">study_question</span>
+        <span class="label">degree_question</span>
+        <span class="arrow">&rarr;</span>
+        <div class="node process">AnswerComposer</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node end">END</div>
+      </div>
+
+      <div class="flow-row">
+        <span class="label">course_offering_question</span>
         <span class="arrow">→</span>
         <div class="node process">CourseKeySelector</div>
         <span class="arrow">→</span>
@@ -735,7 +747,7 @@ POST /api/sessions/{session_id}/transcript</code></pre>
 
     <div class="principle">LLM parses &nbsp;→&nbsp; Python validates &nbsp;→&nbsp; LLM explains</div>
     <div class="note">
-      CourseKeySelector may return zero, one, or many lookup buckets such as
+      CourseKeySelector handles only course-offering questions and may return zero, one, or many lookup buckets such as
       <code>sose26/technical/swp</code>. CourseLookup then returns the complete selected buckets
       from local JSON.
     </div>

@@ -171,14 +171,14 @@
     <h1>FU Berlin CS Consultant Agent Flow</h1>
     <p>
       Backend-only LangGraph flow. <strong>Course offerings use exact JSON bucket lookup</strong>;
-      degree rules live in the LLM system prompt, and study-plan validation is owned by
-      deterministic Python code.
+      pure degree-rule questions go directly to the answer node, and study-plan validation
+      is owned by deterministic Python code.
     </p>
 
     <div class="diagram" aria-label="Agent flow diagram">
       <svg viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
         <title id="title">FU Berlin CS consultant agent flow</title>
-        <desc id="desc">A graph showing scope classification, off-topic routing, study-question course lookup, and plan-check parsing plus deterministic validation before answer composition.</desc>
+        <desc id="desc">A graph showing scope classification, off-topic routing, direct degree-rule answers, course-offering lookup, and plan-check parsing plus deterministic validation before answer composition.</desc>
 
         <defs>
           <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
@@ -207,7 +207,6 @@
           <rect width="150" height="100"></rect>
           <text x="75" y="31">Course Key</text>
           <text x="75" y="53">Selector</text>
-          <text x="75" y="75">many keys OK</text>
         </g>
 
         <g class="node lookup" transform="translate(610 230)">
@@ -248,8 +247,12 @@
         <path class="edge" d="M330 255 C365 170 375 110 410 110"></path>
         <text class="label" x="370" y="172">off_topic</text>
 
+        <path class="edge" d="M330 238 C480 176 695 190 810 270"></path>
+        <text class="label" x="580" y="188">degree_question</text>
+
         <path class="edge" d="M330 280 H410"></path>
-        <text class="label" x="370" y="264">study_question</text>
+        <text class="label" x="371" y="255">course_offering</text>
+        <text class="label" x="371" y="271">question</text>
 
         <path class="edge" d="M330 305 C365 380 375 445 410 445"></path>
         <text class="label" x="370" y="380">plan_check</text>
@@ -276,11 +279,21 @@
     <div class="callout">
       <strong>Lookup scope:</strong> active course-offering lookup reads
       <code>backend/app/domain/data/course_offerings.json</code> through keys like
-      <code>sose26/technical/swp</code>. The old Qdrant retrieval code remains in the repository for
-      manual experiments, but it is not connected to the compiled graph. Degree-rule questions are
-      answered from <code>RULES_CONTEXT</code>, which is rendered from <code>program_rules.py</code>,
-      and the <code>plan_check</code> path runs parser, deterministic rule checker, then
+      <code>sose26/technical/swp</code>. The legacy Qdrant retrieval and query-rewriter
+      nodes have been removed from the runtime.
+      <code>degree_question</code> messages skip lookup and are answered from
+      <code>RULES_CONTEXT</code>, which is rendered from <code>program_rules.py</code>.
+      The <code>plan_check</code> path runs parser, deterministic rule checker, then
       <code>AnswerComposer</code>.
+    </div>
+
+    <div class="callout">
+      <strong>WizardFlow tracing:</strong> every request receives a UUID stored as
+      <code>wizardflow_message_id</code>. LLM nodes record exact
+      <code>llm_input</code> payloads containing <code>prompt</code> and <code>msg</code>,
+      plus <code>llm_output</code>; deterministic nodes record input and output.
+      Transcript text is unredacted. JSONL traces are written under
+      <code>backend/traces/</code> and excluded from Git.
     </div>
   </main>
 </body>

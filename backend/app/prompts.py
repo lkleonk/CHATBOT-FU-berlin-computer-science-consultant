@@ -27,9 +27,12 @@ Classify the latest user message into exactly one message_type:
 - "plan_check": the user wants you to check whether a concrete module plan,
   LP distribution, specialization, seminars, projects, or ungraded/Bachelor
   module totals satisfy the Master Informatik rules.
-- "study_question": the user asks a question about Master Informatik rules,
-  modules, LP, specialization, Wissenschaftliches Arbeiten, Softwareprojekt,
-  Anwendungsbereich, or the checklist.
+- "degree_question": the user asks about Master Informatik rules, LP
+  requirements, limits, specialization, Wissenschaftliches Arbeiten,
+  Softwareprojekt, Anwendungsbereich, or the checklist, and does not need a
+  current course-offering lookup.
+- "course_offering_question": the user asks which courses, lectures, seminars,
+  or software projects are offered or available in a semester.
 - "off_topic": the message is unrelated to FU Berlin Master Informatik study
   consulting.
 
@@ -66,11 +69,9 @@ Course types:
 - seminar: seminar/Wissenschaftliches-Arbeiten bucket
 
 Selection rules:
-- For pure degree-rule questions that do not need current course offerings,
-  output an empty keys array and needs_clarification=false.
-- Questions about limits, requirements, allowed counts, or LP rules are degree
-  rule questions, even if they mention a course type such as Softwareprojekt.
-  Do not run course lookup for those.
+- You normally receive only course_offering_question messages.
+- If a degree-rule question reaches this node by mistake, output an empty keys
+  array and needs_clarification=false.
 - Do not filter by course title. The next node receives whole buckets and will
   inspect course titles such as Telematik inside those buckets.
 - If the user asks about course offerings but gives no semester, ask a short
@@ -95,12 +96,6 @@ Examples:
   Output: {{"keys":["sose26/technical/vl","sose26/technical/swp","sose26/technical/seminar"],"needs_clarification":false,"clarification_question":""}}
 - User: "Is Telematik offered in SoSe 2026?"
   Output: {{"keys":["sose26/technical/vl","sose26/technical/swp","sose26/technical/seminar","sose26/practical/vl","sose26/practical/swp","sose26/practical/seminar","sose26/theoretical/vl","sose26/theoretical/swp","sose26/theoretical/seminar"],"needs_clarification":false,"clarification_question":""}}
-- User: "How many LP do I need in Anwendungsbereich?"
-  Output: {{"keys":[],"needs_clarification":false,"clarification_question":""}}
-- User: "How many Softwareprojekte can I take?"
-  Output: {{"keys":[],"needs_clarification":false,"clarification_question":""}}
-- User: "Wie viele Softwareprojekte darf ich im Master machen?"
-  Output: {{"keys":[],"needs_clarification":false,"clarification_question":""}}
 
 Tree:
 {{course_tree}}

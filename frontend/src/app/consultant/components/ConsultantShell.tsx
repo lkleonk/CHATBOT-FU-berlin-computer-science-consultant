@@ -1,24 +1,42 @@
 "use client";
 
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 
+import { useUsage } from "@/context/UsageContext";
+import { deleteSession } from "@/services/api";
 import type { Citation, MessageType, RuleCheckResult, StudyPlan } from "@/types/api";
 
 import { ChatTab } from "./ChatTab";
+import { downloadChat } from "./chatExport";
+import { type ChatMessage } from "./chatMessages";
 import { DegreeRulesTab } from "./DegreeRulesTab";
+import { LowRequestWarningDialog } from "./LowRequestWarningDialog";
+import { RequestUsageDialog } from "./RequestUsageDialog";
 import { SettingsTab } from "./SettingsTab";
 import { StudyPlanTab } from "./StudyPlanTab";
-import { CHAT_MESSAGES_STORAGE_KEY, SESSION_ID_STORAGE_KEY } from "./storage";
+import {
+  CHAT_MESSAGES_STORAGE_KEY,
+  CURRENT_WELCOME_VERSION,
+  SESSION_ID_STORAGE_KEY,
+  WELCOME_VERSION_STORAGE_KEY,
+  WIZARDFLOW_PROMO_STORAGE_KEY,
+} from "./storage";
+import { WelcomeDialog } from "./WelcomeDialog";
+import { WizardFlowPromo } from "./WizardFlowPromo";
 
 const tabs = [
   { label: "Chat", icon: <ChatBubbleOutlineIcon />, id: "chat" },
@@ -250,11 +268,18 @@ function readStoredStudyPlan(): StudyPlan | null {
 }
 
 export function ConsultantShell() {
+  const { usage } = useUsage();
   const [activeTab, setActiveTab] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [latestRuleCheck, setLatestRuleCheck] = useState<RuleCheckResult | null>(null);
   const [latestStudyPlan, setLatestStudyPlan] = useState<StudyPlan | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [resetToken, setResetToken] = useState(0);
+  const [usageDialogOpen, setUsageDialogOpen] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [welcomeChecked, setWelcomeChecked] = useState(false);
+  const [lowRequestWarningOpen, setLowRequestWarningOpen] = useState(false);
+  const [wizardFlowPromoOpen, setWizardFlowPromoOpen] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -266,12 +291,73 @@ export function ConsultantShell() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const handleClearLocalState = () => {
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const seenVersion = window.localStorage.getItem(WELCOME_VERSION_STORAGE_KEY);
+      setWelcomeOpen(seenVersion !== CURRENT_WELCOME_VERSION);
+      setWelcomeChecked(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (
+      !welcomeChecked ||
+      welcomeOpen ||
+      !usage ||
+      usage.used === 0 ||
+      usage.remaining > 10
+    ) {
+      return;
+    }
+
+    const warningKey = `fu-consultant-low-request-warning-${usage.reset_at}`;
+    if (window.sessionStorage.getItem(warningKey)) {
+      return;
+    }
+    window.sessionStorage.setItem(warningKey, "shown");
+    const timer = window.setTimeout(() => setLowRequestWarningOpen(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [usage, welcomeChecked, welcomeOpen]);
+
+  useEffect(() => {
+    if (!welcomeChecked || welcomeOpen || lowRequestWarningOpen) {
+      return;
+    }
+    if (window.localStorage.getItem(WIZARDFLOW_PROMO_STORAGE_KEY)) {
+      return;
+    }
+    const timer = window.setTimeout(() => setWizardFlowPromoOpen(true), 1200);
+    return () => window.clearTimeout(timer);
+  }, [welcomeChecked, welcomeOpen, lowRequestWarningOpen]);
+
+  const dismissWizardFlowPromo = () => {
+    window.localStorage.setItem(WIZARDFLOW_PROMO_STORAGE_KEY, "1");
+    setWizardFlowPromoOpen(false);
+  };
+
+  const closeWelcome = () => {
+    window.localStorage.setItem(WELCOME_VERSION_STORAGE_KEY, CURRENT_WELCOME_VERSION);
+    if (usage && usage.used > 0 && usage.remaining <= 10) {
+      window.sessionStorage.setItem(
+        `fu-consultant-low-request-warning-${usage.reset_at}`,
+        "shown",
+      );
+    }
+    setWelcomeOpen(false);
+  };
+
+  const handleClearLocalState = async () => {
+    if (sessionId && sessionId !== "dummy-session") {
+      await deleteSession(sessionId);
+    }
     window.sessionStorage.removeItem(SESSION_ID_STORAGE_KEY);
     window.sessionStorage.removeItem(CHAT_MESSAGES_STORAGE_KEY);
     setSessionId(null);
     setLatestRuleCheck(null);
     setLatestStudyPlan(null);
+    setChatMessages([]);
     setResetToken((current) => current + 1);
     setActiveTab(0);
   };
@@ -321,18 +407,51 @@ export function ConsultantShell() {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <SchoolOutlinedIcon color="primary" />
             <Box>
-              <Typography variant="h1">FU Berlin CS Consultant</Typography>
+              <Typography variant="h1">Modulio</Typography>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Master Informatik
               </Typography>
             </Box>
           </Box>
-          <Chip
-            label={sessionId ? "Session active" : "No session"}
-            color={sessionId ? "success" : "default"}
-            size="small"
-            sx={{ display: { xs: "none", sm: "inline-flex" } }}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {activeTab === 0 && (
+              <Tooltip title="Download chat">
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Download chat"
+                    disabled={chatMessages.length === 0}
+                    onClick={() => downloadChat(chatMessages)}
+                  >
+                    <DownloadOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            <Chip
+              icon={<DataUsageOutlinedIcon />}
+              label={
+                <>
+                  <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
+                    {usage?.remaining ?? "—"}
+                  </Box>
+                  <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                    {usage ? `${usage.remaining} requests left` : "Request allowance"}
+                  </Box>
+                </>
+              }
+              color={usage && usage.remaining <= 10 ? "warning" : "default"}
+              onClick={() => setUsageDialogOpen(true)}
+              clickable
+              size="small"
+            />
+            <Chip
+              label={sessionId ? "Session active" : "No session"}
+              color={sessionId ? "success" : "default"}
+              size="small"
+              sx={{ display: { xs: "none", md: "inline-flex" } }}
+            />
+          </Box>
         </Box>
         <Tabs
           value={activeTab}
@@ -384,6 +503,7 @@ export function ConsultantShell() {
               onSessionIdChange={setSessionId}
               onRuleCheckResult={setLatestRuleCheck}
               onStudyPlan={setLatestStudyPlan}
+              onMessagesChange={setChatMessages}
             />
           )}
         </Box>
@@ -426,10 +546,30 @@ export function ConsultantShell() {
               sessionId={sessionId}
               onClearLocalState={handleClearLocalState}
               onLoadDummyData={handleLoadDummyData}
+              onOpenUsage={() => setUsageDialogOpen(true)}
             />
           )}
         </Box>
       </Box>
+      <WelcomeDialog
+        open={welcomeOpen}
+        onClose={closeWelcome}
+        onViewUsage={() => {
+          closeWelcome();
+          setUsageDialogOpen(true);
+        }}
+      />
+      <LowRequestWarningDialog
+        open={lowRequestWarningOpen}
+        remaining={usage?.remaining ?? 0}
+        onClose={() => setLowRequestWarningOpen(false)}
+        onViewUsage={() => {
+          setLowRequestWarningOpen(false);
+          setUsageDialogOpen(true);
+        }}
+      />
+      <RequestUsageDialog open={usageDialogOpen} onClose={() => setUsageDialogOpen(false)} />
+      <WizardFlowPromo open={wizardFlowPromoOpen} onClose={dismissWizardFlowPromo} />
     </Box>
   );
 }

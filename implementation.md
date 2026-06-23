@@ -19,6 +19,7 @@ Phase 1 goal: backend-only LLM consultant for FU Berlin Informatik Master questi
 [x] Add `backend/app/routes.py` with only:
 [x] `GET /health`
 [x] `POST /api/sessions`
+[x] `DELETE /api/sessions/{session_id}`
 [x] `POST /api/sessions/{session_id}/message`
 [x] Add `backend/app/models.py` for Pydantic request/response contracts.
 [x] Add `backend/app/settings.py` for env-based config.
@@ -32,6 +33,7 @@ Phase 1 goal: backend-only LLM consultant for FU Berlin Informatik Master questi
 [x] Do not add Postgres initially; use in-memory LangGraph/session state for phase 1.
 [x] Add `backend/Dockerfile`.
 [x] Add `backend/requirements.txt`.
+[x] Keep Torch, SentenceTransformer, and Qdrant in optional `backend/requirements-legacy-rag.txt` only.
 [x] Add `.env.example`.
 
 ## LLM Providers
@@ -70,7 +72,7 @@ Phase 1 goal: backend-only LLM consultant for FU Berlin Informatik Master questi
 Manual ingestion command target:
 
 ```bash
-docker compose exec backend python scripts/ingest_resources.py
+docker compose --profile legacy-rag run --rm legacy-rag-ingest
 ```
 
 ## Knowledge Artifacts
@@ -109,8 +111,8 @@ docker compose exec backend python scripts/ingest_resources.py
 [x] Add `services/states/consultant_state.py`.
 [x] Track:
 [x] messages
+[x] wizardflow_message_id
 [x] message_type
-[x] retrieval_query
 [x] course_lookup_keys
 [x] course_lookup_needs_clarification
 [x] retrieved_context
@@ -122,8 +124,6 @@ docker compose exec backend python scripts/ingest_resources.py
 ## Agent Nodes
 
 [x] Add `nodes/scope_classifier.py`.
-[x] Add `nodes/query_rewriter.py`.
-[x] Add `nodes/retrieval.py`.
 [x] Add `nodes/course_key_selector.py`.
 [x] Add `nodes/course_lookup.py`.
 [x] Add `nodes/study_plan_parser.py`.
@@ -140,15 +140,26 @@ Target flow:
 ```text
 START
   -> ScopeClassifier
-      -> off_topic      -> OfftopicReply -> END
-      -> study_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
-      -> plan_check     -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
+      -> off_topic                -> OfftopicReply -> END
+      -> degree_question          -> AnswerComposer -> END
+      -> course_offering_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
+      -> plan_check               -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
-Qdrant retrieval code remains in the repository, but it is not wired into the
-active graph. Current course offerings are read from
+The legacy Qdrant retrieval and query-rewriter nodes have been removed. Current
+course offerings are read from
 `backend/app/domain/data/course_offerings.json` with keys such as
 `sose26/technical/swp`.
+
+## WizardFlow Tracing
+
+[x] Add `wizardflow==0.2.0`.
+[x] Initialize tracing from the compiled LangGraph topology.
+[x] Generate one UUID per chat message or transcript upload.
+[x] Store `wizardflow_message_id` in `ConsultantState`.
+[x] Log `llm_input` with `prompt` and unredacted `msg`.
+[x] Log `llm_output`, fallback errors, and deterministic node input/output.
+[x] Persist Docker traces under `backend/traces/` and exclude them from Git.
 
 ## Prompt Design
 
@@ -165,9 +176,25 @@ active graph. Current course offerings are read from
 [x] Add `services/session_service.py`.
 [x] Create UUID session IDs.
 [x] Use LangGraph `thread_id=session_id`.
+[x] Expire inactive in-memory sessions opportunistically and delete reset sessions explicitly.
 [x] Return one assistant reply per user message.
 [x] Include citations in response where available.
 [x] Include structured rule-check result when applicable.
+
+## Usage And Frontend Safety UX
+
+[x] Expose read-only client usage through `GET /api/usage`.
+[x] Return scoped rate-limit headers for chat and transcript actions.
+[x] Show a persistent clickable request-allowance chip.
+[x] Warn once per reset period at ten or fewer remaining requests.
+[x] Add a versioned welcome dialog with unofficial-service, quota, retention,
+    transcript-processing, and tracing disclosures.
+[x] Export the locally stored chat as Markdown.
+[x] Keep `Reset conversation` visible in production with confirmation and a
+    download option.
+[x] Hide API/session diagnostics, health details, and dummy data behind
+    `NEXT_PUBLIC_ENABLE_DEV_TOOLS`.
+[x] Set the default inactivity retention to 48 hours.
 
 ## Tests
 
@@ -200,4 +227,5 @@ active graph. Current course offerings are read from
 [ ] Ask a simple course-offering lookup question.
 [ ] Ask a study-plan validation question.
 [x] Run tests.
+[x] Run the full backend suite from runtime-only requirements without legacy RAG dependencies.
 [x] Confirm no files outside `fu_berlin_cs_consultant/` changed.

@@ -2,6 +2,7 @@ from typing import Any
 
 from app.services.academiccloud_service import AcademicCloudService
 from app.services.ollama_service import OllamaService
+from app.services.quota_service import daily_quota
 from app.settings import settings
 
 
@@ -24,6 +25,7 @@ class ModelService:
         stream: bool = False,
         format: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        daily_quota.consume_llm_invocation()
         return await self.provider.chat(messages=messages, stream=stream, format=format)
 
     async def invoke(
@@ -33,6 +35,7 @@ class ModelService:
         format: dict[str, Any] | None = None,
         stream: bool = False,
     ) -> dict[str, Any]:
+        daily_quota.consume_llm_invocation()
         return await self.provider.invoke(prompt=prompt, message=message, format=format, stream=stream)
 
     async def check_connection(self) -> bool:

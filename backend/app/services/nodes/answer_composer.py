@@ -4,6 +4,7 @@ import logging
 from app.prompts import ANSWER_COMPOSER_SYSTEM_PROMPT
 from app.services.agent_config import agent_flow_config
 from app.services.model_service import ModelService
+from app.services.quota_service import DailyQuotaExceeded
 from app.services.nodes.utils import (
     format_recent_messages,
     latest_user_message,
@@ -11,6 +12,12 @@ from app.services.nodes.utils import (
     recent_messages,
 )
 from app.services.states.consultant_state import ConsultantState
+from app.services.wizardflow_service import (
+    log_llm_error,
+    log_llm_input,
+    log_llm_output,
+    log_node_output,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -48,6 +55,7 @@ def fallback_answer(state: ConsultantState) -> str:
 
 async def answer_composer_node(state: ConsultantState) -> ConsultantState:
     logger.info("Answer composer invoked")
+    wizardflow_message_id = state.get("wizardflow_message_id")
     user_message = latest_user_message(state)
     history = format_recent_messages(
         recent_messages(state, agent_flow_config.answer_composer.history_turns)
@@ -76,19 +84,32 @@ Deterministic rule-check result:
 {json.dumps(rule_result, ensure_ascii=False, indent=2) if rule_result else "(not a plan check)"}
 """.strip()
 
+    log_llm_input(
+        wizardflow_message_id,
+        "answer_composer",
+        ANSWER_COMPOSER_SYSTEM_PROMPT,
+        message,
+    )
     try:
         response = await ModelService().invoke(
             prompt=ANSWER_COMPOSER_SYSTEM_PROMPT,
             message=message,
             format=ANSWER_SCHEMA,
         )
-        data = parse_json_content(response.get("content", ""))
+        response_content = response.get("content", "")
+        log_llm_output(wizardflow_message_id, "answer_composer", response_content)
+        data = parse_json_content(response_content)
         reply = data.get("message") or fallback_answer(state)
-    except Exception:
+    except DailyQuotaExceeded:
+        raise
+    except Exception as exc:
+        log_llm_error(wizardflow_message_id, "answer_composer", exc)
         logger.exception("Answer composition failed; using fallback.")
         reply = fallback_answer(state)
 
-    return {
+    result: ConsultantState = {
         "reply": reply,
         "messages": [{"role": "assistant", "content": reply}],
     }
+    log_node_output(wizardflow_message_id, "answer_composer", result)
+    return result

@@ -163,9 +163,10 @@ The existing flow is:
 ```text
 START
   -> ScopeClassifier
-      -> off_topic      -> OfftopicReply -> END
-      -> study_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
-      -> plan_check     -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
+      -> off_topic                -> OfftopicReply -> END
+      -> degree_question          -> AnswerComposer -> END
+      -> course_offering_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
+      -> plan_check               -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
 Planned first integration:
@@ -173,9 +174,10 @@ Planned first integration:
 ```text
 START
   -> ScopeClassifier
-      -> off_topic      -> OfftopicReply -> END
-      -> study_question -> AttachmentContext -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
-      -> plan_check     -> AttachmentContext -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
+      -> off_topic                -> OfftopicReply -> END
+      -> degree_question          -> AttachmentContext -> AnswerComposer -> END
+      -> course_offering_question -> AttachmentContext -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
+      -> plan_check               -> AttachmentContext -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
 `AttachmentContext` should be deterministic. It should not call an LLM.

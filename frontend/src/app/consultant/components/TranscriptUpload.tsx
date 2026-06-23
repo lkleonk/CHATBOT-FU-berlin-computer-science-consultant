@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useCallback, useRef, useState, type ChangeEvent } from "react";
 
+import { useUsage } from "@/context/UsageContext";
 import { ApiError, getApiErrorDetail, uploadTranscript } from "@/services/api";
 import type { TranscriptUploadResponse } from "@/types/api";
 
@@ -31,6 +32,7 @@ export function TranscriptUpload({
   disabled = false,
   variant = "icon",
 }: TranscriptUploadProps) {
+  const { updateQuota } = useUsage();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -51,9 +53,13 @@ export function TranscriptUpload({
       setIsUploading(true);
       try {
         const sessionId = await ensureSession();
-        const result = await uploadTranscript(sessionId, file);
-        onUploaded(result);
+        const response = await uploadTranscript(sessionId, file);
+        updateQuota(response.usage);
+        onUploaded(response.data);
       } catch (error) {
+        if (error instanceof ApiError) {
+          updateQuota(error.usage);
+        }
         const detail = getApiErrorDetail(error);
         if (detail?.error_code === "pdf_unreadable") {
           setDialogOpen(true);
@@ -70,7 +76,7 @@ export function TranscriptUpload({
         setIsUploading(false);
       }
     },
-    [ensureSession, onError, onUploaded],
+    [ensureSession, onError, onUploaded, updateQuota],
   );
 
   const triggerPicker = () => inputRef.current?.click();

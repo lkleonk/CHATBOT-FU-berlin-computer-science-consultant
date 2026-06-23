@@ -3,8 +3,11 @@ import type {
   HealthResponse,
   ModelReply,
   ProgramRulesCatalogue,
+  QuotaAwareResponse,
   SessionResponse,
   TranscriptUploadResponse,
+  UsageQuota,
+  UsageResponse,
 } from "@/types/api";
 
 export const API_BASE_URL =
@@ -18,12 +21,14 @@ type ErrorBody = {
 export class ApiError extends Error {
   status: number;
   detail: unknown;
+  usage: UsageQuota | null;
 
-  constructor(message: string, status: number, detail: unknown) {
+  constructor(message: string, status: number, detail: unknown, usage: UsageQuota | null = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.detail = detail;
+    this.usage = usage;
   }
 }
 
@@ -49,7 +54,28 @@ async function parseResponse(response: Response): Promise<unknown> {
   }
 }
 
-async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+function parseUsageHeaders(response: Response): UsageQuota | null {
+  if (response.headers.get("X-RateLimit-Scope") !== "user_action") {
+    return null;
+  }
+  const limit = Number(response.headers.get("X-RateLimit-Limit"));
+  const remaining = Number(response.headers.get("X-RateLimit-Remaining"));
+  const resetAt = response.headers.get("X-RateLimit-Reset");
+  if (!Number.isFinite(limit) || !Number.isFinite(remaining) || !resetAt) {
+    return null;
+  }
+  return {
+    limit,
+    used: Math.max(0, limit - remaining),
+    remaining,
+    reset_at: resetAt,
+  };
+}
+
+async function requestJsonWithMetadata<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<QuotaAwareResponse<T>> {
   const response = await fetch(joinUrl(path), {
     ...init,
     headers: {
@@ -59,17 +85,25 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   const body = await parseResponse(response);
+  const usage = parseUsageHeaders(response);
   if (!response.ok) {
     const errorBody = isRecord(body) ? (body as ErrorBody) : undefined;
     const detail = errorBody?.detail ?? body;
     const message =
+      (isRecord(detail) && typeof detail.message === "string"
+        ? detail.message
+        : undefined) ??
       errorBody?.message ??
       (typeof detail === "string" ? detail : `Request failed with ${response.status}`);
 
-    throw new ApiError(message, response.status, detail);
+    throw new ApiError(message, response.status, detail, usage);
   }
 
-  return body as T;
+  return { data: body as T, usage };
+}
+
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  return (await requestJsonWithMetadata<T>(path, init)).data;
 }
 
 function extractHealthFromError(error: ApiError): HealthResponse | null {
@@ -108,11 +142,17 @@ export async function createSession(): Promise<SessionResponse> {
   });
 }
 
+export async function deleteSession(sessionId: string): Promise<void> {
+  await requestJson<null>(`/api/sessions/${sessionId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function sendMessage(
   sessionId: string,
   content: string,
-): Promise<ModelReply> {
-  return requestJson<ModelReply>(`/api/sessions/${sessionId}/message`, {
+): Promise<QuotaAwareResponse<ModelReply>> {
+  return requestJsonWithMetadata<ModelReply>(`/api/sessions/${sessionId}/message`, {
     method: "POST",
     body: JSON.stringify({ content }),
   });
@@ -121,7 +161,7 @@ export async function sendMessage(
 export async function uploadTranscript(
   sessionId: string,
   file: File,
-): Promise<TranscriptUploadResponse> {
+): Promise<QuotaAwareResponse<TranscriptUploadResponse>> {
   const formData = new FormData();
   formData.append("file", file);
 
@@ -132,6 +172,7 @@ export async function uploadTranscript(
   });
 
   const body = await parseResponse(response);
+  const usage = parseUsageHeaders(response);
   if (!response.ok) {
     const errorBody = isRecord(body) ? (body as ErrorBody) : undefined;
     const detail = errorBody?.detail ?? body;
@@ -142,10 +183,10 @@ export async function uploadTranscript(
       errorBody?.message ??
       (typeof detail === "string" ? detail : `Upload failed with ${response.status}`);
 
-    throw new ApiError(message, response.status, detail);
+    throw new ApiError(message, response.status, detail, usage);
   }
 
-  return body as TranscriptUploadResponse;
+  return { data: body as TranscriptUploadResponse, usage };
 }
 
 /** Pull the structured error_code/message out of an ApiError thrown by uploadTranscript. */
@@ -158,6 +199,10 @@ export function getApiErrorDetail(error: unknown): ApiErrorDetail | null {
 
 export async function getProgramRules(): Promise<ProgramRulesCatalogue> {
   return requestJson<ProgramRulesCatalogue>("/api/program-rules");
+}
+
+export async function getUsage(): Promise<UsageResponse> {
+  return requestJson<UsageResponse>("/api/usage");
 }
 
 export async function getHealth(): Promise<HealthResponse> {

@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.11-slim-bookworm AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -20,7 +20,7 @@ RUN set -eux; \
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY requirements.txt requirements-legacy-rag.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
     echo "backend build: installing uv package manager"; \
@@ -29,11 +29,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     set -eux; \
-    echo "backend build: installing CPU PyTorch from PyTorch wheel index"; \
-    uv pip install --system --extra-index-url https://download.pytorch.org/whl/cpu "torch==2.5.1+cpu"; \
-    echo "backend build: installing backend Python requirements"; \
+    echo "backend build: installing runtime Python requirements"; \
     uv pip install --system -r requirements.txt; \
-    echo "backend build: Python dependencies installed"
+    echo "backend build: runtime Python dependencies installed"
 
 COPY app ./app
 COPY scripts ./scripts
@@ -42,3 +40,16 @@ COPY knowledge_base ./knowledge_base
 ENV PYTHONPATH=/app
 
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5100"]
+
+# Built only by the optional legacy-rag Compose service. The normal backend
+# target above intentionally does not contain Torch, SentenceTransformer, or
+# Qdrant dependencies.
+FROM base AS legacy-rag
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    set -eux; \
+    echo "legacy-rag build: installing optional ingestion requirements"; \
+    uv pip install --system -r requirements-legacy-rag.txt; \
+    echo "legacy-rag build: optional ingestion dependencies installed"
+
+FROM base AS runtime

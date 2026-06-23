@@ -1,10 +1,11 @@
 # RAG Ingestion
 
 This document describes how the FU Berlin CS consultant builds its optional local RAG knowledge base.
-The active `study_question` graph path no longer uses Qdrant for course/module
-answers; it uses exact lookup over `backend/app/domain/data/course_offerings.json`.
-The RAG code and ingestion script remain available for future experiments and
-manual module-catalogue retrieval.
+The active `course_offering_question` graph path no longer uses Qdrant for
+course/module answers; it uses exact lookup over
+`backend/app/domain/data/course_offerings.json`. The `degree_question` path
+skips lookup and answers from `RULES_CONTEXT`. The RAG code and ingestion script
+remain available for future experiments and manual module-catalogue retrieval.
 
 ## Design Choice
 
@@ -67,6 +68,12 @@ module-catalogue-style source.
 
 From `fu_berlin_cs_consultant/`:
 
+The normal backend environment installs `backend/requirements.txt` and does
+not include the embedding stack. Manual ingestion uses the optional
+`backend/requirements-legacy-rag.txt`, which adds the CPU-only Torch build,
+SentenceTransformer, and Qdrant client. Docker selects that dependency set
+through the `legacy-rag` image target.
+
 Qdrant is disabled by default in Docker Compose. Start the optional legacy RAG
 profile before running ingestion:
 
@@ -75,19 +82,31 @@ docker compose --profile legacy-rag up -d qdrant
 ```
 
 ```bash
-docker compose exec backend python scripts/ingest_resources.py
+docker compose --profile legacy-rag run --rm legacy-rag-ingest
 ```
 
 To ingest only original files under `ressources/`:
 
 ```bash
-docker compose exec backend python scripts/ingest_resources.py --skip-generated
+docker compose --profile legacy-rag run --rm legacy-rag-ingest \
+  python scripts/ingest_resources.py --skip-generated
 ```
 
 The script can also take a custom collection:
 
 ```bash
-docker compose exec backend python scripts/ingest_resources.py --collection fu_cs_consultant_knowledge
+docker compose --profile legacy-rag run --rm legacy-rag-ingest \
+  python scripts/ingest_resources.py --collection fu_cs_consultant_knowledge
+```
+
+For non-Docker experiments, create a separate environment so the production
+runtime stays small:
+
+```bash
+cd backend
+python -m venv .venv-legacy-rag
+source .venv-legacy-rag/bin/activate
+python -m pip install --no-cache-dir -r requirements-legacy-rag.txt
 ```
 
 ## Collection
@@ -205,7 +224,7 @@ embedding_model
 ingested_at
 ```
 
-The retrieval node turns this metadata into API citations:
+The removed legacy retrieval node previously turned this metadata into API citations:
 
 ```text
 source
@@ -215,10 +234,10 @@ page
 score
 ```
 
-## Legacy Retrieval Runtime
+## No Runtime Retrieval Node
 
 Runtime Qdrant retrieval is currently not wired into
-`backend/app/services/agent_graph_service.py`. The active study-question path is:
+`backend/app/services/agent_graph_service.py`. The active course-offering path is:
 
 ```text
 course_key_selector
@@ -230,34 +249,10 @@ Course lookup selects keys such as `sose26/technical/swp`, validates them
 against `course_offerings.json`, and passes whole buckets to the answer
 composer.
 
-The legacy retrieval node remains implemented in:
-
-
-```text
-backend/app/services/nodes/retrieval.py
-```
-
-Legacy flow:
-
-```text
-retrieval_query
-  -> VectorService.search()
-  -> Qdrant query_points()
-  -> score threshold filter
-  -> retrieved_context + citations
-```
-
-Settings:
-
-```text
-RAG_SCORE_THRESHOLD
-RAG_RETRIEVAL_LIMIT
-```
-
-If this node is manually wired in again and no chunks survive the threshold, the
-graph continues with empty context. The answer composer is instructed to say
-that the local resources do not contain enough information instead of inventing
-rules.
+The former `retrieval.py` and `query_rewriter.py` agent nodes have been removed.
+The remaining `VectorService` can still support explicit manual experiments,
+but no active or inactive LangGraph node calls it. Manual callers choose their
+own search limit and filtering behavior.
 
 ## Relationship To Deterministic Rules
 

@@ -66,7 +66,9 @@ Current public API:
 ```text
 GET  /health
 GET  /api/program-rules
+GET  /api/usage
 POST /api/sessions
+DELETE /api/sessions/{session_id}
 POST /api/sessions/{session_id}/message
 POST /api/sessions/{session_id}/transcript
 ```
@@ -77,6 +79,10 @@ No `POST /api/ingest` route should exist.
 (field name `file`). See the "PDF Transcript Upload" section.
 
 `GET /api/program-rules` returns the structured display catalogue for the frontend Degree Rules tab. It should not require Qdrant, embeddings, LangGraph, or an LLM to answer.
+
+`GET /api/usage` returns the current client-IP user-action allowance, UTC reset
+time, configured session inactivity TTL, and whether diagnostic WizardFlow
+tracing is enabled. It must not consume quota or invoke the LLM.
 
 ## Docker
 
@@ -92,12 +98,17 @@ Qdrant is behind the optional `legacy-rag` Compose profile. Normal
 `docker compose --profile legacy-rag up -d qdrant` only for manual legacy RAG
 ingestion or retrieval experiments.
 
+The normal backend image installs `backend/requirements.txt`, which excludes
+Torch, SentenceTransformer, and Qdrant. The optional ingestion image target
+installs `backend/requirements-legacy-rag.txt`.
+
 Compose uses `.env` as the backend env file. Keep `.env.example` aligned when adding required runtime variables.
 
 The frontend image is built from `frontend/Dockerfile`. The browser-facing API base URL is passed as:
 
 ```text
 NEXT_PUBLIC_API_BASE_URL=http://localhost:5100
+NEXT_PUBLIC_ENABLE_DEV_TOOLS=false
 ```
 
 This value is intentionally host-facing because the JavaScript runs in the user's browser, not inside the Docker network.
@@ -109,20 +120,56 @@ Implemented in `backend/app/services/agent_graph_service.py`.
 ```text
 START
   -> ScopeClassifier
-      -> off_topic      -> OfftopicReply -> END
-      -> study_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
-      -> plan_check     -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
+      -> off_topic                -> OfftopicReply -> END
+      -> degree_question          -> AnswerComposer -> END
+      -> course_offering_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
+      -> plan_check               -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
 Degree rules reach the system prompt through `app.prompts.RULES_CONTEXT`, which
 is rendered from `backend/app/domain/program_rules.py`. The `plan_check` path
-does not need retrieval before parsing. Course-offering lookup on the
-`study_question` path reads exact buckets from
+does not need retrieval before parsing. Pure degree-rule questions on the
+`degree_question` path skip course lookup and go straight to `AnswerComposer`.
+Course-offering lookup on the `course_offering_question` path reads exact buckets from
 `backend/app/domain/data/course_offerings.json`, using keys like
-`sose26/technical/swp`. Qdrant retrieval code remains in the repository but is
-not wired into the active graph.
+`sose26/technical/swp`. The legacy Qdrant retrieval and query-rewriter nodes
+have been removed; manual ingestion and vector-service code remain available.
 
-`MemorySaver` is used for phase 1, so session state is in memory and lost on backend restart.
+`MemorySaver` is used for phase 1, so session state is in memory and lost on
+backend restart. Sessions also expire after 48 hours of inactivity through
+opportunistic cleanup. `DELETE /api/sessions/{session_id}` removes inactive
+state immediately or defers deletion until an active request finishes.
+
+Session lifecycle env knobs:
+
+```text
+SESSION_INACTIVITY_TTL_SECONDS
+SESSION_CLEANUP_INTERVAL_SECONDS
+```
+
+## Usage Quotas
+
+Deployment quotas are process-local Python state in
+`backend/app/services/quota_service.py`. They reset at 00:00 UTC and whenever
+the backend process restarts. Run one backend worker if the configured values
+must remain the effective global limits.
+
+Default limits:
+
+```text
+DAILY_LLM_INVOCATIONS=200
+DAILY_USER_ACTIONS=100
+```
+
+Every call through `ModelService.chat()` or `ModelService.invoke()` consumes
+one global LLM invocation. A single chat action can therefore consume multiple
+LLM invocations. The user-action limit applies per client IP to chat messages
+and transcript uploads. Creating or deleting sessions, reading program rules,
+and checking health do not consume user actions. Quota exhaustion returns HTTP
+429 with a structured error payload and rate-limit headers. Successful user
+actions expose user-action rate-limit headers; global LLM headers use a
+different scope and must not be rendered as a user's allowance. There is no LLM
+concurrency cap.
 
 Agent-flow tuning lives in `backend/app/services/agent_config.py`. Current env
 knobs include:
@@ -202,15 +249,17 @@ Flow after a readable upload (`SessionService.process_transcript`):
 extract+validate -> parse_study_plan (LLM parse, reused study_plan_parser)
                  -> validate_study_plan (deterministic rule check)
                  -> persist parsed plan + rule check into LangGraph session state
-                 -> discard the PDF text; return parsed plan + rule check
+                 -> retain extracted text only in the local WizardFlow trace
+                 -> return parsed plan + rule check
 ```
 
-The raw PDF text is never injected into the LLM context. The LLM only ever sees
-the validated `parsed_study_plan` (module list) and the deterministic
-`rule_check_result`, in line with "LLM parses -> Python validates -> LLM
-explains". The parsed plan is persisted via `agent_app.update_state` so chat
-follow-ups (e.g. "is Telematik counted?") can reference it. `answer_composer`
-now receives the parsed plan alongside the rule-check result.
+The parser LLM receives extracted PDF text as its unredacted `msg`, and
+WizardFlow stores that `llm_input` locally. Raw text is not persisted in
+LangGraph session state and is not passed to `answer_composer`; only the parsed
+`StudyPlan` and deterministic `rule_check_result` continue through the session,
+in line with "LLM parses -> Python validates -> LLM explains". The parsed plan
+is persisted via `agent_app.update_state` so chat follow-ups (e.g. "is Telematik
+counted?") can reference it.
 
 PDF library: `pypdf` (already in `requirements.txt`). It was chosen over PyMuPDF
 to avoid the AGPL license; the `PDFExtractor` interface keeps the choice swappable.
@@ -301,6 +350,7 @@ frontend/
     components/
     context/
       SettingsContext.tsx
+      UsageContext.tsx
     services/
       api.ts
     theme/
@@ -324,7 +374,8 @@ Tab responsibilities:
 - `Chat`: session creation, message send, assistant response, citations, and plan-check result summary.
 - `Study Plan`: student-specific extracted plan, modules, LP totals, Wahlbereich data, and validation issues. This needs dedicated study-plan API endpoints before it can be complete.
 - `Degree Rules`: read-only rendering of `GET /api/program-rules`.
-- `Settings`: dark mode plus developer tools such as session ID, reset session, backend health, and API base URL.
+- `Settings`: dark mode, request allowance, production-visible reset
+  conversation, plus optional developer diagnostics.
 
 Frontend conventions:
 
@@ -334,6 +385,10 @@ Frontend conventions:
 - Use icon buttons where an established icon exists.
 - Keep the first screen as the actual consultant app, not a landing page.
 - Keep SettingsContext as the frontend source of truth for dark mode.
+- Keep UsageContext as the frontend source of truth for request allowance and
+  runtime retention information.
+- Keep `Reset conversation` visible when `NEXT_PUBLIC_ENABLE_DEV_TOOLS=false`;
+  only API/session diagnostics, health details, and dummy data are developer-only.
 - Keep API calls in `frontend/src/services/api.ts`.
 - Keep shared TypeScript API contracts in `frontend/src/types/api.ts`.
 - Do not put degree-rule validation logic in TypeScript. The frontend renders backend data and validation results.
@@ -351,7 +406,7 @@ Run from `fu_berlin_cs_consultant/` after Docker services are running:
 
 ```bash
 docker compose --profile legacy-rag up -d qdrant
-docker compose exec backend python scripts/ingest_resources.py
+docker compose --profile legacy-rag run --rm legacy-rag-ingest
 ```
 
 Default collection:
@@ -423,7 +478,7 @@ python -m compileall -q "fu_berlin_cs_consultant\backend\app" "fu_berlin_cs_cons
 Focused tests from `fu_berlin_cs_consultant/backend`:
 
 ```bash
-uv run --with pytest --with pydantic --with python-dotenv --with fastapi --with httpx --with uvicorn --with pypdf --with python-multipart python -m pytest -q
+uv run --isolated --python 3.12.10 --with-requirements requirements.txt --with pytest python -m pytest -q
 ```
 
 Runtime checks, when Docker and credentials are available:

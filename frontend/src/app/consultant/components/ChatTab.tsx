@@ -1,5 +1,6 @@
 "use client";
 
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -15,7 +16,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { createSession, sendMessage } from "@/services/api";
+import { useUsage } from "@/context/UsageContext";
+import { ApiError, createSession, sendMessage } from "@/services/api";
 import type { RuleCheckResult, StudyPlan, TranscriptUploadResponse } from "@/types/api";
 
 import {
@@ -34,6 +36,7 @@ type ChatTabProps = {
   onSessionIdChange: (sessionId: string | null) => void;
   onRuleCheckResult: (result: RuleCheckResult | null) => void;
   onStudyPlan: (plan: StudyPlan | null) => void;
+  onMessagesChange: (messages: ChatMessage[]) => void;
 };
 
 function countRuleIssues(result: RuleCheckResult) {
@@ -48,7 +51,9 @@ export function ChatTab({
   onSessionIdChange,
   onRuleCheckResult,
   onStudyPlan,
+  onMessagesChange,
 }: ChatTabProps) {
+  const { updateQuota } = useUsage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -78,6 +83,10 @@ export function ChatTab({
     }
     window.sessionStorage.setItem(CHAT_MESSAGES_STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
+
+  useEffect(() => {
+    onMessagesChange(messages);
+  }, [messages, onMessagesChange]);
 
   useEffect(() => {
     if (sessionId) {
@@ -124,7 +133,9 @@ export function ChatTab({
 
     try {
       const activeSessionId = await ensureSession();
-      const reply = await sendMessage(activeSessionId, content);
+      const response = await sendMessage(activeSessionId, content);
+      updateQuota(response.usage);
+      const reply = response.data;
       const assistantMessage: ChatMessage = {
         id: createMessageId(),
         role: "assistant",
@@ -141,11 +152,14 @@ export function ChatTab({
         onStudyPlan(reply.parsed_study_plan);
       }
     } catch (sendError) {
+      if (sendError instanceof ApiError) {
+        updateQuota(sendError.usage);
+      }
       setError(sendError instanceof Error ? sendError.message : "Failed to send message.");
     } finally {
       setIsLoading(false);
     }
-  }, [ensureSession, input, isLoading, onRuleCheckResult, onStudyPlan]);
+  }, [ensureSession, input, isLoading, onRuleCheckResult, onStudyPlan, updateQuota]);
 
   const handleTranscriptUploaded = useCallback(
     (result: TranscriptUploadResponse) => {
@@ -346,6 +360,26 @@ export function ChatTab({
               </IconButton>
             </span>
           </Tooltip>
+        </Stack>
+        <Stack
+          component="aside"
+          aria-label="Unofficial service notice"
+          direction="row"
+          spacing={0.75}
+          sx={{
+            maxWidth: 980,
+            mx: "auto",
+            mt: 1,
+            alignItems: "flex-start",
+            justifyContent: "center",
+            color: "text.secondary",
+          }}
+        >
+          <InfoOutlinedIcon sx={{ mt: "1px", fontSize: 16, flexShrink: 0 }} />
+          <Typography variant="caption">
+            Unofficial service. Answers may be incomplete or incorrect. Please verify important
+            information using official FU Berlin regulations or the responsible advising office.
+          </Typography>
         </Stack>
       </Box>
     </Box>

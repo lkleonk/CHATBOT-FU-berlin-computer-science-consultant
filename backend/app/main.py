@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import health_router, program_rules_router, session_router
+from app.routes import health_router, program_rules_router, session_router, usage_router
 from app.services.ssh_manager import SSHManager
 from app.settings import settings
 
@@ -52,10 +52,17 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=[
+        "X-RateLimit-Limit",
+        "X-RateLimit-Remaining",
+        "X-RateLimit-Reset",
+        "X-RateLimit-Scope",
+    ],
 )
 
 app.include_router(session_router)
 app.include_router(program_rules_router)
+app.include_router(usage_router)
 app.include_router(health_router)
 
 

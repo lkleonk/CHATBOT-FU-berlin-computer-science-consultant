@@ -1,4 +1,4 @@
-export type MessageType = "study_question" | "plan_check" | "off_topic";
+export type MessageType = "degree_question" | "course_offering_question" | "plan_check" | "off_topic";
 
 export type Citation = {
   source: string;
@@ -67,7 +67,28 @@ export type TranscriptUploadResponse = {
 export type ApiErrorDetail = {
   error_code?: string;
   message?: string;
+  limit?: number;
+  remaining?: number;
+  reset_at?: string;
   readability?: Record<string, unknown>;
+};
+
+export type UsageQuota = {
+  limit: number;
+  used: number;
+  remaining: number;
+  reset_at: string;
+};
+
+export type UsageResponse = UsageQuota & {
+  session_inactivity_ttl_seconds: number;
+  diagnostic_tracing_enabled: boolean;
+  quota_scope: "client_ip";
+};
+
+export type QuotaAwareResponse<T> = {
+  data: T;
+  usage: UsageQuota | null;
 };
 
 export type SessionResponse = {

@@ -330,7 +330,7 @@ export function StudyPlanTab({
       <GlobalStyles styles={PRINT_STYLES} />
       <Stack data-study-plan-print-report="true" spacing={2} sx={{ maxWidth: 1100, mx: "auto" }}>
         <Box data-print-only="true" sx={{ display: "none", mb: 1 }}>
-          <Typography variant="h1">FU Berlin CS Consultant</Typography>
+          <Typography variant="h1">Modulio</Typography>
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             Master Informatik study plan report - Generated {generatedAt}
           </Typography>

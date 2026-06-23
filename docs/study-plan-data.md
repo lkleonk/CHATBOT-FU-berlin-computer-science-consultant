@@ -16,8 +16,8 @@ The graph state for that thread holds:
 
 ```text
 messages
+wizardflow_message_id
 message_type
-retrieval_query
 course_lookup_keys
 course_lookup_needs_clarification
 retrieved_context
@@ -31,8 +31,14 @@ Important implications:
 
 - The study plan is in memory only.
 - The study plan is lost when the backend process restarts.
+- Sessions are deleted after 48 hours of inactivity by opportunistic cleanup
+  during later message or transcript requests.
+- `DELETE /api/sessions/{session_id}` immediately removes inactive session
+  state. If a request for that session is still running, deletion is deferred
+  until the active request finishes.
 - The current design is not multi-instance safe.
-- There is no audit trail.
+- WizardFlow writes a local diagnostic trace, but there is no authoritative
+  study-plan audit database. Deleting a session does not delete trace files.
 - There is no dedicated endpoint yet for reading or editing a study plan.
 - A parsed plan exists only after a message has gone through the `plan_check` path.
 
@@ -47,6 +53,10 @@ POST /api/sessions/{session_id}/message
   -> SessionService.process_message()
   -> LangGraph ainvoke(..., thread_id=session_id)
   -> agent graph updates in-memory ConsultantState
+
+DELETE /api/sessions/{session_id}
+  -> SessionService.delete_session()
+  -> MemorySaver.delete_thread(session_id)
 ```
 
 For a normal study question, the graph may store exact course-offering lookup

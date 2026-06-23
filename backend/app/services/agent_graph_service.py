@@ -10,6 +10,7 @@ from app.services.nodes.scope_classifier import scope_classifier_node
 from app.services.nodes.study_plan_parser import study_plan_parser_node
 from app.services.routing import route_after_classifier
 from app.services.states.consultant_state import ConsultantState
+from app.services.wizardflow_service import initialize_wizardflow
 
 
 workflow = StateGraph(ConsultantState)
@@ -28,7 +29,8 @@ workflow.add_conditional_edges(
     route_after_classifier,
     {
         "off_topic": "offtopic",
-        "study_question": "course_key_selector",
+        "degree_question": "answer_composer",
+        "course_offering_question": "course_key_selector",
         "plan_check": "study_plan_parser",
     },
 )
@@ -42,3 +44,4 @@ workflow.add_edge("offtopic", END)
 
 memory = MemorySaver()
 app = workflow.compile(checkpointer=memory)
+initialize_wizardflow(app)

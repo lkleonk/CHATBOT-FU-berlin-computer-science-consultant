@@ -25,23 +25,26 @@ backend/app/services/agent_config.py
 ```text
 START
   -> ScopeClassifier
-      -> off_topic      -> OfftopicReply -> END
-      -> study_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
-      -> plan_check     -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
+      -> off_topic                -> OfftopicReply -> END
+      -> degree_question          -> AnswerComposer -> END
+      -> course_offering_question -> CourseKeySelector -> CourseLookup -> AnswerComposer -> END
+      -> plan_check               -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
 Degree rules reach the system prompt through `app.prompts.RULES_CONTEXT`, which
 is rendered from `backend/app/domain/program_rules.py`; the `plan_check` path
-skips retrieval entirely. Course-offering questions on the `study_question` path
-use exact lookup buckets from `backend/app/domain/data/course_offerings.json`;
-Qdrant retrieval code remains in the repository but is no longer wired into the
-active graph.
+skips retrieval entirely. Pure degree-rule questions on the `degree_question`
+path also skip course lookup and go straight to `AnswerComposer`.
+Course-offering questions on the `course_offering_question` path use exact
+lookup buckets from `backend/app/domain/data/course_offerings.json`. The legacy
+Qdrant retrieval and query-rewriter nodes have been removed from the runtime.
 
 ## State Keys
 
 | State key | Producer | Consumer |
 |---|---|---|
 | `messages` | API input, `answer_composer`, `offtopic` | all LLM nodes |
+| `wizardflow_message_id` | `SessionService` | every active node, WizardFlow finalization |
 | `message_type` | `scope_classifier` | graph router, downstream nodes |
 | `course_lookup_keys` | `course_key_selector` | `course_lookup`, `answer_composer` |
 | `course_lookup_invalid_keys` | `course_key_selector` | `course_lookup` |
@@ -70,7 +73,8 @@ Purpose:
 
 - Classify the latest user message.
 - Return one of:
-  - `study_question`
+  - `degree_question`
+  - `course_offering_question`
   - `plan_check`
   - `off_topic`
 
@@ -97,8 +101,6 @@ Purpose:
   semester when no area is specified.
 - Ask for clarification when the user asks about course offerings but omits the
   semester.
-- Output no keys for pure degree-rule questions that do not need course
-  offerings.
 
 Behavior:
 
@@ -133,21 +135,11 @@ retrieved_context
 citations
 ```
 
-Course lookup runs only on the `study_question` path. Degree rules are rendered
-from `program_rules.py` into `app.prompts.RULES_CONTEXT`. Plan checks rely on
-the deterministic Python validator plus rules in the system prompt, so they do
-not hit Qdrant.
-
-### Legacy Retrieval
-
-The old Qdrant retrieval node still exists in:
-
-```text
-backend/app/services/nodes/retrieval.py
-```
-
-It is kept for possible future RAG experiments and manual ingestion workflows,
-but it is not connected to the compiled graph.
+Course lookup runs only on the `course_offering_question` path. Degree rules
+are rendered from `program_rules.py` into `app.prompts.RULES_CONTEXT`; pure
+degree questions go directly from `ScopeClassifier` to `AnswerComposer`. Plan
+checks rely on the deterministic Python validator plus rules in the system
+prompt, so they do not hit Qdrant.
 
 ### StudyPlanParser
 
@@ -254,10 +246,27 @@ backend/app/services/routing.py
 It maps:
 
 ```text
-plan_check     -> study_plan_parser
-study_question -> course_key_selector (then course_lookup, then answer_composer)
-everything else -> offtopic
+plan_check               -> study_plan_parser
+degree_question          -> answer_composer
+course_offering_question -> course_key_selector (then course_lookup, then answer_composer)
+everything else          -> offtopic
 ```
+
+## WizardFlow Tracing
+
+`SessionService` creates a new UUID for each chat request or transcript upload
+and stores it in `ConsultantState.wizardflow_message_id`. The same UUID is passed
+to each node and finalized once at the request boundary.
+
+The compiled graph topology is registered through
+`wizardflow.init_from_langgraph`. All active nodes log explicitly:
+
+- LLM nodes: `llm_input`, `llm_output`, `llm_error`, and `node_output`.
+- Deterministic nodes: `node_input` and `node_output`.
+
+Each `llm_input` contains both the exact system `prompt` and provider `msg`.
+Transcript parser messages are intentionally unredacted. Generated JSONL files
+are written to `backend/traces/` by default and excluded from Git.
 
 ## Error Handling Strategy
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -11,6 +12,16 @@ class MessageRequest(BaseModel):
 
 class SessionResponse(BaseModel):
     session_id: str
+
+
+class UsageResponse(BaseModel):
+    limit: int
+    used: int
+    remaining: int
+    reset_at: datetime
+    session_inactivity_ttl_seconds: int
+    diagnostic_tracing_enabled: bool
+    quota_scope: Literal["client_ip"] = "client_ip"
 
 
 class Citation(BaseModel):
@@ -37,7 +48,7 @@ class RuleCheckResponse(BaseModel):
 
 class ModelReply(BaseModel):
     reply: str
-    message_type: Literal["study_question", "plan_check", "off_topic"]
+    message_type: Literal["degree_question", "course_offering_question", "plan_check", "off_topic"]
     citations: list[Citation] = Field(default_factory=list)
     rule_check_result: RuleCheckResponse | None = None
     parsed_study_plan: StudyPlan | None = None

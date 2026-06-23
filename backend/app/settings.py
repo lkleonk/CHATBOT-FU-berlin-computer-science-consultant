@@ -30,6 +30,14 @@ class Settings(BaseModel):
     class Llm(BaseModel):
         PROVIDER: str = os.getenv("LLM_PROVIDER", "academiccloud")
 
+    class Quota(BaseModel):
+        DAILY_LLM_INVOCATIONS: int = int(os.getenv("DAILY_LLM_INVOCATIONS", "200"))
+        DAILY_USER_ACTIONS: int = int(os.getenv("DAILY_USER_ACTIONS", "100"))
+
+    class Sessions(BaseModel):
+        INACTIVITY_TTL_SECONDS: int = int(os.getenv("SESSION_INACTIVITY_TTL_SECONDS", "172800"))
+        CLEANUP_INTERVAL_SECONDS: int = int(os.getenv("SESSION_CLEANUP_INTERVAL_SECONDS", "300"))
+
     class AcademicCloud(BaseModel):
         BASE_URL: str = os.getenv("ACADEMICCLOUD_BASE_URL", "https://chat-ai.academiccloud.de/v1")
         API_KEY: str = os.getenv("ACADEMICCLOUD_API_KEY", "")
@@ -75,18 +83,30 @@ class Settings(BaseModel):
         VECTOR_SIZE: int = int(os.getenv("QDRANT_VECTOR_SIZE", "384"))
 
     class Rag(BaseModel):
-        SCORE_THRESHOLD: float = float(os.getenv("RAG_SCORE_THRESHOLD", "0.35"))
-        RETRIEVAL_LIMIT: int = int(os.getenv("RAG_RETRIEVAL_LIMIT", "5"))
         RESOURCES_DIR: Path = Path(os.getenv("RESOURCES_DIR", str(PROJECT_ROOT / "ressources")))
+
+    class WizardFlow(BaseModel):
+        ENABLED: bool = os.getenv("WIZARDFLOW_ENABLED", "true").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        _output_dir = Path(os.getenv("WIZARDFLOW_OUTPUT_DIR", "traces"))
+        OUTPUT_DIR: Path = _output_dir if _output_dir.is_absolute() else BACKEND_ROOT / _output_dir
+        FILE_PREFIX: str = os.getenv("WIZARDFLOW_FILE_PREFIX", "fu_cs_consultant")
 
     API: Api = Api()
     DEPLOYMENT: Deployment = Deployment()
     LLM: Llm = Llm()
+    QUOTA: Quota = Quota()
+    SESSIONS: Sessions = Sessions()
     ACADEMICCLOUD: AcademicCloud = AcademicCloud()
     FU_OLLAMA: FuOllama = FuOllama()
     LOCAL_OLLAMA: LocalOllama = LocalOllama()
     QDRANT: Qdrant = Qdrant()
     RAG: Rag = Rag()
+    WIZARDFLOW: WizardFlow = WizardFlow()
 
     def provider_name(self) -> str:
         return self.LLM.PROVIDER.lower()

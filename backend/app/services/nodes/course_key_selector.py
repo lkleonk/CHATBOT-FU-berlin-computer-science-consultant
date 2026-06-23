@@ -14,6 +14,7 @@ from app.domain.course_offerings import (
 from app.prompts import COURSE_KEY_SELECTOR_SYSTEM_PROMPT_TEMPLATE
 from app.services.agent_config import agent_flow_config
 from app.services.model_service import ModelService
+from app.services.quota_service import DailyQuotaExceeded
 from app.services.nodes.utils import (
     format_recent_messages,
     latest_user_message,
@@ -21,6 +22,12 @@ from app.services.nodes.utils import (
     recent_messages,
 )
 from app.services.states.consultant_state import ConsultantState
+from app.services.wizardflow_service import (
+    log_llm_error,
+    log_llm_input,
+    log_llm_output,
+    log_node_output,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -81,6 +88,7 @@ RULE_QUESTION_PATTERNS = [
 
 async def course_key_selector_node(state: ConsultantState) -> ConsultantState:
     logger.info("Course key selector invoked")
+    wizardflow_message_id = state.get("wizardflow_message_id")
     user_message = latest_user_message(state)
     semester_note = (
         build_available_semesters_note()
@@ -99,20 +107,33 @@ async def course_key_selector_node(state: ConsultantState) -> ConsultantState:
     history = format_recent_messages(
         recent_messages(state, agent_flow_config.course_key_selector.history_turns)
     )
+    llm_message = f"Recent conversation:\n{history}\n\nLatest user message:\n{user_message}"
 
+    log_llm_input(
+        wizardflow_message_id,
+        "course_key_selector",
+        prompt,
+        llm_message,
+    )
     try:
         response = await ModelService().invoke(
             prompt=prompt,
-            message=f"Recent conversation:\n{history}\n\nLatest user message:\n{user_message}",
+            message=llm_message,
             format=COURSE_KEY_SELECTOR_SCHEMA,
         )
-        data = parse_json_content(response.get("content", ""))
-    except Exception:
+        response_content = response.get("content", "")
+        log_llm_output(wizardflow_message_id, "course_key_selector", response_content)
+        data = parse_json_content(response_content)
+    except DailyQuotaExceeded:
+        raise
+    except Exception as exc:
+        log_llm_error(wizardflow_message_id, "course_key_selector", exc)
         logger.exception("Course key selection failed; using heuristic selector.")
         data = heuristic_select_course_keys(user_message)
 
     selected = _sanitize_selector_result(data, user_message)
     logger.info("Selected course lookup keys: %s", selected["course_lookup_keys"])
+    log_node_output(wizardflow_message_id, "course_key_selector", selected)
     return selected
 
 
