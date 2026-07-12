@@ -214,6 +214,7 @@ preview:
 cp .env.example .env
 # Add ACADEMICCLOUD_API_KEY or the selected provider's credentials to
 # .env.local. Both files are ignored by Git.
+cd frontend && npm run build && cd ..
 docker compose --profile frontend-preview up --build
 ```
 
@@ -228,10 +229,11 @@ API docs: http://localhost:8000/docs
 Changing `NEXT_PUBLIC_API_BASE_URL` requires a static export rebuild. Use:
 
 ```bash
+cd frontend && npm run build && cd ..
 docker compose --profile frontend-preview up --build -d
 ```
 
-For isolated builds while diagnosing dependency installs:
+To package an already-built static export for the local preview:
 
 ```bash
 docker compose build backend

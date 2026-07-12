@@ -4,9 +4,6 @@ services:
     build:
       context: ./frontend
       target: static-server
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
-        NEXT_PUBLIC_ENABLE_DEV_TOOLS: ${NEXT_PUBLIC_ENABLE_DEV_TOOLS:-false}
     container_name: fu_cs_consultant_frontend
     restart: unless-stopped
     ports:

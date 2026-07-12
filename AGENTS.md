@@ -164,7 +164,8 @@ Compose uses `.env` as the backend env file. Keep `.env.example` aligned when ad
 The frontend is a static Next.js export (`output: "export"`). Build it on the
 local machine with `npm run build`; deploy the generated, Git-ignored
 `frontend/out/` directory alongside the repository. The browser-facing API base
-URL is baked into that export (and into the optional Docker preview image) as:
+URL is baked into that export; the optional Docker preview image packages the
+export unchanged:
 
 ```text
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
@@ -670,6 +671,7 @@ Runtime checks, when Docker and credentials are available:
 
 ```bash
 docker compose build backend
+cd frontend && npm run build && cd ..
 docker compose --profile frontend-preview build frontend
 docker compose --profile frontend-preview up
 curl http://localhost:3000/
