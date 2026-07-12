@@ -1,5 +1,7 @@
 ![FU Berlin CS Consultant home page](ressources/home_page.png)
 
+Website: [cs-modulio.com](https://cs-modulio.com)
+
 # LeoPunkt — FU Berlin CS Consultant
 
 Full-stack prototype for a FU Berlin computer-science study consultant, named **LeoPunkt** (a nod to *Leistungspunkte* — the LP credits it helps you track).
@@ -60,8 +62,8 @@ fu_berlin_cs_consultant/
 ## Services
 
 ```text
-Next.js frontend -> http://localhost:3000/consultant
-FastAPI backend  -> http://localhost:8000
+Static frontend preview -> http://localhost:3000/consultant
+FastAPI backend          -> http://localhost:8000
 Qdrant           -> optional legacy-rag profile, localhost:6335 on host when enabled
 ```
 
@@ -91,10 +93,12 @@ Deployment settings:
 | Variable | Purpose | Local default |
 | --- | --- | --- |
 | `COMPOSE_BIND_ADDRESS` | Host address on which Compose publishes ports | `127.0.0.1` |
-| `FRONTEND_PORT` | Frontend host and container port | `3000` |
+| `APP_DOMAIN` | Canonical public hostname served by Caddy | `localhost` |
+| `APP_WWW_DOMAIN` | `www` hostname that Caddy redirects to `APP_DOMAIN` | `www.localhost` |
+| `FRONTEND_PORT` | Host port for the optional local static-frontend preview | `3000` |
 | `CONSULTANT_HOST` | Backend bind address inside its container | `0.0.0.0` |
 | `CONSULTANT_PORT` | Backend host and container port | `8000` |
-| `NEXT_PUBLIC_API_BASE_URL` | Browser-facing backend URL embedded during `next build` | `http://localhost:8000` |
+| `NEXT_PUBLIC_API_BASE_URL` | Browser-facing backend URL embedded in the static export during `next build` | `http://localhost:8000` |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated exact frontend origins allowed by FastAPI | `http://localhost:3000` |
 | `FORWARDED_ALLOW_IPS` | Proxy IPs/CIDRs allowed to supply forwarded client IPs | `127.0.0.1` |
 
@@ -102,8 +106,8 @@ Deployment settings:
 port, with no path. Example: `https://consultant.example.com,https://admin.example.com`.
 
 `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_ENABLE_DEV_TOOLS` are public,
-build-time values. Rebuild the frontend image after changing either one. Never
-place API keys or passwords in a `NEXT_PUBLIC_*` variable.
+build-time values. Rebuild and redeploy `frontend/out` after changing either
+one. Never place API keys or passwords in a `NEXT_PUBLIC_*` variable.
 
 For production, explicitly set `NEXT_PUBLIC_API_BASE_URL`,
 `CORS_ALLOWED_ORIGINS`, `LLM_PROVIDER`, and the selected provider's base URL,
@@ -203,13 +207,14 @@ at backend startup (unknown degree ids, areas, or module ids fail loudly).
 ## Local Development With Docker Compose
 
 Create the local configuration, add the secret required by the selected LLM
-provider, then build and start the stack:
+provider, then build and start the backend plus an optional static-frontend
+preview:
 
 ```bash
 cp .env.example .env
 # Add ACADEMICCLOUD_API_KEY or the selected provider's credentials to
 # .env.local. Both files are ignored by Git.
-docker compose up --build
+docker compose --profile frontend-preview up --build
 ```
 
 The default local endpoints are:
@@ -220,18 +225,18 @@ Backend:  http://localhost:8000
 API docs: http://localhost:8000/docs
 ```
 
-Changing `NEXT_PUBLIC_API_BASE_URL` requires a frontend rebuild. Use:
+Changing `NEXT_PUBLIC_API_BASE_URL` requires a static export rebuild. Use:
 
 ```bash
-docker compose up --build -d
+docker compose --profile frontend-preview up --build -d
 ```
 
 For isolated builds while diagnosing dependency installs:
 
 ```bash
 docker compose build backend
-docker compose build frontend
-docker compose up
+docker compose --profile frontend-preview build frontend
+docker compose --profile frontend-preview up
 ```
 
 Follow runtime logs after services start:
@@ -252,12 +257,13 @@ resolution.
 
 ## Production Deployment On A DigitalOcean Droplet
 
-The production Compose profile adds Caddy. Caddy terminates HTTPS and proxies
-to the frontend/backend over the internal Compose network. The application
-ports remain published only on host loopback for diagnostics:
+The production Compose profile adds Caddy. Caddy terminates HTTPS, serves the
+locally built static frontend export, and proxies backend paths over the
+internal Compose network. There is no Node.js frontend process on the Droplet.
+The backend port remains published only on host loopback for diagnostics:
 
 ```text
-Internet -> Caddy :80/:443 -> frontend:3000
+Internet -> Caddy :80/:443 -> frontend/out static files
                            -> backend:8000 for /api, /health, and API docs
 ```
 
@@ -268,8 +274,19 @@ Prerequisites:
 - A firewall allowing SSH, HTTP, HTTPS, and optionally HTTPS/UDP for HTTP/3.
   Do not expose application or Qdrant ports publicly.
 
-Copy the repository to the server, create the production environment, and
-restrict its permissions:
+Build the static export on the local machine with the production public API
+origin, then copy both the repository and `frontend/out/` to the server. The
+output directory is intentionally Git-ignored, so it must be included in the
+deployment transfer.
+
+```powershell
+cd frontend
+$env:NEXT_PUBLIC_API_BASE_URL = "https://cs-modulio.com"
+npm run build
+cd ..
+```
+
+Create the production environment on the server and restrict its permissions:
 
 ```bash
 cp .env.example .env
@@ -285,12 +302,13 @@ CONSULTANT_HOST=0.0.0.0
 CONSULTANT_PORT=8000
 
 # Public DNS name only; do not include https:// or a path.
-APP_DOMAIN=consultant.example.com
+APP_DOMAIN=cs-modulio.com
+APP_WWW_DOMAIN=www.cs-modulio.com
 CADDY_HTTP_PORT=80
 CADDY_HTTPS_PORT=443
 
-NEXT_PUBLIC_API_BASE_URL=https://consultant.example.com
-CORS_ALLOWED_ORIGINS=https://consultant.example.com
+NEXT_PUBLIC_API_BASE_URL=https://cs-modulio.com
+CORS_ALLOWED_ORIGINS=https://cs-modulio.com
 NEXT_PUBLIC_ENABLE_DEV_TOOLS=false
 
 # The backend port is loopback-only, so only local processes can reach it.
@@ -314,13 +332,14 @@ published publicly. Caddy supplies the original client address through
 forwarded headers, which keeps per-client quotas working.
 
 Create an `A` record (and `AAAA` only when IPv6 is configured) from
-`APP_DOMAIN` to the Droplet. Ensure ports 80 and 443 are free, then deploy the
-production profile:
+`APP_DOMAIN` to the Droplet. Create `APP_WWW_DOMAIN` as a DNS alias for the
+same host; Caddy redirects it permanently to `APP_DOMAIN`. Ensure ports 80 and
+443 are free, then deploy the production profile:
 
 ```bash
 docker compose --profile production up --build -d
 docker compose ps
-docker compose logs -f caddy backend frontend
+docker compose logs -f caddy backend
 ```
 
 Caddy obtains and renews the TLS certificate automatically. Certificate state
@@ -328,19 +347,20 @@ is persisted in the `caddy_data` volume; do not delete that volume during normal
 deployments. Check certificate or routing failures with
 `docker compose logs --tail=200 caddy`.
 
-After any `NEXT_PUBLIC_*` change, rebuild the frontend image. Backend-only
+After any `NEXT_PUBLIC_*` change, rebuild the static export locally and upload
+the refreshed `frontend/out/` directory before restarting Caddy. Backend-only
 environment changes require a container recreation but not an image rebuild.
 
 Production frontend:
 
 ```text
-https://consultant.example.com/consultant
+https://cs-modulio.com/
 ```
 
 Production health check:
 
 ```text
-https://consultant.example.com/health
+https://cs-modulio.com/health
 ```
 
 ## WizardFlow Traces

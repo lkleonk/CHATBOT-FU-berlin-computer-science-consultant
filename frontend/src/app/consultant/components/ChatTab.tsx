@@ -2,7 +2,6 @@
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -28,6 +27,7 @@ import {
   type ChatMessage,
 } from "./chatMessages";
 import { CitationList } from "./CitationList";
+import { ChatErrorDialog, DEFAULT_CHAT_ERROR_MESSAGE } from "./ChatErrorDialog";
 import { RuleCheckPanel } from "./RuleCheckPanel";
 import { TranscriptUpload } from "./TranscriptUpload";
 import { CHAT_MESSAGES_STORAGE_KEY, SESSION_ID_STORAGE_KEY } from "./storage";
@@ -60,6 +60,7 @@ export function ChatTab({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [expandedRuleMessageId, setExpandedRuleMessageId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const hasLoadedStoredMessages = useRef(false);
@@ -105,6 +106,11 @@ export function ChatTab({
 
   const canSend = useMemo(() => input.trim().length > 0 && !isLoading, [input, isLoading]);
 
+  const showError = useCallback((message: string) => {
+    setError(message);
+    setErrorDialogOpen(true);
+  }, []);
+
   const ensureSession = useCallback(async () => {
     if (sessionId) {
       return sessionId;
@@ -123,6 +129,7 @@ export function ChatTab({
     }
 
     setError(null);
+    setErrorDialogOpen(false);
     setInput("");
     setIsLoading(true);
 
@@ -157,11 +164,19 @@ export function ChatTab({
       if (sendError instanceof ApiError) {
         updateQuota(sendError.usage);
       }
-      setError(sendError instanceof Error ? sendError.message : "Failed to send message.");
+      showError(sendError instanceof Error ? sendError.message : "The message could not be sent.");
     } finally {
       setIsLoading(false);
     }
-  }, [ensureSession, input, isLoading, onRuleCheckResult, onStudyPlan, updateQuota]);
+  }, [
+    ensureSession,
+    input,
+    isLoading,
+    onRuleCheckResult,
+    onStudyPlan,
+    showError,
+    updateQuota,
+  ]);
 
   const handleTranscriptUploaded = useCallback(
     (result: TranscriptUploadResponse) => {
@@ -307,7 +322,6 @@ export function ChatTab({
               <Typography variant="body2">Waiting for response</Typography>
             </Stack>
           )}
-          {error && <Alert severity="error">{error}</Alert>}
         </Stack>
       </Box>
 
@@ -330,7 +344,7 @@ export function ChatTab({
           <TranscriptUpload
             ensureSession={ensureSession}
             onUploaded={handleTranscriptUploaded}
-            onError={setError}
+            onError={showError}
             disabled={isLoading}
           />
           <TextField
@@ -384,6 +398,14 @@ export function ChatTab({
           </Typography>
         </Stack>
       </Box>
+      <ChatErrorDialog
+        open={errorDialogOpen}
+        message={error ?? DEFAULT_CHAT_ERROR_MESSAGE}
+        onClose={() => {
+          setErrorDialogOpen(false);
+          setError(null);
+        }}
+      />
     </Box>
   );
 }

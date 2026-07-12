@@ -11,6 +11,7 @@ from app.pdf.models import PdfUnreadableError
 from app.pdf.service import extract_and_validate
 from app.services import wizardflow_service
 from app.services.nodes.rule_checker import check_study_plan
+from app.services.nodes.answer_composer import AnswerGenerationError
 from app.services.nodes.study_plan_parser import parse_study_plan
 from app.services.session_lifecycle_service import SessionLifecycleService, session_lifecycle
 
@@ -66,8 +67,11 @@ class SessionService:
                 "wizardflow_message_id": wizardflow_message_id,
             }
             result = await agent_app.ainvoke(state, config=config)
+            reply = result.get("reply")
+            if not isinstance(reply, str) or not reply.strip():
+                raise AnswerGenerationError("The consultant returned an empty response.")
             return ModelReply(
-                reply=result.get("reply") or "The consultant could not generate a reply.",
+                reply=reply,
                 message_type=result.get("message_type") or "off_topic",
                 citations=result.get("citations") or [],
                 rule_check_result=result.get("rule_check_result"),
@@ -75,6 +79,15 @@ class SessionService:
             )
         except HTTPException:
             raise
+        except AnswerGenerationError as exc:
+            logger.warning("Consultant answer unavailable: %s", exc)
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "error_code": "answer_generation_failed",
+                    "message": "The consultant could not generate an answer right now. Please try again.",
+                },
+            ) from exc
         except Exception as exc:
             logger.exception("Error processing consultant message")
             raise HTTPException(status_code=500, detail=str(exc)) from exc

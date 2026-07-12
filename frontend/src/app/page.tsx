@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { ConsultantShell } from "./consultant/components/ConsultantShell";
 
 export default function Home() {
-  redirect("/consultant");
+  return <ConsultantShell />;
 }

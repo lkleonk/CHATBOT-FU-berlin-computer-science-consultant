@@ -1,16 +1,16 @@
 services:
   frontend:
+    profiles: ["frontend-preview"]
     build:
       context: ./frontend
+      target: static-server
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
         NEXT_PUBLIC_ENABLE_DEV_TOOLS: ${NEXT_PUBLIC_ENABLE_DEV_TOOLS:-false}
     container_name: fu_cs_consultant_frontend
     restart: unless-stopped
     ports:
-      - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000}"
-    environment:
-      PORT: ${FRONTEND_PORT:-3000}
+      - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-3000}:80"
     depends_on:
       backend:
         condition: service_started
@@ -47,15 +47,14 @@ services:
       - "${CADDY_HTTPS_PORT:-443}:443/udp"
     environment:
       APP_DOMAIN: ${APP_DOMAIN:-localhost}
-      FRONTEND_PORT: ${FRONTEND_PORT:-3000}
+      APP_WWW_DOMAIN: ${APP_WWW_DOMAIN:-www.localhost}
       CONSULTANT_PORT: ${CONSULTANT_PORT:-8000}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/out:/srv:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      frontend:
-        condition: service_started
       backend:
         condition: service_started
 

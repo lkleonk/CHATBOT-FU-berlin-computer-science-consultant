@@ -23,6 +23,10 @@ from app.services.wizardflow_service import (
 logger = logging.getLogger(__name__)
 
 
+class AnswerGenerationError(RuntimeError):
+    """Raised when the answer composer cannot produce a real answer."""
+
+
 ANSWER_SCHEMA = {
     "type": "object",
     "properties": {
@@ -30,27 +34,6 @@ ANSWER_SCHEMA = {
     },
     "required": ["message"],
 }
-
-
-def fallback_answer(state: ConsultantState) -> str:
-    if state.get("course_lookup_needs_clarification"):
-        return state.get("course_lookup_clarification_question") or (
-            "Which semester should I use for the course offering lookup?"
-        )
-
-    rule_result = state.get("rule_check_result")
-    if rule_result:
-        issues = rule_result.get("issues") or []
-        if not issues:
-            return rule_result.get("summary") or "The supplied study plan satisfies the implemented checks."
-        first = issues[0]
-        return f"{rule_result.get('summary')} First issue: {first.get('message')}"
-
-    if state.get("retrieved_context"):
-        if state.get("course_lookup_message"):
-            return state["course_lookup_message"]
-        return "I found relevant local context, but the LLM response could not be generated. Please retry."
-    return "The local resources do not contain enough information to answer that."
 
 
 async def answer_composer_node(state: ConsultantState) -> ConsultantState:
@@ -100,13 +83,17 @@ Deterministic rule-check result:
         response_content = response.get("content", "")
         log_llm_output(wizardflow_message_id, "answer_composer", response_content)
         data = parse_json_content(response_content)
-        reply = data.get("message") or fallback_answer(state)
+        reply = data.get("message") if isinstance(data, dict) else None
+        if not isinstance(reply, str) or not reply.strip():
+            raise AnswerGenerationError("The answer composer returned an empty response.")
     except DailyQuotaExceeded:
         raise
     except Exception as exc:
         log_llm_error(wizardflow_message_id, "answer_composer", exc)
-        logger.exception("Answer composition failed; using fallback.")
-        reply = fallback_answer(state)
+        logger.exception("Answer composition failed.")
+        if isinstance(exc, AnswerGenerationError):
+            raise
+        raise AnswerGenerationError("The answer composer failed to generate a response.") from exc
 
     result: ConsultantState = {
         "reply": reply,

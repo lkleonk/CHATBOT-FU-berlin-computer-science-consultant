@@ -1,12 +1,16 @@
 "use client";
 
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -28,7 +32,7 @@ type WelcomeDialogProps = {
 
 export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps) {
   const { usage } = useUsage();
-  const { degreeId, degrees } = useDegree();
+  const { degreeId, degrees, effectiveDegreeId } = useDegree();
   const [pickedDegree, setPickedDegree] = useState<string | null>(null);
   // An explicit pick wins; otherwise preselect the previously stored choice.
   const selectedDegree = pickedDegree ?? degreeId;
@@ -36,7 +40,16 @@ export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps
 
   return (
     <Dialog open={open} fullWidth maxWidth="sm" aria-labelledby="welcome-title">
-      <DialogTitle id="welcome-title">Welcome to Modulio</DialogTitle>
+      <DialogTitle id="welcome-title" sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
+        Welcome to Modulio
+        <IconButton
+          aria-label="Close welcome dialog"
+          edge="end"
+          onClick={() => onClose(selectedDegree ?? effectiveDegreeId)}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
           Choose your degree program
@@ -82,20 +95,20 @@ export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps
         <List disablePadding>
           <ListItem disableGutters alignItems="flex-start">
             <ListItemIcon sx={{ minWidth: 36, mt: 0.5 }}>
-              <InfoOutlinedIcon fontSize="small" />
+              <DataUsageOutlinedIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText
-              primary="Limited request allowance"
+              primary="Daily request allowance"
               secondary={
                 usage
                   ? `${usage.remaining} of ${usage.limit} requests remain today. Messages and transcript uploads each use one request.`
-                  : "Messages and transcript uploads are subject to a daily request allowance."
+                  : "Messages and transcript uploads use your daily request allowance."
               }
             />
           </ListItem>
           <ListItem disableGutters alignItems="flex-start">
             <ListItemIcon sx={{ minWidth: 36, mt: 0.5 }}>
-              <InfoOutlinedIcon fontSize="small" />
+              <TimerOutlinedIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText
               primary="Temporary session data"
@@ -108,7 +121,7 @@ export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps
           </ListItem>
           <ListItem disableGutters alignItems="flex-start">
             <ListItemIcon sx={{ minWidth: 36, mt: 0.5 }}>
-              <InfoOutlinedIcon fontSize="small" />
+              <PictureAsPdfOutlinedIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText
               primary="Transcript processing"
@@ -124,7 +137,7 @@ export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps
       </DialogContent>
       <DialogActions>
         <Button disabled={!selectedDegree} onClick={() => selectedDegree && onViewUsage(selectedDegree)}>
-          View request allowance
+          View daily request allowance
         </Button>
         <Button
           onClick={() => selectedDegree && onClose(selectedDegree)}

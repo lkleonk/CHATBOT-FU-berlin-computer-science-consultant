@@ -34,19 +34,9 @@ RUN test -n "$NEXT_PUBLIC_API_BASE_URL" \
  && npm run build \
  && echo "frontend build: Next.js build completed"
 
-FROM node:22-alpine AS runner
+FROM caddy:2-alpine AS static-server
 
-WORKDIR /app
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=builder /app/out /srv
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
-
-EXPOSE 3000
-
-CMD ["npm", "run", "start"]
+EXPOSE 80

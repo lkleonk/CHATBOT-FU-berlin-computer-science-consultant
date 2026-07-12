@@ -1,11 +1,12 @@
 "use client";
 
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -34,18 +35,32 @@ import type { HealthResponse } from "@/types/api";
 import { downloadStoredChat } from "./chatExport";
 import { loadStoredChatMessages } from "./chatMessages";
 
+const dialogPreviewButtonSx = {
+  color: "text.primary",
+  borderColor: "divider",
+  bgcolor: "background.paper",
+  "&:hover": {
+    borderColor: "text.secondary",
+    bgcolor: "action.hover",
+  },
+};
+
 type SettingsTabProps = {
   sessionId: string | null;
   onClearLocalState: () => Promise<void>;
-  onLoadDummyData: () => void;
+  onShowFailedChatRequest: () => void;
+  onShowUsagePreview: () => void;
   onOpenUsage: () => void;
+  onShowWelcome: () => void;
 };
 
 export function SettingsTab({
   sessionId,
   onClearLocalState,
-  onLoadDummyData,
+  onShowFailedChatRequest,
+  onShowUsagePreview,
   onOpenUsage,
+  onShowWelcome,
 }: SettingsTabProps) {
   const { darkMode, toggleDarkMode } = useSettings();
   const { usage } = useUsage();
@@ -128,7 +143,7 @@ export function SettingsTab({
               Settings
             </Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Appearance, request allowance, and conversation data.
+              Appearance, daily request allowance, and conversation data.
             </Typography>
           </Box>
 
@@ -146,7 +161,7 @@ export function SettingsTab({
 
           <Box>
             <Typography variant="h3" sx={{ mb: 1 }}>
-              Request allowance
+              Daily request allowance
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" } }}>
               <Chip
@@ -220,14 +235,11 @@ export function SettingsTab({
                     </List>
                   )}
 
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-                    <Button
-                      startIcon={<AddCircleOutlineOutlinedIcon />}
-                      onClick={onLoadDummyData}
-                      variant="contained"
-                    >
-                      Set Dummy Data
-                    </Button>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    useFlexGap
+                    sx={{ flexWrap: "wrap", gap: 1.25 }}
+                  >
                     <Button
                       startIcon={<RefreshOutlinedIcon />}
                       onClick={() => void refreshHealth()}
@@ -254,6 +266,45 @@ export function SettingsTab({
                       New trace file started: <code>{tracePath}</code>
                     </Alert>
                   )}
+
+                  <Box>
+                    <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 700 }}>
+                      Dialog previews
+                    </Typography>
+                    <Stack
+                      direction={{ xs: "column", sm: "row" }}
+                      useFlexGap
+                      sx={{ flexWrap: "wrap", gap: 1.25 }}
+                    >
+                      <Button
+                        size="small"
+                        startIcon={<DataUsageOutlinedIcon />}
+                        onClick={onShowUsagePreview}
+                        variant="outlined"
+                        sx={dialogPreviewButtonSx}
+                      >
+                        Show daily request allowance dialog
+                      </Button>
+                      <Button
+                        size="small"
+                        startIcon={<ErrorOutlineOutlinedIcon />}
+                        onClick={onShowFailedChatRequest}
+                        variant="outlined"
+                        sx={dialogPreviewButtonSx}
+                      >
+                        Show failed chat request dialog
+                      </Button>
+                      <Button
+                        size="small"
+                        startIcon={<SchoolOutlinedIcon />}
+                        onClick={onShowWelcome}
+                        variant="outlined"
+                        sx={dialogPreviewButtonSx}
+                      >
+                        Show welcome dialog
+                      </Button>
+                    </Stack>
+                  </Box>
                 </Stack>
               </Box>
             </>

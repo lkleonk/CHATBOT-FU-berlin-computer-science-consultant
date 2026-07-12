@@ -23,11 +23,12 @@ import { useEffect, useState } from "react";
 import { DEGREE_STORAGE_KEY, useDegree } from "@/context/DegreeContext";
 import { useUsage } from "@/context/UsageContext";
 import { deleteSession } from "@/services/api";
-import type { Citation, MessageType, RuleCheckResult, StudyPlan } from "@/types/api";
+import type { RuleCheckResult, StudyPlan, UsageResponse } from "@/types/api";
 
 import { ChatTab } from "./ChatTab";
 import { downloadChat } from "./chatExport";
-import { type ChatMessage } from "./chatMessages";
+import { loadStoredChatMessages, type ChatMessage } from "./chatMessages";
+import { ChatErrorDialog, DEFAULT_CHAT_ERROR_MESSAGE } from "./ChatErrorDialog";
 import { DegreeRulesTab } from "./DegreeRulesTab";
 import { DegreeSwitchDialog } from "./DegreeSwitchDialog";
 import { LowRequestWarningDialog } from "./LowRequestWarningDialog";
@@ -51,226 +52,36 @@ const tabs = [
   { label: "Settings", icon: <SettingsOutlinedIcon />, id: "settings" },
 ];
 
-type StoredChatMessage = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  messageType?: MessageType;
-  citations?: Citation[];
-  ruleCheckResult?: RuleCheckResult | null;
-  parsedStudyPlan?: StudyPlan | null;
+const DAILY_REQUEST_ALLOWANCE_PREVIEW: UsageResponse = {
+  limit: 25,
+  used: 13,
+  remaining: 12,
+  reset_at: "2026-07-13T00:00:00Z",
+  session_inactivity_ttl_seconds: 172800,
+  diagnostic_tracing_enabled: false,
+  quota_scope: "client_ip",
 };
-
-const DUMMY_STUDY_PLAN: StudyPlan = {
-  specialization_area: "technical",
-  modules: [
-    {
-      name: "Softwareprojekt Campus Planner B",
-      lp: 10,
-      area: "practical",
-      is_wahlbereich: false,
-      is_ungraded: true,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: true,
-    },
-    {
-      name: "Advanced Software Engineering",
-      lp: 10,
-      area: "practical",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Advanced Algorithms",
-      lp: 10,
-      area: "theoretical",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Model Checking",
-      lp: 10,
-      area: "theoretical",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Wissenschaftliches Arbeiten Theoretische Informatik",
-      lp: 5,
-      area: "theoretical",
-      is_wahlbereich: false,
-      is_ungraded: true,
-      is_bachelor_module: false,
-      is_scientific_work: true,
-      is_software_project: false,
-    },
-    {
-      name: "Secure Systems",
-      lp: 10,
-      area: "technical",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Computer Architecture Lab",
-      lp: 10,
-      area: "technical",
-      is_wahlbereich: false,
-      is_ungraded: true,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Machine Learning",
-      lp: 10,
-      area: "technical",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Wissenschaftliches Arbeiten Technische Informatik",
-      lp: 5,
-      area: "technical",
-      is_wahlbereich: false,
-      is_ungraded: true,
-      is_bachelor_module: false,
-      is_scientific_work: true,
-      is_software_project: false,
-    },
-    {
-      name: "Human-Computer Interaction in Education",
-      lp: 10,
-      area: "application",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-    {
-      name: "Masterarbeit",
-      lp: 30,
-      area: "thesis",
-      is_wahlbereich: false,
-      is_ungraded: false,
-      is_bachelor_module: false,
-      is_scientific_work: false,
-      is_software_project: false,
-    },
-  ],
-};
-
-const DUMMY_RULE_CHECK: RuleCheckResult = {
-  is_valid: true,
-  summary: "Dummy study plan satisfies the implemented 2014 Master Informatik checks.",
-  totals: {
-    practical_lp: 20,
-    theoretical_lp: 25,
-    technical_lp: 35,
-    application_lp: 10,
-    informatics_lp: 80,
-    module_area_lp: 90,
-    thesis_lp: 30,
-    master_total_lp: 120,
-    ungraded_lp: 30,
-    bachelor_module_lp: 0,
-    wahlbereich_lp: 0,
-    core_scientific_work_count: 2,
-    total_scientific_work_count: 2,
-    core_software_project_count: 1,
-    total_software_project_count: 1,
-  },
-  issues: [],
-};
-
-function createDummyMessages(): StoredChatMessage[] {
-  return [
-    {
-      id: "dummy-user-study-plan",
-      role: "user",
-      content: "Load dummy study plan data for frontend testing.",
-    },
-    {
-      id: "dummy-assistant-study-plan",
-      role: "assistant",
-      content:
-        "Dummy data loaded. This is a frontend-only fixture for testing the Study Plan and print/PDF view without the backend.",
-      messageType: "plan_check",
-      citations: [],
-      ruleCheckResult: DUMMY_RULE_CHECK,
-      parsedStudyPlan: DUMMY_STUDY_PLAN,
-    },
-  ];
-}
 
 function readStoredSessionId() {
   if (typeof window === "undefined") {
     return null;
   }
-  return window.sessionStorage.getItem(SESSION_ID_STORAGE_KEY);
+  const sessionId = window.sessionStorage.getItem(SESSION_ID_STORAGE_KEY);
+  if (sessionId === "dummy-session") {
+    window.sessionStorage.removeItem(SESSION_ID_STORAGE_KEY);
+    return null;
+  }
+  return sessionId;
 }
 
 function readStoredRuleCheck(): RuleCheckResult | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const stored = window.sessionStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) {
-      return null;
-    }
-
-    const latest = [...parsed].reverse().find((message) => message?.ruleCheckResult);
-    return latest?.ruleCheckResult ?? null;
-  } catch {
-    return null;
-  }
+  const latest = [...loadStoredChatMessages()].reverse().find((message) => message.ruleCheckResult);
+  return latest?.ruleCheckResult ?? null;
 }
 
 function readStoredStudyPlan(): StudyPlan | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const stored = window.sessionStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) {
-      return null;
-    }
-
-    const latest = [...parsed].reverse().find((message) => message?.parsedStudyPlan);
-    return latest?.parsedStudyPlan ?? null;
-  } catch {
-    return null;
-  }
+  const latest = [...loadStoredChatMessages()].reverse().find((message) => message.parsedStudyPlan);
+  return latest?.parsedStudyPlan ?? null;
 }
 
 export function ConsultantShell() {
@@ -284,6 +95,8 @@ export function ConsultantShell() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [resetToken, setResetToken] = useState(0);
   const [usageDialogOpen, setUsageDialogOpen] = useState(false);
+  const [usagePreviewDialogOpen, setUsagePreviewDialogOpen] = useState(false);
+  const [failedChatPreviewOpen, setFailedChatPreviewOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const [lowRequestWarningOpen, setLowRequestWarningOpen] = useState(false);
@@ -364,7 +177,7 @@ export function ConsultantShell() {
   };
 
   const handleClearLocalState = async () => {
-    if (sessionId && sessionId !== "dummy-session") {
+    if (sessionId) {
       try {
         await deleteSession(sessionId);
       } catch {
@@ -402,17 +215,6 @@ export function ConsultantShell() {
     }
     await handleClearLocalState();
     selectDegree(target);
-  };
-
-  const handleLoadDummyData = () => {
-    const dummySessionId = "dummy-session";
-    window.sessionStorage.setItem(SESSION_ID_STORAGE_KEY, dummySessionId);
-    window.sessionStorage.setItem(CHAT_MESSAGES_STORAGE_KEY, JSON.stringify(createDummyMessages()));
-    setSessionId(dummySessionId);
-    setLatestRuleCheck(DUMMY_RULE_CHECK);
-    setLatestStudyPlan(DUMMY_STUDY_PLAN);
-    setResetToken((current) => current + 1);
-    setActiveTab(1);
   };
 
   return (
@@ -499,7 +301,7 @@ export function ConsultantShell() {
                     {usage?.remaining ?? "—"}
                   </Box>
                   <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                    {usage ? `${usage.remaining} requests left` : "Request allowance"}
+                    {usage ? `${usage.remaining} requests left` : "Daily request allowance"}
                   </Box>
                 </>
               }
@@ -608,8 +410,10 @@ export function ConsultantShell() {
             <SettingsTab
               sessionId={sessionId}
               onClearLocalState={handleClearLocalState}
-              onLoadDummyData={handleLoadDummyData}
+              onShowFailedChatRequest={() => setFailedChatPreviewOpen(true)}
+              onShowUsagePreview={() => setUsagePreviewDialogOpen(true)}
               onOpenUsage={() => setUsageDialogOpen(true)}
+              onShowWelcome={() => setWelcomeOpen(true)}
             />
           )}
         </Box>
@@ -680,6 +484,16 @@ export function ConsultantShell() {
         }}
       />
       <RequestUsageDialog open={usageDialogOpen} onClose={() => setUsageDialogOpen(false)} />
+      <RequestUsageDialog
+        open={usagePreviewDialogOpen}
+        onClose={() => setUsagePreviewDialogOpen(false)}
+        usageOverride={DAILY_REQUEST_ALLOWANCE_PREVIEW}
+      />
+      <ChatErrorDialog
+        open={failedChatPreviewOpen}
+        message={DEFAULT_CHAT_ERROR_MESSAGE}
+        onClose={() => setFailedChatPreviewOpen(false)}
+      />
       <WizardFlowPromo open={wizardFlowPromoOpen} onClose={dismissWizardFlowPromo} />
     </Box>
   );

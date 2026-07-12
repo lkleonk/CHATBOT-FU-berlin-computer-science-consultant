@@ -37,7 +37,20 @@ export function loadStoredChatMessages(): ChatMessage[] {
 
   try {
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? (parsed as ChatMessage[]) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    const messages = parsed.filter(
+      (message): message is ChatMessage =>
+        typeof message === "object" &&
+        message !== null &&
+        !String((message as { id?: unknown }).id ?? "").startsWith("dummy-"),
+    );
+    if (messages.length !== parsed.length) {
+      window.sessionStorage.setItem(CHAT_MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+    }
+    return messages;
   } catch {
     return [];
   }

@@ -3,14 +3,23 @@ import { alpha, createTheme } from "@mui/material/styles";
 import { colors } from "./colors";
 
 export function createAppTheme(darkMode: boolean) {
-  return createTheme({
-    palette: {
-      mode: darkMode ? "dark" : "light",
-      primary: {
+  const primary = darkMode
+    ? {
+        main: "#78d6b4",
+        dark: "#43ad86",
+        light: "#b8f1da",
+        contrastText: "#10221b",
+      }
+    : {
         main: colors.fuGreen,
         dark: colors.fuGreenDark,
         light: colors.fuGreenLight,
-      },
+      };
+
+  return createTheme({
+    palette: {
+      mode: darkMode ? "dark" : "light",
+      primary,
       secondary: {
         main: colors.info,
       },
@@ -65,6 +74,19 @@ export function createAppTheme(darkMode: boolean) {
         styleOverrides: {
           root: {
             borderRadius: 6,
+          },
+        },
+      },
+      MuiSwitch: {
+        styleOverrides: {
+          switchBase: {
+            "&.Mui-checked": {
+              color: darkMode ? "#b8f1da" : colors.fuGreen,
+            },
+            "&.Mui-checked + .MuiSwitch-track": {
+              backgroundColor: darkMode ? "#43ad86" : colors.fuGreen,
+              opacity: 1,
+            },
           },
         },
       },

@@ -33,7 +33,7 @@ export function LowRequestWarningDialog({
       <DialogActions>
         <Button onClick={onClose}>Continue</Button>
         <Button onClick={onViewUsage} variant="contained">
-          View request allowance
+          View daily request allowance
         </Button>
       </DialogActions>
     </Dialog>

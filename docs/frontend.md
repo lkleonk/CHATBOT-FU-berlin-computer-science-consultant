@@ -1,18 +1,19 @@
 # Frontend Architecture
 
-The standalone Next.js frontend is served at `/consultant` and uses React,
+The static Next.js export is served at `/` (and `/consultant`) and uses React,
 TypeScript, Material UI, and the App Router.
 
 The browser-facing backend origin comes from `NEXT_PUBLIC_API_BASE_URL`. This
-public value is embedded during `next build`, so Docker deployments must pass it
-as a build argument and rebuild the frontend image after changing it. The local
-Compose default is `http://localhost:8000`; production should use the public
-HTTPS origin handled by the reverse proxy.
+public value is embedded during `next build`, so rebuild and redeploy
+`frontend/out` after changing it. The local Compose default is
+`http://localhost:8000`; production should use the public HTTPS origin handled
+by the reverse proxy.
 
 The optional Compose `production` profile runs Caddy on ports 80/443. Caddy
-serves the frontend and proxies backend/API-documentation paths on the same
-public origin, so `NEXT_PUBLIC_API_BASE_URL` and `CORS_ALLOWED_ORIGINS` should
-both use `https://<APP_DOMAIN>`.
+serves the locally built `frontend/out` directory directly and proxies
+backend/API-documentation paths on the same public origin; no Node.js frontend
+container runs in production. `NEXT_PUBLIC_API_BASE_URL` and
+`CORS_ALLOWED_ORIGINS` should both use `https://<APP_DOMAIN>`.
 
 ## Client State
 

@@ -12,6 +12,8 @@ Instructions for agents working in `fu_berlin_cs_consultant/`.
 
 ## Project Purpose
 
+Public website: `https://cs-modulio.com`
+
 This is a FU Berlin study consultant for multiple degree programs with a backend-first architecture and a standalone Next.js frontend. Supported degrees live in a registry (`backend/app/domain/degrees/`): currently `msc_informatik` (M.Sc. Informatik, SPO 2014) and `msc_data_science` (M.Sc. Data Science, FU-Mitteilungen 18/2021). A `bsc_informatik` package is planned once its §7(3)/(4) module lists are available.
 
 It answers questions using exact local course-offering lookup plus rules in prompts, while preserving optional local RAG code for future/manual retrieval experiments. It validates proposed study plans with deterministic per-degree Python rules. The LLM may parse and explain, but the LLM must not be trusted for final LP validation. Every session is bound to exactly one degree; the LLM never chooses or infers the degree.
@@ -134,16 +136,19 @@ as the module global `tracer` in `services/wizardflow_service.py`.
 
 ## Docker
 
-`docker-compose.yml` starts locally:
+`docker-compose.yml` starts the backend locally. The optional static-frontend
+preview uses the `frontend-preview` profile:
 
 ```text
-frontend -> http://localhost:3000/consultant
-backend  -> http://localhost:8000
+frontend preview -> http://localhost:3000/
+backend          -> http://localhost:8000
 ```
 
 The optional `production` profile also starts Caddy on ports 80/443. Caddy
-terminates HTTPS and proxies application traffic over the internal Compose
-network. Its certificate state persists in the `caddy_data` volume.
+terminates HTTPS, serves `frontend/out` directly from `/srv`, and proxies only
+backend traffic over the internal Compose network. Production therefore runs
+no Node.js frontend container. Its certificate state persists in the
+`caddy_data` volume.
 
 Qdrant is behind the optional `legacy-rag` Compose profile. Normal
 `docker compose up` should not start Qdrant. Use
@@ -156,7 +161,10 @@ installs `backend/requirements-legacy-rag.txt`.
 
 Compose uses `.env` as the backend env file. Keep `.env.example` aligned when adding required runtime variables.
 
-The frontend image is built from `frontend/Dockerfile`. The browser-facing API base URL is passed as:
+The frontend is a static Next.js export (`output: "export"`). Build it on the
+local machine with `npm run build`; deploy the generated, Git-ignored
+`frontend/out/` directory alongside the repository. The browser-facing API base
+URL is baked into that export (and into the optional Docker preview image) as:
 
 ```text
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
@@ -166,10 +174,11 @@ NEXT_PUBLIC_ENABLE_DEV_TOOLS=false
 This value is intentionally host-facing because the JavaScript runs in the user's browser, not inside the Docker network.
 
 Compose publishes application ports on `COMPOSE_BIND_ADDRESS` and reads
-`FRONTEND_PORT`, `CONSULTANT_PORT`, `CORS_ALLOWED_ORIGINS`, and
+`FRONTEND_PORT` (preview only), `CONSULTANT_PORT`, `CORS_ALLOWED_ORIGINS`, and
 `FORWARDED_ALLOW_IPS` from `.env`. Keep the application bind address on loopback
 when the production Caddy profile is enabled. Production additionally requires
-`APP_DOMAIN`, `NEXT_PUBLIC_API_BASE_URL`, and matching CORS configuration.
+`APP_DOMAIN`, a static export built with the matching `NEXT_PUBLIC_API_BASE_URL`,
+and matching CORS configuration.
 
 ## Agent Flow
 
@@ -481,7 +490,10 @@ TypeScript
 Material UI
 ```
 
-The frontend is now scaffolded and served by Docker Compose. Keep frontend edits inside `fu_berlin_cs_consultant/frontend/`.
+The frontend is exported statically. Caddy serves `frontend/out` directly in
+production; `frontend-preview` is an optional local Docker profile backed by a
+small Caddy image, not a Node.js runtime. Keep frontend edits inside
+`fu_berlin_cs_consultant/frontend/`.
 
 Expected first frontend structure:
 
@@ -658,13 +670,16 @@ Runtime checks, when Docker and credentials are available:
 
 ```bash
 docker compose build backend
-docker compose build frontend
-docker compose up
-curl http://localhost:3000/consultant
+docker compose --profile frontend-preview build frontend
+docker compose --profile frontend-preview up
+curl http://localhost:3000/
 curl http://localhost:8000/health
 ```
 
-Use `docker compose logs -f backend frontend` when runtime behavior is unclear.
+For production, first build and upload `frontend/out/`, then use
+`docker compose --profile production up --build -d`; only `backend` and Caddy
+run. Use `docker compose logs -f backend caddy` when production runtime behavior
+is unclear.
 Use `docker compose --profile legacy-rag up -d qdrant` only when testing manual
 legacy RAG ingestion.
 
