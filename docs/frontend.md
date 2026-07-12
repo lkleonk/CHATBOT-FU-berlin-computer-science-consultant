@@ -4,8 +4,8 @@ The static Next.js export is served at `/` (and `/consultant`) and uses React,
 TypeScript, Material UI, and the App Router.
 
 The browser-facing backend origin comes from `NEXT_PUBLIC_API_BASE_URL`. This
-public value is embedded during `next build`, so rebuild and redeploy
-`frontend/out` after changing it. The local Compose default is
+public value is embedded during `next build`, so rebuild and commit the tracked
+`frontend/out` deployment artifact after changing it. The local Compose default is
 `http://localhost:8000`; production should use the public HTTPS origin handled
 by the reverse proxy.
 

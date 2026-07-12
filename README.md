@@ -277,9 +277,8 @@ Prerequisites:
   Do not expose application or Qdrant ports publicly.
 
 Build the static export on the local machine with the production public API
-origin, then copy both the repository and `frontend/out/` to the server. The
-output directory is intentionally Git-ignored, so it must be included in the
-deployment transfer.
+origin. `frontend/out/` is a tracked deployment artifact, so include its
+refreshed contents in the deployment revision before updating the server.
 
 ```powershell
 cd frontend

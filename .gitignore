@@ -30,7 +30,6 @@ frontend/.yarn/*
 !frontend/.yarn/releases
 !frontend/.yarn/versions
 frontend/.next/
-frontend/out/
 frontend/build/
 frontend/coverage/
 frontend/.vercel/

@@ -162,10 +162,10 @@ installs `backend/requirements-legacy-rag.txt`.
 Compose uses `.env` as the backend env file. Keep `.env.example` aligned when adding required runtime variables.
 
 The frontend is a static Next.js export (`output: "export"`). Build it on the
-local machine with `npm run build`; deploy the generated, Git-ignored
-`frontend/out/` directory alongside the repository. The browser-facing API base
-URL is baked into that export; the optional Docker preview image packages the
-export unchanged:
+local machine with `npm run build`; the generated `frontend/out/` directory is
+a tracked deployment artifact and must be refreshed before deployment. The
+browser-facing API base URL is baked into that export; the optional Docker
+preview image packages the export unchanged:
 
 ```text
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
@@ -678,10 +678,10 @@ curl http://localhost:3000/
 curl http://localhost:8000/health
 ```
 
-For production, first build and upload `frontend/out/`, then use
-`docker compose --profile production up --build -d`; only `backend` and Caddy
-run. Use `docker compose logs -f backend caddy` when production runtime behavior
-is unclear.
+For production, first rebuild `frontend/out/` locally and deploy the updated
+repository revision, then run the production Compose profile; only `backend`
+and Caddy run. Use `docker compose logs -f backend caddy` when production
+runtime behavior is unclear.
 Use `docker compose --profile legacy-rag up -d qdrant` only when testing manual
 legacy RAG ingestion.
 
