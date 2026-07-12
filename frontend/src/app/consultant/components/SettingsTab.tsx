@@ -32,7 +32,6 @@ import { useUsage } from "@/context/UsageContext";
 import { API_BASE_URL, getHealth, reinitTracing } from "@/services/api";
 import type { HealthResponse } from "@/types/api";
 
-import { downloadStoredChat } from "./chatExport";
 import { loadStoredChatMessages } from "./chatMessages";
 
 const dialogPreviewButtonSx = {
@@ -52,6 +51,7 @@ type SettingsTabProps = {
   onShowUsagePreview: () => void;
   onOpenUsage: () => void;
   onShowWelcome: () => void;
+  onOpenChatExport: () => void;
 };
 
 export function SettingsTab({
@@ -61,6 +61,7 @@ export function SettingsTab({
   onShowUsagePreview,
   onOpenUsage,
   onShowWelcome,
+  onOpenChatExport,
 }: SettingsTabProps) {
   const { darkMode, toggleDarkMode } = useSettings();
   const { usage } = useUsage();
@@ -322,7 +323,7 @@ export function SettingsTab({
         </DialogContent>
         <DialogActions>
           {hasDownloadableChat && (
-            <Button startIcon={<DownloadOutlinedIcon />} onClick={() => downloadStoredChat()}>
+            <Button startIcon={<DownloadOutlinedIcon />} onClick={onOpenChatExport}>
               Download chat
             </Button>
           )}

@@ -6,7 +6,7 @@ export function createAppTheme(darkMode: boolean) {
   const primary = darkMode
     ? {
         main: "#78d6b4",
-        dark: "#43ad86",
+        dark: colors.fuGreenDark,
         light: "#b8f1da",
         contrastText: "#10221b",
       }

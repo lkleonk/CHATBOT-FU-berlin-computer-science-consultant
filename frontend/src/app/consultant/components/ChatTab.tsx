@@ -234,8 +234,18 @@ export function ChatTab({
                   sx={{
                     p: 1.5,
                     maxWidth: "min(780px, 100%)",
-                    bgcolor: isUser ? "primary.main" : "background.paper",
-                    color: isUser ? "primary.contrastText" : "text.primary",
+                    bgcolor: (theme) =>
+                      isUser
+                        ? theme.palette.mode === "dark"
+                          ? theme.palette.primary.dark
+                          : theme.palette.primary.main
+                        : theme.palette.background.paper,
+                    color: (theme) =>
+                      isUser
+                        ? theme.palette.mode === "dark"
+                          ? theme.palette.common.white
+                          : theme.palette.primary.contrastText
+                        : theme.palette.text.primary,
                     borderColor: isUser ? "primary.dark" : "divider",
                   }}
                 >
@@ -245,7 +255,7 @@ export function ChatTab({
                       display: "block",
                       mb: 0.5,
                       fontWeight: 700,
-                      color: isUser ? "primary.contrastText" : "text.secondary",
+                      color: isUser ? "inherit" : "text.secondary",
                     }}
                   >
                     {isUser ? "You" : "Assistant"}

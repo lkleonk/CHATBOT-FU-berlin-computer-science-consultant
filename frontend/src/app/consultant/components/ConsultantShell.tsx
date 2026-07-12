@@ -26,7 +26,8 @@ import { deleteSession } from "@/services/api";
 import type { RuleCheckResult, StudyPlan, UsageResponse } from "@/types/api";
 
 import { ChatTab } from "./ChatTab";
-import { downloadChat } from "./chatExport";
+import { ChatExportDialog } from "./ChatExportDialog";
+import { downloadChat, type ChatExportFormat } from "./chatExport";
 import { loadStoredChatMessages, type ChatMessage } from "./chatMessages";
 import { ChatErrorDialog, DEFAULT_CHAT_ERROR_MESSAGE } from "./ChatErrorDialog";
 import { DegreeRulesTab } from "./DegreeRulesTab";
@@ -101,6 +102,8 @@ export function ConsultantShell() {
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const [lowRequestWarningOpen, setLowRequestWarningOpen] = useState(false);
   const [wizardFlowPromoOpen, setWizardFlowPromoOpen] = useState(false);
+  const [chatExportOpen, setChatExportOpen] = useState(false);
+  const [chatMessagesToExport, setChatMessagesToExport] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -217,6 +220,20 @@ export function ConsultantShell() {
     selectDegree(target);
   };
 
+  const openChatExport = (messages = chatMessages) => {
+    const messagesToExport = messages.length > 0 ? messages : loadStoredChatMessages();
+    if (messagesToExport.length === 0) {
+      return;
+    }
+    setChatMessagesToExport(messagesToExport);
+    setChatExportOpen(true);
+  };
+
+  const downloadSelectedChatFormat = (format: ChatExportFormat) => {
+    downloadChat(chatMessagesToExport, format);
+    setChatExportOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -286,7 +303,7 @@ export function ConsultantShell() {
                     size="small"
                     aria-label="Download chat"
                     disabled={chatMessages.length === 0}
-                    onClick={() => downloadChat(chatMessages)}
+                    onClick={() => openChatExport()}
                   >
                     <DownloadOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -414,6 +431,7 @@ export function ConsultantShell() {
               onShowUsagePreview={() => setUsagePreviewDialogOpen(true)}
               onOpenUsage={() => setUsageDialogOpen(true)}
               onShowWelcome={() => setWelcomeOpen(true)}
+              onOpenChatExport={() => openChatExport()}
             />
           )}
         </Box>
@@ -466,7 +484,7 @@ export function ConsultantShell() {
         targetDegree={degrees.find((degree) => degree.id === pendingDegreeId) ?? null}
         hasChatMessages={chatMessages.length > 0}
         hasStudyPlan={latestStudyPlan !== null}
-        onDownloadChat={() => downloadChat(chatMessages)}
+        onDownloadChat={() => openChatExport(chatMessages)}
         onOpenStudyPlan={() => {
           setPendingDegreeId(null);
           setActiveTab(1);
@@ -493,6 +511,12 @@ export function ConsultantShell() {
         open={failedChatPreviewOpen}
         message={DEFAULT_CHAT_ERROR_MESSAGE}
         onClose={() => setFailedChatPreviewOpen(false)}
+      />
+      <ChatExportDialog
+        open={chatExportOpen}
+        messages={chatMessagesToExport}
+        onClose={() => setChatExportOpen(false)}
+        onDownload={downloadSelectedChatFormat}
       />
       <WizardFlowPromo open={wizardFlowPromoOpen} onClose={dismissWizardFlowPromo} />
     </Box>

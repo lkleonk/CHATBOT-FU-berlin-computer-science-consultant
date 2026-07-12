@@ -150,6 +150,12 @@ backend traffic over the internal Compose network. Production therefore runs
 no Node.js frontend container. Its certificate state persists in the
 `caddy_data` volume.
 
+The two Caddyfiles have distinct roles. The root `Caddyfile` belongs to the
+production `caddy` service and handles TLS, the `www` redirect, backend
+proxying, and the static export. `frontend/Caddyfile.preview` belongs only to the
+optional `frontend-preview` service; it is a minimal local static-file server
+and is not used in the production request path.
+
 Qdrant is behind the optional `legacy-rag` Compose profile. Normal
 `docker compose up` should not start Qdrant. Use
 `docker compose --profile legacy-rag up -d qdrant` only for manual legacy RAG
@@ -627,6 +633,13 @@ Each provider reads its own `<PROVIDER>_*` env vars (model, temperature,
 timeout, etc.). The SSH tunnel for `fu_ollama` is started automatically
 during app lifespan — there is no separate `USE_SSH` flag. SSH credentials
 live under `FU_SSH_USER` / `FU_SSH_PASSWORD` in `.env.local`.
+
+For the AcademicCloud deployment, use
+`ACADEMICCLOUD_MODEL=qwen3-30b-a3b-instruct-2507`. It is the deliberate
+dedicated instruction-model choice for concise, predictable consultant
+responses. Do not switch it to the thinking-capable `qwen3.6-35b-a3b` merely
+because it may be stronger overall; its reasoning-oriented behaviour can make
+user-facing responses unnecessarily long.
 
 `fu_ollama` only works when the computer is connected to the FU Berlin VPN. If
 the SSH tunnel or cuda01 connection fails, check VPN connectivity before
