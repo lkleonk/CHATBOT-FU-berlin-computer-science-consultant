@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { DegreeProvider } from "@/context/DegreeContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { UsageProvider } from "@/context/UsageContext";
 
@@ -8,7 +9,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Modulio",
-  description: "Study consultant for the FU Berlin Master Informatik.",
+  description: "Study consultant for FU Berlin computer science degree programs.",
   icons: {
     icon: "/favicon.svg",
   },
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body>
         <EmotionRegistry>
           <SettingsProvider>
-            <UsageProvider>{children}</UsageProvider>
+            <UsageProvider>
+              <DegreeProvider>{children}</DegreeProvider>
+            </UsageProvider>
           </SettingsProvider>
         </EmotionRegistry>
       </body>

@@ -1,4 +1,4 @@
-from app.domain.degree_rules import validate_study_plan
+from app.domain.degrees.msc_informatik.degree_rules import validate_study_plan
 
 
 def issue_codes(result):

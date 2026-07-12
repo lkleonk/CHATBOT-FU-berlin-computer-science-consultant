@@ -8,14 +8,16 @@ from app.domain.course_offerings import (
     available_semesters,
     build_available_semesters_note,
     build_course_lookup_tree,
+    has_offerings,
     iter_lookup_keys,
     lookup_key,
 )
-from app.prompts import COURSE_KEY_SELECTOR_SYSTEM_PROMPT_TEMPLATE
+from app.domain.degrees import DEFAULT_DEGREE_ID
 from app.services.agent_config import agent_flow_config
 from app.services.model_service import ModelService
 from app.services.quota_service import DailyQuotaExceeded
 from app.services.nodes.utils import (
+    degree_for,
     format_recent_messages,
     latest_user_message,
     parse_json_content,
@@ -89,19 +91,33 @@ RULE_QUESTION_PATTERNS = [
 async def course_key_selector_node(state: ConsultantState) -> ConsultantState:
     logger.info("Course key selector invoked")
     wizardflow_message_id = state.get("wizardflow_message_id")
+    degree = degree_for(state)
+    if not has_offerings(degree.id):
+        result: ConsultantState = {
+            "course_lookup_keys": [],
+            "course_lookup_invalid_keys": [],
+            "course_lookup_needs_clarification": False,
+            "course_lookup_clarification_question": "",
+            "course_lookup_message": (
+                f"No local course-offering data is available for {degree.display_name} yet. "
+                "Course offerings must be checked in the official FU Berlin Vorlesungsverzeichnis."
+            ),
+        }
+        log_node_output(wizardflow_message_id, "course_key_selector", result)
+        return result
     user_message = latest_user_message(state)
     semester_note = (
-        build_available_semesters_note()
+        build_available_semesters_note(degree.id)
         if agent_flow_config.course_key_selector.include_available_semesters_note
         else "(semester coverage note disabled)"
     )
     prompt = (
-        COURSE_KEY_SELECTOR_SYSTEM_PROMPT_TEMPLATE.replace(
+        degree.prompts.course_key_selector_template.replace(
             "{semester_coverage_note}",
             semester_note,
         ).replace(
             "{course_tree}",
-            build_course_lookup_tree(),
+            build_course_lookup_tree(degree.id),
         )
     )
     history = format_recent_messages(
@@ -129,17 +145,17 @@ async def course_key_selector_node(state: ConsultantState) -> ConsultantState:
     except Exception as exc:
         log_llm_error(wizardflow_message_id, "course_key_selector", exc)
         logger.exception("Course key selection failed; using heuristic selector.")
-        data = heuristic_select_course_keys(user_message)
+        data = heuristic_select_course_keys(user_message, degree.id)
 
-    selected = _sanitize_selector_result(data, user_message)
+    selected = _sanitize_selector_result(data, user_message, degree.id)
     logger.info("Selected course lookup keys: %s", selected["course_lookup_keys"])
     log_node_output(wizardflow_message_id, "course_key_selector", selected)
     return selected
 
 
-def heuristic_select_course_keys(message: str) -> dict[str, Any]:
+def heuristic_select_course_keys(message: str, degree_id: str = DEFAULT_DEGREE_ID) -> dict[str, Any]:
     text = _normalize_text(message)
-    semester_mentions = _detect_semester_mentions(text)
+    semester_mentions = _detect_semester_mentions(text, degree_id)
     offering_question = _looks_like_course_offering_question(text, semester_mentions)
 
     if not offering_question:
@@ -156,7 +172,7 @@ def heuristic_select_course_keys(message: str) -> dict[str, Any]:
             "clarification_question": "Which semester should I use for the course offering lookup?",
         }
 
-    valid_semesters = set(available_semesters())
+    valid_semesters = set(available_semesters(degree_id))
     selected_semesters = [semester for semester in semester_mentions if semester in valid_semesters]
     missing_semesters = [semester for semester in semester_mentions if semester not in valid_semesters]
 
@@ -171,7 +187,7 @@ def heuristic_select_course_keys(message: str) -> dict[str, Any]:
 
     areas = _detect_areas(text)
     course_types = _detect_course_types(text)
-    keys = _expand_keys(selected_semesters, areas, course_types)
+    keys = _expand_keys(selected_semesters, areas, course_types, degree_id)
 
     return {
         "keys": keys,
@@ -186,7 +202,11 @@ def heuristic_select_course_keys(message: str) -> dict[str, Any]:
     }
 
 
-def _sanitize_selector_result(data: dict[str, Any], message: str) -> ConsultantState:
+def _sanitize_selector_result(
+    data: dict[str, Any],
+    message: str,
+    degree_id: str = DEFAULT_DEGREE_ID,
+) -> ConsultantState:
     text = _normalize_text(message)
     if _looks_like_degree_rule_question(text) and not _has_explicit_offering_term(text):
         return {
@@ -197,7 +217,7 @@ def _sanitize_selector_result(data: dict[str, Any], message: str) -> ConsultantS
             "course_lookup_message": "",
         }
 
-    valid_keys = set(iter_lookup_keys())
+    valid_keys = set(iter_lookup_keys(degree_id))
     max_keys = agent_flow_config.course_key_selector.max_keys
     raw_keys = data.get("keys") if isinstance(data, dict) else []
     if not isinstance(raw_keys, list):
@@ -231,8 +251,8 @@ def _sanitize_selector_result(data: dict[str, Any], message: str) -> ConsultantS
         message_text = data["message"].strip()
 
     if not keys and not needs_clarification:
-        semester_mentions = _detect_semester_mentions(text)
-        valid_semesters = set(available_semesters())
+        semester_mentions = _detect_semester_mentions(text, degree_id)
+        valid_semesters = set(available_semesters(degree_id))
         missing = [semester for semester in semester_mentions if semester not in valid_semesters]
         if missing and _looks_like_course_offering_question(text, semester_mentions):
             message_text = "No local course-offering data is available for semester(s): " + ", ".join(missing)
@@ -250,14 +270,15 @@ def _expand_keys(
     semesters: list[str],
     areas: list[str],
     course_types: list[str],
+    degree_id: str = DEFAULT_DEGREE_ID,
 ) -> list[str]:
-    valid_keys = set(iter_lookup_keys())
+    valid_keys = set(iter_lookup_keys(degree_id))
     keys: list[str] = []
 
     for semester in semesters:
-        selected_areas = areas or available_areas(semester)
+        selected_areas = areas or available_areas(degree_id, semester)
         for area in selected_areas:
-            selected_types = course_types or available_course_types(semester, area)
+            selected_types = course_types or available_course_types(degree_id, semester, area)
             for course_type in selected_types:
                 key = lookup_key(semester, area, course_type)
                 if key in valid_keys:
@@ -282,10 +303,10 @@ def _detect_course_types(text: str) -> list[str]:
     return course_types
 
 
-def _detect_semester_mentions(text: str) -> list[str]:
+def _detect_semester_mentions(text: str, degree_id: str = DEFAULT_DEGREE_ID) -> list[str]:
     mentions: list[str] = []
 
-    for semester in available_semesters():
+    for semester in available_semesters(degree_id):
         for alias in _semester_aliases(semester):
             if alias in text:
                 _append_unique(mentions, semester)

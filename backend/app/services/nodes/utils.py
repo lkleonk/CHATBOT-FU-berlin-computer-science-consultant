@@ -2,6 +2,12 @@ import json
 import re
 from typing import Any
 
+from app.domain.degrees import DegreeDefinition, get_degree_or_default
+
+
+def degree_for(state: dict[str, Any]) -> DegreeDefinition:
+    return get_degree_or_default(state.get("degree_id"))
+
 
 def latest_user_message(state: dict[str, Any]) -> str:
     for message in reversed(state.get("messages", []) or []):

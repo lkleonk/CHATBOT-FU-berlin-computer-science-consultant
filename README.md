@@ -2,9 +2,9 @@
 
 # LeoPunkt — FU Berlin CS Consultant
 
-Full-stack prototype for a FU Berlin Master Informatik study consultant, named **LeoPunkt** (a nod to *Leistungspunkte* — the LP credits it helps you track).
+Full-stack prototype for a FU Berlin computer-science study consultant, named **LeoPunkt** (a nod to *Leistungspunkte* — the LP credits it helps you track).
 
-The app answers questions from local resources in `ressources/` and can check a proposed study plan against deterministic 2014 Master Informatik rules. It includes a standalone Next.js frontend and a FastAPI backend. It reuses architecture patterns from the parent `llm_chatbot` project, but all code lives inside `fu_berlin_cs_consultant/`.
+The app supports multiple degree programs through a backend degree registry — currently the M.Sc. Informatik (SPO 2014) and the M.Sc. Data Science (FU-Mitteilungen 18/2021). Users pick their degree in the welcome dialog and can switch later from the header; each session is bound to one degree. The app answers questions from local resources and can check a proposed study plan against deterministic per-degree rules. It includes a standalone Next.js frontend and a FastAPI backend. It reuses architecture patterns from the parent `llm_chatbot` project, but all code lives inside `fu_berlin_cs_consultant/`.
 
 ## Screenshots
 
@@ -32,9 +32,9 @@ fu_berlin_cs_consultant/
 │   │   ├── main.py              # App entrypoint
 │   │   ├── routes.py            # API routes
 │   │   ├── models.py            # Pydantic models
-│   │   ├── prompts.py           # LLM prompts
 │   │   ├── settings.py          # Config
-│   │   ├── domain/              # Degree rules, course offerings, module catalog, study plan logic
+│   │   ├── domain/              # Course offerings, study plan logic, shared rule models
+│   │   │   └── degrees/         # Degree registry: per-degree prompts, rules, catalogues
 │   │   └── services/            # LLM providers, vector store, agent graph
 │   │       ├── nodes/           # Agent graph nodes (course lookup, rule checker, ...)
 │   │       └── states/          # Agent graph state
@@ -61,9 +61,12 @@ fu_berlin_cs_consultant/
 
 ```text
 Next.js frontend -> http://localhost:3000/consultant
-FastAPI backend  -> http://localhost:5100
+FastAPI backend  -> http://localhost:8000
 Qdrant           -> optional legacy-rag profile, localhost:6335 on host when enabled
 ```
+
+These are local defaults from `.env.example`. The host bind address and all
+published ports are configurable without changing the Compose file.
 
 The normal backend installation uses `backend/requirements.txt` and does not
 install Torch, SentenceTransformer, or Qdrant. Those packages are isolated in
@@ -72,13 +75,40 @@ manual-ingestion environment or Docker target.
 
 ## Environment
 
-Create `.env` from `.env.example` and fill in the provider you want. Docker Compose uses `.env` as the container env file.
+Create `.env` from `.env.example` and fill in the provider you want. Docker
+Compose uses it for variable interpolation and passes backend settings into the
+backend container. Optional secrets in `.env.local` override the corresponding
+backend values from `.env`.
 
 ```bash
 cp .env.example .env
 ```
 
 Pick one provider via `LLM_PROVIDER`. Each provider reads its own `<PROVIDER>_*` vars; the others are ignored.
+
+Deployment settings:
+
+| Variable | Purpose | Local default |
+| --- | --- | --- |
+| `COMPOSE_BIND_ADDRESS` | Host address on which Compose publishes ports | `127.0.0.1` |
+| `FRONTEND_PORT` | Frontend host and container port | `3000` |
+| `CONSULTANT_HOST` | Backend bind address inside its container | `0.0.0.0` |
+| `CONSULTANT_PORT` | Backend host and container port | `8000` |
+| `NEXT_PUBLIC_API_BASE_URL` | Browser-facing backend URL embedded during `next build` | `http://localhost:8000` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated exact frontend origins allowed by FastAPI | `http://localhost:3000` |
+| `FORWARDED_ALLOW_IPS` | Proxy IPs/CIDRs allowed to supply forwarded client IPs | `127.0.0.1` |
+
+`CORS_ALLOWED_ORIGINS` entries must contain only scheme, hostname, and optional
+port, with no path. Example: `https://consultant.example.com,https://admin.example.com`.
+
+`NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_ENABLE_DEV_TOOLS` are public,
+build-time values. Rebuild the frontend image after changing either one. Never
+place API keys or passwords in a `NEXT_PUBLIC_*` variable.
+
+For production, explicitly set `NEXT_PUBLIC_API_BASE_URL`,
+`CORS_ALLOWED_ORIGINS`, `LLM_PROVIDER`, and the selected provider's base URL,
+model, and credentials. The bind addresses and ports have safe local defaults
+but should still be reviewed before deployment.
 
 AcademicCloud (hosted API):
 
@@ -165,27 +195,35 @@ available. The chat download is produced locally as Markdown and never sent to
 the backend.
 
 Semester coverage is not configured manually. The course selector derives
-available semesters from `backend/app/domain/data/course_offerings.json`.
+available semesters from the session degree's projection of
+`backend/app/domain/data/course_offerings.json`. That file is a flat list of
+courses, each tagged with the degree programs it counts toward; it is validated
+at backend startup (unknown degree ids, areas, or module ids fail loudly).
 
-## Start
+## Local Development With Docker Compose
 
-Backend only, without Docker (Python 3.11 or 3.12):
+Create the local configuration, add the secret required by the selected LLM
+provider, then build and start the stack:
 
 ```bash
-cd backend
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --no-cache-dir -r requirements.txt
-python -m uvicorn app.main:app --host 0.0.0.0 --port 5100 --workers 1
+cp .env.example .env
+# Add ACADEMICCLOUD_API_KEY or the selected provider's credentials to
+# .env.local. Both files are ignored by Git.
+docker compose up --build
 ```
 
-This installs only the active API/agent runtime. Do not use
-`requirements-legacy-rag.txt` on a normal deployment server.
+The default local endpoints are:
 
-Full stack with Docker:
+```text
+Frontend: http://localhost:3000/consultant
+Backend:  http://localhost:8000
+API docs: http://localhost:8000/docs
+```
+
+Changing `NEXT_PUBLIC_API_BASE_URL` requires a frontend rebuild. Use:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 For isolated builds while diagnosing dependency installs:
@@ -207,18 +245,102 @@ The backend Dockerfile has timeouts around apt:
 - package index update: 300 seconds
 - system dependency install: 600 seconds
 
-If one of those times out, the problem is Debian package network access from Docker rather than Python dependency resolution.
+The image switches Debian's default package sources from HTTP to HTTPS before
+updating the package index. If one of the guarded apt commands still times out,
+the problem is Debian mirror access from Docker rather than Python dependency
+resolution.
 
-Frontend:
+## Production Deployment On A DigitalOcean Droplet
+
+The production Compose profile adds Caddy. Caddy terminates HTTPS and proxies
+to the frontend/backend over the internal Compose network. The application
+ports remain published only on host loopback for diagnostics:
 
 ```text
-http://localhost:3000/consultant
+Internet -> Caddy :80/:443 -> frontend:3000
+                           -> backend:8000 for /api, /health, and API docs
 ```
 
-API docs:
+Prerequisites:
+
+- A Droplet with Docker Engine and the Docker Compose plugin installed.
+- A domain whose DNS record points to the Droplet.
+- A firewall allowing SSH, HTTP, HTTPS, and optionally HTTPS/UDP for HTTP/3.
+  Do not expose application or Qdrant ports publicly.
+
+Copy the repository to the server, create the production environment, and
+restrict its permissions:
+
+```bash
+cp .env.example .env
+chmod 600 .env
+```
+
+Example production values for a single-domain deployment:
+
+```env
+COMPOSE_BIND_ADDRESS=127.0.0.1
+FRONTEND_PORT=3000
+CONSULTANT_HOST=0.0.0.0
+CONSULTANT_PORT=8000
+
+# Public DNS name only; do not include https:// or a path.
+APP_DOMAIN=consultant.example.com
+CADDY_HTTP_PORT=80
+CADDY_HTTPS_PORT=443
+
+NEXT_PUBLIC_API_BASE_URL=https://consultant.example.com
+CORS_ALLOWED_ORIGINS=https://consultant.example.com
+NEXT_PUBLIC_ENABLE_DEV_TOOLS=false
+
+# The backend port is loopback-only, so only local processes can reach it.
+# Trust forwarded client IPs from the host reverse proxy/Docker gateway.
+FORWARDED_ALLOW_IPS=*
+
+LLM_PROVIDER=academiccloud
+ACADEMICCLOUD_BASE_URL=https://provider.example.com/v1
+ACADEMICCLOUD_MODEL=your-model-name
+ACADEMICCLOUD_API_KEY=replace-with-the-real-secret-on-the-server
+
+WIZARDFLOW_ENABLED=false
+```
+
+The placeholder values above are examples only. Use the real provider URL,
+model, and secret for the selected provider. Do not commit the production
+`.env` file.
+
+`FORWARDED_ALLOW_IPS=*` is appropriate here only while the backend is not
+published publicly. Caddy supplies the original client address through
+forwarded headers, which keeps per-client quotas working.
+
+Create an `A` record (and `AAAA` only when IPv6 is configured) from
+`APP_DOMAIN` to the Droplet. Ensure ports 80 and 443 are free, then deploy the
+production profile:
+
+```bash
+docker compose --profile production up --build -d
+docker compose ps
+docker compose logs -f caddy backend frontend
+```
+
+Caddy obtains and renews the TLS certificate automatically. Certificate state
+is persisted in the `caddy_data` volume; do not delete that volume during normal
+deployments. Check certificate or routing failures with
+`docker compose logs --tail=200 caddy`.
+
+After any `NEXT_PUBLIC_*` change, rebuild the frontend image. Backend-only
+environment changes require a container recreation but not an image rebuild.
+
+Production frontend:
 
 ```text
-http://localhost:5100/docs
+https://consultant.example.com/consultant
+```
+
+Production health check:
+
+```text
+https://consultant.example.com/health
 ```
 
 ## WizardFlow Traces
@@ -236,8 +358,9 @@ llm_output -> raw model response
 llm_error  -> exception type and message, when a fallback is used
 ```
 
-Deterministic nodes record `node_input` and `node_output`. Trace failures are
-logged but do not fail consultant requests.
+Deterministic nodes record `node_input` and `node_output`. The `__start__` graph
+step is not logged; `__end__` is finalized as a payload-free marker. Trace
+failures are logged but do not fail consultant requests.
 
 Configuration:
 
@@ -251,6 +374,18 @@ For a university production deployment that promises session-only temporary
 storage, set `WIZARDFLOW_ENABLED=false`. When tracing is enabled, the welcome
 dialog discloses that unredacted diagnostic files may outlive in-memory session
 state.
+
+All traffic is written into one long-lived trace file per backend process. To
+start a fresh timestamped trace file without restarting the backend (for
+example before a manual test run), use the `New Trace File` button in the
+Settings developer section, or call the endpoint directly:
+
+```bash
+curl -X POST http://localhost:8000/api/tracing/reinit
+```
+
+The old file is left as-is, open messages carry over into the new file, and a
+disabled tracer answers HTTP 409 with `error_code == "tracing_disabled"`.
 
 From `backend/`, inspect a generated trace with:
 
@@ -299,28 +434,42 @@ The default ingestion includes:
 
 ## API
 
-Create a session:
+List the supported degree programs:
 
 ```bash
-curl -X POST http://localhost:5100/api/sessions
+curl http://localhost:8000/api/degrees
+```
+
+Create a session (degree defaults to `msc_informatik` when the body is omitted):
+
+```bash
+curl -X POST http://localhost:8000/api/sessions \
+  -H "Content-Type: application/json" \
+  -d "{\"degree\":\"msc_data_science\"}"
+```
+
+Read the degree-rule catalogue for one degree:
+
+```bash
+curl "http://localhost:8000/api/program-rules?degree=msc_informatik"
 ```
 
 Delete a session and its in-memory LangGraph state:
 
 ```bash
-curl -X DELETE http://localhost:5100/api/sessions/<session-id>
+curl -X DELETE http://localhost:8000/api/sessions/<session-id>
 ```
 
 Read the current client request allowance and retention information:
 
 ```bash
-curl http://localhost:5100/api/usage
+curl http://localhost:8000/api/usage
 ```
 
 Ask a question:
 
 ```bash
-curl -X POST http://localhost:5100/api/sessions/<session-id>/message \
+curl -X POST http://localhost:8000/api/sessions/<session-id>/message \
   -H "Content-Type: application/json" \
   -d "{\"content\":\"Wie viele LP brauche ich im Anwendungsbereich?\"}"
 ```
@@ -328,7 +477,7 @@ curl -X POST http://localhost:5100/api/sessions/<session-id>/message \
 Check a study plan:
 
 ```bash
-curl -X POST http://localhost:5100/api/sessions/<session-id>/message \
+curl -X POST http://localhost:8000/api/sessions/<session-id>/message \
   -H "Content-Type: application/json" \
   -d "{\"content\":\"Bitte pruefe meinen Studienplan mit Vertiefung Praktische Informatik: Softwareprojekt Praktische Informatik B 10 LP, Wissenschaftliches Arbeiten Praktische Informatik A 5 LP, Projektmanagement 5 LP, Kuenstliche Intelligenz 5 LP, Datenbanktechnologie 5 LP, Rechnersicherheit 10 LP, Algorithmische Geometrie 10 LP, Modelchecking 10 LP, Betriebssysteme 10 LP, Wissenschaftliches Arbeiten Technische Informatik A 5 LP, Mobilkommunikation 5 LP, Anwendungsmodul A 10 LP.\"}"
 ```
@@ -336,7 +485,7 @@ curl -X POST http://localhost:5100/api/sessions/<session-id>/message \
 Health:
 
 ```bash
-curl http://localhost:5100/health
+curl http://localhost:8000/health
 ```
 
 ## Tests

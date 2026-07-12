@@ -1,17 +1,25 @@
 import type {
   ApiErrorDetail,
+  DegreeInfo,
   HealthResponse,
   ModelReply,
   ProgramRulesCatalogue,
   QuotaAwareResponse,
   SessionResponse,
+  TracingReinitResponse,
   TranscriptUploadResponse,
   UsageQuota,
   UsageResponse,
 } from "@/types/api";
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5100";
+const DEFAULT_API_BASE_URL = "http://localhost:8000";
+
+function getApiBaseUrl(): string {
+  const value = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  return value || DEFAULT_API_BASE_URL;
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 type ErrorBody = {
   detail?: unknown;
@@ -135,11 +143,15 @@ function extractHealthFromError(error: ApiError): HealthResponse | null {
   return null;
 }
 
-export async function createSession(): Promise<SessionResponse> {
+export async function createSession(degree?: string): Promise<SessionResponse> {
   return requestJson<SessionResponse>("/api/sessions", {
     method: "POST",
-    body: JSON.stringify({}),
+    body: JSON.stringify(degree ? { degree } : {}),
   });
+}
+
+export async function getDegrees(): Promise<DegreeInfo[]> {
+  return requestJson<DegreeInfo[]>("/api/degrees");
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {
@@ -197,12 +209,20 @@ export function getApiErrorDetail(error: unknown): ApiErrorDetail | null {
   return error.detail as ApiErrorDetail;
 }
 
-export async function getProgramRules(): Promise<ProgramRulesCatalogue> {
-  return requestJson<ProgramRulesCatalogue>("/api/program-rules");
+export async function getProgramRules(degree?: string): Promise<ProgramRulesCatalogue> {
+  const query = degree ? `?degree=${encodeURIComponent(degree)}` : "";
+  return requestJson<ProgramRulesCatalogue>(`/api/program-rules${query}`);
 }
 
 export async function getUsage(): Promise<UsageResponse> {
   return requestJson<UsageResponse>("/api/usage");
+}
+
+/** Developer-only: start a new WizardFlow trace file on the backend. */
+export async function reinitTracing(): Promise<TracingReinitResponse> {
+  return requestJson<TracingReinitResponse>("/api/tracing/reinit", {
+    method: "POST",
+  });
 }
 
 export async function getHealth(): Promise<HealthResponse> {

@@ -153,12 +153,17 @@ course offerings are read from
 
 ## WizardFlow Tracing
 
-[x] Add `wizardflow==0.2.0`.
-[x] Initialize tracing from the compiled LangGraph topology.
+[x] Add `wizardflow==0.3.0`.
+[x] Initialize tracing from the compiled LangGraph topology; keep the client
+    as the module global `tracer` in `services/wizardflow_service.py`.
+[x] Rotate to a fresh trace file on demand via `POST /api/tracing/reinit`
+    (`tracer.reinit()`), triggered by the `New Trace File` button in the
+    Settings developer section.
 [x] Generate one UUID per chat message or transcript upload.
 [x] Store `wizardflow_message_id` in `ConsultantState`.
 [x] Log `llm_input` with `prompt` and unredacted `msg`.
 [x] Log `llm_output`, fallback errors, and deterministic node input/output.
+[x] Do not log `__start__`; keep `__end__` payload-free.
 [x] Persist Docker traces under `backend/traces/` and exclude them from Git.
 
 ## Prompt Design
@@ -229,3 +234,39 @@ course offerings are read from
 [x] Run tests.
 [x] Run the full backend suite from runtime-only requirements without legacy RAG dependencies.
 [x] Confirm no files outside `fu_berlin_cs_consultant/` changed.
+
+## Multi-Degree Support
+
+Phase 1 — degree framework:
+
+[x] Add `domain/degrees/definition.py` (`DegreeDefinition` + `DegreePrompts`).
+[x] Add `domain/degrees/__init__.py` registry with `DEFAULT_DEGREE_ID=msc_informatik`.
+[x] Move Master Informatik prompts/rules/catalogue into `domain/degrees/msc_informatik/`; remove `app/prompts.py`.
+[x] Extract shared `RuleIssue`/`RuleCheckResult` into `domain/rule_check.py`.
+[x] Seed `degree_id` into the LangGraph checkpoint at session creation; nodes resolve prompts via `degree_for(state)`.
+[x] `POST /api/sessions` accepts `{"degree": ...}`; add `GET /api/degrees`; `GET /api/program-rules?degree=`.
+
+Phase 2 — shared course offerings:
+
+[x] Convert `course_offerings.json` to a flat tagged list (placement lists per degree, `lp` override, `module_id(s)`, `is_bachelor_module`).
+[x] Deterministic per-degree projection to `semester/area/type` bucket trees; selector/lookup nodes are degree-scoped.
+[x] Load-time validation against the registry (area vocabulary, canonical module ids).
+[x] Migration-equivalence test against the pre-migration Master buckets fixture.
+[x] `CourseKeySelector` short-circuits without an LLM call for degrees without tagged offerings.
+
+Phase 3 — degree packages:
+
+[x] `msc_data_science`: canonical module catalogue, profile-inference checklist validator, rules catalogue, prompts, tests.
+[ ] `bsc_informatik`: blocked on the §7(3) Pflicht and §7(4) Wahlpflicht module lists (SPO 2023).
+[ ] Tag Data Science entries in `course_offerings.json` once the curated offerings data is ready.
+
+Phase 4 — frontend:
+
+[x] `DegreeContext` (fetches `/api/degrees`, persists choice in localStorage).
+[x] Welcome dialog collects the degree with card-style toggle buttons.
+[x] Header degree switcher with `DegreeSwitchDialog` (data-loss warning, chat download, Study Plan print shortcut).
+[x] Session creation sends the degree; Degree Rules tab refetches per degree.
+
+Phase 5 — docs:
+
+[x] Update `AGENTS.md`, `README.md`, `docs/agent-flow.md`, `docs/agent-flow.html`, `docs/frontend.md`, `implementation.md`.

@@ -5,6 +5,7 @@ from app.domain.course_offerings import (
     format_course_lookup_context,
     lookup_course_buckets,
 )
+from app.services.nodes.utils import degree_for
 from app.services.states.consultant_state import ConsultantState
 from app.services.wizardflow_service import log_node_input, log_node_output
 
@@ -50,7 +51,7 @@ async def course_lookup_node(state: ConsultantState) -> ConsultantState:
         log_node_output(wizardflow_message_id, "course_lookup", result)
         return result
 
-    buckets, missing_keys = lookup_course_buckets(keys)
+    buckets, missing_keys = lookup_course_buckets(degree_for(state).id, keys)
     context = format_course_lookup_context(
         buckets,
         invalid_keys=[*invalid_keys, *missing_keys],

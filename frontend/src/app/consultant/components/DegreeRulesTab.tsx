@@ -14,6 +14,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useState } from "react";
 
+import { useDegree } from "@/context/DegreeContext";
 import { getProgramRules } from "@/services/api";
 import type { ProgramRuleItem, ProgramRulesCatalogue } from "@/types/api";
 
@@ -34,6 +35,7 @@ function itemRange(item: ProgramRuleItem) {
 }
 
 export function DegreeRulesTab() {
+  const { effectiveDegreeId } = useDegree();
   const [catalogue, setCatalogue] = useState<ProgramRulesCatalogue | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +44,13 @@ export function DegreeRulesTab() {
     setIsLoading(true);
     setError(null);
     try {
-      setCatalogue(await getProgramRules());
+      setCatalogue(await getProgramRules(effectiveDegreeId));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Failed to load degree rules.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [effectiveDegreeId]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

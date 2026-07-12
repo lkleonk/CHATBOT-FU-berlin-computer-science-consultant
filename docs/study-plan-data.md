@@ -45,9 +45,10 @@ Important implications:
 ## Data Flow
 
 ```text
-POST /api/sessions
-  -> SessionService.create_session()
-  -> returns session_id
+POST /api/sessions            # optional body {"degree": "<degree_id>"}
+  -> SessionService.create_session(degree_id)
+  -> seeds degree_id into the LangGraph checkpoint
+  -> returns session_id + degree
 
 POST /api/sessions/{session_id}/message
   -> SessionService.process_message()
@@ -73,7 +74,15 @@ The API response includes `rule_check_result` when available.
 
 ## StudyPlan Schema
 
-The canonical in-process schema lives in `backend/app/domain/study_plan.py`.
+The canonical in-process schema lives in `backend/app/domain/study_plan.py` and
+is shared by all degree programs. Degree-specific semantics live in each degree
+package: the parser's JSON schema (`DegreeDefinition.study_plan_schema`)
+constrains which fields the LLM fills per degree, and the degree's validator
+interprets them. For `msc_informatik` all fields below are used; for
+`msc_data_science` the parser only fills `name`, `lp`, and `area`
+(`thesis`/`unknown`) — classification happens deterministically against the
+canonical module catalogue, and `specialization_area` plus the boolean flags
+stay at their defaults.
 
 ```python
 class StudyPlan(BaseModel):
@@ -124,7 +133,11 @@ Field meaning:
 
 ## User Data vs Inferred Data
 
-The study plan parser extracts what the user says. Then `module_catalog.py` enriches modules using `module_catalog.json`.
+The study plan parser extracts what the user says. Then the degree's
+`enrich_study_plan` fills in deterministic knowledge: `msc_informatik` enriches
+through `module_catalog.py` using `module_catalog.json`; `msc_data_science`
+canonicalizes matched names and default LP from its module catalogue in
+`domain/degrees/msc_data_science/module_catalog.py`.
 
 User-provided data can include:
 
@@ -172,7 +185,9 @@ This implements the caveat:
 
 ## RuleCheckResult Schema
 
-Validation output is produced by `backend/app/domain/degree_rules.py`.
+Validation output is produced by the session degree's validator
+(`backend/app/domain/degrees/<degree>/degree_rules.py`); the shared
+`RuleIssue`/`RuleCheckResult` models live in `backend/app/domain/rule_check.py`.
 
 ```python
 class RuleCheckResult(BaseModel):

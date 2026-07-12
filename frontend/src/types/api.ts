@@ -93,11 +93,22 @@ export type QuotaAwareResponse<T> = {
 
 export type SessionResponse = {
   session_id: string;
+  degree: string;
+};
+
+export type DegreeInfo = {
+  id: string;
+  display_name: string;
+  regulation: string;
 };
 
 export type HealthResponse = {
   status: "healthy" | "degraded";
   services: Record<string, string>;
+};
+
+export type TracingReinitResponse = {
+  trace_path: string;
 };
 
 export type ProgramRuleSource = {

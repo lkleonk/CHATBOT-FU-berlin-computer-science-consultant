@@ -1,3 +1,40 @@
+"""Shared course-offerings dataset with per-degree projection.
+
+``data/course_offerings.json`` is a flat list of offered courses. Each entry
+appears once per semester and carries a ``degrees`` map tagging every degree
+program it counts toward, with that degree's area classification(s):
+
+    {
+      "semester": "sose26",
+      "type": "vl",
+      "title": "Telematik",
+      "lp": 10,
+      "schedule": "...", "description": null, "url": "...",
+      "degrees": {
+        "msc_informatik": [
+          {"area": "technical", "module_catalog_name": "Telematik"}
+        ],
+        "msc_data_science": [
+          {"area": "technologies", "module_ids": ["telematik"]}
+        ]
+      }
+    }
+
+Placement rules (enforced at load time):
+- ``area`` must belong to the degree's area vocabulary.
+- Degrees with a canonical module list (``course_module_ids`` on the
+  ``DegreeDefinition``) require ``module_ids`` (or ``module_id`` shorthand)
+  referencing known ids; degrees without one require ``module_catalog_name``
+  and must not carry module ids.
+- ``lp`` inside a placement overrides the entry-level default for that degree.
+- ``is_bachelor_module`` marks Bachelor lectures creditable in a Master
+  (15 LP cap caveat).
+
+Deterministic projection builds one ``semester -> area -> course_type``
+bucket tree per degree; the LLM course-key selector only ever sees the tree
+for the session's degree. The degree is never chosen by the LLM.
+"""
+
 import json
 import re
 from functools import lru_cache
@@ -8,10 +45,10 @@ from typing import Any
 COURSE_OFFERINGS_PATH = Path(__file__).with_name("data") / "course_offerings.json"
 LOOKUP_KEY_SEPARATOR = "/"
 
-VALID_AREAS = {"practical", "technical", "theoretical", "application"}
 VALID_COURSE_TYPES = {"vl", "swp", "seminar"}
-REQUIRED_COURSE_FIELDS = {"title", "module_catalog_name", "lp", "schedule", "description", "url"}
-ALLOWED_COURSE_FIELDS = REQUIRED_COURSE_FIELDS
+REQUIRED_ENTRY_FIELDS = {"semester", "type", "title", "lp", "schedule", "description", "url", "degrees"}
+ALLOWED_ENTRY_FIELDS = REQUIRED_ENTRY_FIELDS
+ALLOWED_PLACEMENT_FIELDS = {"area", "module_catalog_name", "module_id", "module_ids", "lp", "is_bachelor_module"}
 
 MARKDOWN_LINK_RE = re.compile(r"^\[[^\]]+\]\((https?://[^)]+)\)$")
 SEMESTER_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -34,66 +71,189 @@ def normalize_course_url(value: Any) -> str | None:
     return stripped
 
 
-def load_course_offerings() -> dict[str, Any]:
-    return _load_course_offerings_cached()
+def load_course_entries() -> list[dict[str, Any]]:
+    return _load_course_entries_cached()
 
 
 @lru_cache(maxsize=1)
-def _load_course_offerings_cached() -> dict[str, Any]:
+def _load_course_entries_cached() -> list[dict[str, Any]]:
     data = json.loads(COURSE_OFFERINGS_PATH.read_text(encoding="utf-8"))
-    validate_course_offerings(data)
+    validate_course_entries(data)
     return data
 
 
-def validate_course_offerings(data: Any) -> None:
-    if not isinstance(data, dict) or not data:
-        raise ValueError("Course offerings data must be a non-empty object.")
+def validate_course_entries(data: Any) -> None:
+    from app.domain.degrees import get_degree, is_valid_degree
 
-    for semester, areas in data.items():
+    if not isinstance(data, list) or not data:
+        raise ValueError("Course offerings data must be a non-empty list of course entries.")
+
+    seen_identities: set[tuple[str, str, str]] = set()
+    for index, entry in enumerate(data):
+        label = f"entry[{index}]"
+        if not isinstance(entry, dict):
+            raise ValueError(f"{label} must be an object.")
+
+        missing = REQUIRED_ENTRY_FIELDS - set(entry)
+        if missing:
+            raise ValueError(f"{label} misses required fields: {sorted(missing)}")
+        extra = set(entry) - ALLOWED_ENTRY_FIELDS
+        if extra:
+            raise ValueError(f"{label} has unsupported fields: {sorted(extra)}")
+
+        semester = entry.get("semester")
         if not isinstance(semester, str) or not SEMESTER_RE.match(semester):
-            raise ValueError(f"Invalid semester key: {semester!r}")
-        if not isinstance(areas, dict) or not areas:
-            raise ValueError(f"Semester {semester!r} must contain area objects.")
+            raise ValueError(f"{label} has an invalid semester: {semester!r}")
+        if entry.get("type") not in VALID_COURSE_TYPES:
+            raise ValueError(f"{label} has an invalid course type: {entry.get('type')!r}")
+        if not isinstance(entry.get("title"), str) or not entry["title"].strip():
+            raise ValueError(f"{label}.title must be a non-empty string.")
+        if entry.get("lp") is not None and not isinstance(entry.get("lp"), int):
+            raise ValueError(f"{label}.lp must be an integer or null.")
+        for field in ("schedule", "description", "url"):
+            if entry.get(field) is not None and not isinstance(entry.get(field), str):
+                raise ValueError(f"{label}.{field} must be a string or null.")
 
-        for area, course_types in areas.items():
-            if area not in VALID_AREAS:
-                raise ValueError(f"Invalid area key {area!r} under {semester!r}.")
-            if not isinstance(course_types, dict) or not course_types:
-                raise ValueError(f"Area {semester}/{area} must contain course type lists.")
+        identity = (semester, entry["type"], entry["title"].strip())
+        if identity in seen_identities:
+            raise ValueError(
+                f"{label} duplicates {identity}; a course appears once per semester "
+                "with all degree tags on the same entry."
+            )
+        seen_identities.add(identity)
 
-            for course_type, courses in course_types.items():
-                if course_type not in VALID_COURSE_TYPES:
-                    raise ValueError(f"Invalid course type key {course_type!r} under {semester}/{area}.")
-                if not isinstance(courses, list):
-                    raise ValueError(f"Bucket {semester}/{area}/{course_type} must be a list.")
+        degrees = entry.get("degrees")
+        if not isinstance(degrees, dict) or not degrees:
+            raise ValueError(f"{label}.degrees must be a non-empty object.")
 
-                for index, course in enumerate(courses):
-                    bucket = f"{semester}/{area}/{course_type}[{index}]"
-                    _validate_course(course, bucket)
+        for degree_id, placements in degrees.items():
+            if not is_valid_degree(degree_id):
+                raise ValueError(f"{label} tags unknown degree id {degree_id!r}.")
+            degree = get_degree(degree_id)
+
+            if isinstance(placements, dict):
+                placements = [placements]
+            if not isinstance(placements, list) or not placements:
+                raise ValueError(f"{label}.degrees.{degree_id} must be a placement object or list.")
+
+            seen_areas: set[str] = set()
+            for placement in placements:
+                _validate_placement(placement, degree, f"{label}.degrees.{degree_id}")
+                area = placement["area"]
+                if area in seen_areas:
+                    raise ValueError(f"{label}.degrees.{degree_id} places area {area!r} twice.")
+                seen_areas.add(area)
 
 
-def _validate_course(course: Any, bucket: str) -> None:
-    if not isinstance(course, dict):
-        raise ValueError(f"Course entry {bucket} must be an object.")
+def _validate_placement(placement: Any, degree, label: str) -> None:
+    if not isinstance(placement, dict):
+        raise ValueError(f"{label} placements must be objects.")
 
-    missing = REQUIRED_COURSE_FIELDS - set(course)
-    if missing:
-        raise ValueError(f"Course entry {bucket} misses required fields: {sorted(missing)}")
-
-    extra = set(course) - ALLOWED_COURSE_FIELDS
+    extra = set(placement) - ALLOWED_PLACEMENT_FIELDS
     if extra:
-        raise ValueError(f"Course entry {bucket} has unsupported fields: {sorted(extra)}")
+        raise ValueError(f"{label} placement has unsupported fields: {sorted(extra)}")
 
-    for field in ("title", "module_catalog_name"):
-        if not isinstance(course.get(field), str) or not course[field].strip():
-            raise ValueError(f"Course entry {bucket}.{field} must be a non-empty string.")
+    area = placement.get("area")
+    if area not in degree.course_areas:
+        raise ValueError(
+            f"{label} placement area {area!r} is not in the degree's area vocabulary "
+            f"{sorted(degree.course_areas)}."
+        )
 
-    if course.get("lp") is not None and not isinstance(course.get("lp"), int):
-        raise ValueError(f"Course entry {bucket}.lp must be an integer or null.")
+    if placement.get("lp") is not None and not isinstance(placement.get("lp"), int):
+        raise ValueError(f"{label} placement lp must be an integer or null.")
+    if not isinstance(placement.get("is_bachelor_module", False), bool):
+        raise ValueError(f"{label} placement is_bachelor_module must be a boolean.")
 
-    for field in ("schedule", "description", "url"):
-        if course.get(field) is not None and not isinstance(course.get(field), str):
-            raise ValueError(f"Course entry {bucket}.{field} must be a string or null.")
+    module_ids = _placement_module_ids(placement)
+    if degree.course_modules is None:
+        if module_ids:
+            raise ValueError(
+                f"{label} placement carries module ids, but the degree has no canonical module list."
+            )
+        name = placement.get("module_catalog_name")
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"{label} placement requires a non-empty module_catalog_name.")
+    else:
+        if not module_ids:
+            raise ValueError(
+                f"{label} placement requires module_ids referencing the degree's canonical module list."
+            )
+        unknown = [module_id for module_id in module_ids if module_id not in degree.course_modules]
+        if unknown:
+            raise ValueError(f"{label} placement references unknown module ids: {unknown}")
+
+
+def _placement_module_ids(placement: dict[str, Any]) -> list[str]:
+    if "module_ids" in placement and "module_id" in placement:
+        raise ValueError("A placement must use either module_id or module_ids, not both.")
+    if "module_id" in placement:
+        value = placement["module_id"]
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("module_id must be a non-empty string.")
+        return [value]
+    value = placement.get("module_ids", [])
+    if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
+        raise ValueError("module_ids must be a list of non-empty strings.")
+    return value
+
+
+def project_offerings(degree_id: str) -> dict[str, Any]:
+    """Bucket tree ``semester -> area -> course_type -> [courses]`` for one degree."""
+    return _project_offerings_cached(degree_id)
+
+
+@lru_cache(maxsize=8)
+def _project_offerings_cached(degree_id: str) -> dict[str, Any]:
+    from app.domain.degrees import get_degree
+
+    degree = get_degree(degree_id)
+    tree: dict[str, Any] = {}
+
+    for entry in load_course_entries():
+        placements = entry["degrees"].get(degree_id)
+        if placements is None:
+            continue
+        if isinstance(placements, dict):
+            placements = [placements]
+
+        for placement in placements:
+            course = _projected_course(entry, placement, degree)
+            bucket = (
+                tree.setdefault(entry["semester"], {})
+                .setdefault(placement["area"], {})
+                .setdefault(entry["type"], [])
+            )
+            bucket.append(course)
+
+    return tree
+
+
+def _projected_course(entry: dict[str, Any], placement: dict[str, Any], degree) -> dict[str, Any]:
+    module_ids = _placement_module_ids(placement)
+    module_catalog_name = placement.get("module_catalog_name")
+    if not module_catalog_name and module_ids and degree.course_modules:
+        module_catalog_name = "; ".join(
+            degree.course_modules.get(module_id, module_id) for module_id in module_ids
+        )
+
+    course = {
+        "title": entry["title"],
+        "module_catalog_name": module_catalog_name,
+        "lp": placement.get("lp") if placement.get("lp") is not None else entry.get("lp"),
+        "schedule": entry.get("schedule"),
+        "description": entry.get("description"),
+        "url": entry.get("url"),
+    }
+    if module_ids:
+        course["module_ids"] = module_ids
+    if placement.get("is_bachelor_module"):
+        course["is_bachelor_module"] = True
+    return course
+
+
+def has_offerings(degree_id: str) -> bool:
+    return bool(project_offerings(degree_id))
 
 
 def lookup_key(semester: str, area: str, course_type: str) -> str:
@@ -107,22 +267,21 @@ def parse_lookup_key(key: str) -> tuple[str, str, str]:
     return parts[0], parts[1], parts[2]
 
 
-def iter_lookup_keys(offerings: dict[str, Any] | None = None) -> list[str]:
-    data = offerings or load_course_offerings()
+def iter_lookup_keys(degree_id: str) -> list[str]:
     keys: list[str] = []
-    for semester, areas in data.items():
+    for semester, areas in project_offerings(degree_id).items():
         for area, course_types in areas.items():
             for course_type in course_types:
                 keys.append(lookup_key(semester, area, course_type))
     return keys
 
 
-def available_semesters(offerings: dict[str, Any] | None = None) -> list[str]:
-    return list((offerings or load_course_offerings()).keys())
+def available_semesters(degree_id: str) -> list[str]:
+    return list(project_offerings(degree_id).keys())
 
 
-def build_available_semesters_note(offerings: dict[str, Any] | None = None) -> str:
-    semesters = available_semesters(offerings)
+def build_available_semesters_note(degree_id: str) -> str:
+    semesters = available_semesters(degree_id)
     if not semesters:
         return "Available semesters in local course-offering data: none."
     return (
@@ -132,24 +291,19 @@ def build_available_semesters_note(offerings: dict[str, Any] | None = None) -> s
     )
 
 
-def available_areas(semester: str, offerings: dict[str, Any] | None = None) -> list[str]:
-    data = offerings or load_course_offerings()
-    return list((data.get(semester) or {}).keys())
+def available_areas(degree_id: str, semester: str) -> list[str]:
+    return list((project_offerings(degree_id).get(semester) or {}).keys())
 
 
-def available_course_types(
-    semester: str,
-    area: str,
-    offerings: dict[str, Any] | None = None,
-) -> list[str]:
-    data = offerings or load_course_offerings()
-    return list(((data.get(semester) or {}).get(area) or {}).keys())
+def available_course_types(degree_id: str, semester: str, area: str) -> list[str]:
+    tree = project_offerings(degree_id)
+    return list(((tree.get(semester) or {}).get(area) or {}).keys())
 
 
-def get_course_bucket(key: str, offerings: dict[str, Any] | None = None) -> dict[str, Any] | None:
+def get_course_bucket(degree_id: str, key: str) -> dict[str, Any] | None:
     semester, area, course_type = parse_lookup_key(key)
-    data = offerings or load_course_offerings()
-    courses = ((data.get(semester) or {}).get(area) or {}).get(course_type)
+    tree = project_offerings(degree_id)
+    courses = ((tree.get(semester) or {}).get(area) or {}).get(course_type)
     if courses is None:
         return None
 
@@ -162,7 +316,7 @@ def get_course_bucket(key: str, offerings: dict[str, Any] | None = None) -> dict
     }
 
 
-def lookup_course_buckets(keys: list[str]) -> tuple[list[dict[str, Any]], list[str]]:
+def lookup_course_buckets(degree_id: str, keys: list[str]) -> tuple[list[dict[str, Any]], list[str]]:
     buckets: list[dict[str, Any]] = []
     invalid_keys: list[str] = []
     seen: set[str] = set()
@@ -173,7 +327,7 @@ def lookup_course_buckets(keys: list[str]) -> tuple[list[dict[str, Any]], list[s
         seen.add(key)
 
         try:
-            bucket = get_course_bucket(key)
+            bucket = get_course_bucket(degree_id, key)
         except ValueError:
             bucket = None
 
@@ -186,11 +340,10 @@ def lookup_course_buckets(keys: list[str]) -> tuple[list[dict[str, Any]], list[s
     return buckets, invalid_keys
 
 
-def build_course_lookup_tree(offerings: dict[str, Any] | None = None) -> str:
-    data = offerings or load_course_offerings()
+def build_course_lookup_tree(degree_id: str) -> str:
     lines = ["Available course-offering lookup tree. Only output keys shown after ->."]
 
-    for semester, areas in data.items():
+    for semester, areas in project_offerings(degree_id).items():
         lines.append(f"{semester}")
         for area, course_types in areas.items():
             lines.append(f"  {area}")
@@ -311,6 +464,10 @@ def _format_course(index: int, course: dict[str, Any]) -> list[str]:
         f"   LP: {lp}",
     ]
 
+    if course.get("is_bachelor_module"):
+        lines.append(
+            "   Bachelor module: counts toward the maximum of 15 LP of Bachelor modules in a Master plan."
+        )
     if course.get("schedule"):
         lines.append(f"   Schedule: {course['schedule']}")
     if course.get("description"):

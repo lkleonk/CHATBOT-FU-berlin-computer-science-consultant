@@ -4,7 +4,11 @@ import uuid
 from pathlib import Path
 
 import wizardflow
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
+from app.domain.degrees import get_degree_or_default
+from app.routes import tracing_router
 from app.services import wizardflow_service
 from app.services.nodes import scope_classifier
 from app.services.session_service import SessionService
@@ -15,9 +19,8 @@ def test_wizardflow_payloads_include_prompt_and_msg(tmp_path, monkeypatch):
         output_dir=str(tmp_path),
         nodes=["__start__", "scope_classifier", "__end__"],
     )
-    monkeypatch.setattr(wizardflow_service, "_client", client)
+    monkeypatch.setattr(wizardflow_service, "tracer", client)
 
-    wizardflow_service.start_message("message-1", "chat")
     wizardflow_service.log_llm_input(
         "message-1",
         "scope_classifier",
@@ -40,6 +43,8 @@ def test_wizardflow_payloads_include_prompt_and_msg(tmp_path, monkeypatch):
         step for step in message["steps"] if step["nodeId"] == "scope_classifier"
     )
 
+    assert all(step["nodeId"] != "__start__" for step in message["steps"])
+    assert all(step["nodeId"] != "__end__" for step in message["steps"])
     assert classifier_step["payloads"] == [
         {
             "label": "llm_input",
@@ -65,16 +70,10 @@ def test_session_service_adds_a_unique_wizardflow_id_to_graph_state(monkeypatch)
                 "citations": [],
             }
 
-    starts = []
     ends = []
     monkeypatch.setattr(
         "app.services.session_service._get_agent_app",
         lambda: FakeAgentApp(),
-    )
-    monkeypatch.setattr(
-        wizardflow_service,
-        "start_message",
-        lambda message_id, request_kind: starts.append((message_id, request_kind)),
     )
     monkeypatch.setattr(
         wizardflow_service,
@@ -87,8 +86,41 @@ def test_session_service_adds_a_unique_wizardflow_id_to_graph_state(monkeypatch)
     message_id = captured["state"]["wizardflow_message_id"]
     uuid.UUID(message_id)
     assert reply.reply == "Answer"
-    assert starts == [(message_id, "chat")]
     assert ends == [(message_id, "How many LP?")]
+
+
+def _tracing_client() -> TestClient:
+    app = FastAPI()
+    app.include_router(tracing_router)
+    return TestClient(app)
+
+
+def test_tracing_reinit_returns_conflict_when_tracing_is_disabled(monkeypatch):
+    monkeypatch.setattr(wizardflow_service, "tracer", None)
+    monkeypatch.setattr(wizardflow_service.settings.WIZARDFLOW, "ENABLED", False)
+
+    with _tracing_client() as client:
+        response = client.post("/api/tracing/reinit")
+
+    assert response.status_code == 409
+    assert response.json()["detail"]["error_code"] == "tracing_disabled"
+
+
+def test_tracing_reinit_starts_a_new_trace_file(tmp_path, monkeypatch):
+    tracer = wizardflow.init(
+        output_dir=str(tmp_path),
+        nodes=["__start__", "scope_classifier", "__end__"],
+    )
+    old_path = str(tracer.current_path)
+    monkeypatch.setattr(wizardflow_service, "tracer", tracer)
+
+    with _tracing_client() as client:
+        response = client.post("/api/tracing/reinit")
+
+    assert response.status_code == 200
+    new_path = response.json()["trace_path"]
+    assert new_path == str(tracer.current_path)
+    assert new_path != old_path
 
 
 def test_scope_classifier_logs_the_exact_llm_input(monkeypatch):
@@ -124,5 +156,5 @@ def test_scope_classifier_logs_the_exact_llm_input(monkeypatch):
     assert result == {"message_type": "degree_question"}
     assert captured["message_id"] == "trace-id"
     assert captured["node"] == "scope_classifier"
-    assert captured["prompt"] == scope_classifier.CLASSIFIER_SYSTEM_PROMPT
+    assert captured["prompt"] == get_degree_or_default(None).prompts.classifier_system_prompt
     assert captured["msg"] == "Latest user message:\nHow many LP do I need?"

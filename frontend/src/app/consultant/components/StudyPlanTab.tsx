@@ -13,6 +13,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useState } from "react";
 
+import { useDegree } from "@/context/DegreeContext";
 import { createSession } from "@/services/api";
 import type {
   ModuleArea,
@@ -275,6 +276,7 @@ export function StudyPlanTab({
   onRuleCheckResult,
   onStudyPlan,
 }: StudyPlanTabProps) {
+  const { effectiveDegreeId } = useDegree();
   const [generatedAt, setGeneratedAt] = useState(() => formatGeneratedAt());
   const [uploadError, setUploadError] = useState<string | null>(null);
   const modules = latestStudyPlan?.modules ?? [];
@@ -301,11 +303,11 @@ export function StudyPlanTab({
     if (sessionId) {
       return sessionId;
     }
-    const created = await createSession();
+    const created = await createSession(effectiveDegreeId);
     onSessionIdChange(created.session_id);
     window.sessionStorage.setItem(SESSION_ID_STORAGE_KEY, created.session_id);
     return created.session_id;
-  }, [onSessionIdChange, sessionId]);
+  }, [effectiveDegreeId, onSessionIdChange, sessionId]);
 
   // The Chat tab is unmounted while this tab is active, so persist the upload to
   // the shared chat store and lift state up. The Chat tab rehydrates from storage

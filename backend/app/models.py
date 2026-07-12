@@ -3,6 +3,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from app.domain.degrees import DEFAULT_DEGREE_ID
 from app.domain.study_plan import StudyPlan
 
 
@@ -10,8 +11,19 @@ class MessageRequest(BaseModel):
     content: str = Field(min_length=1)
 
 
+class SessionCreateRequest(BaseModel):
+    degree: str = DEFAULT_DEGREE_ID
+
+
 class SessionResponse(BaseModel):
     session_id: str
+    degree: str
+
+
+class DegreeInfo(BaseModel):
+    id: str
+    display_name: str
+    regulation: str
 
 
 class UsageResponse(BaseModel):
@@ -65,3 +77,7 @@ class TranscriptUploadResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: Literal["healthy", "degraded"]
     services: dict[str, str]
+
+
+class TracingReinitResponse(BaseModel):
+    trace_path: str

@@ -1,8 +1,9 @@
 from fastapi.testclient import TestClient
 
-from app.domain.program_rules import get_program_rules, render_program_rules_context
+from app.domain.degrees.msc_informatik.program_rules import get_program_rules
+from app.domain.degrees.msc_informatik.prompts import RULES_CONTEXT
+from app.domain.program_rules import render_rules_context
 from app.main import app
-from app.prompts import RULES_CONTEXT
 
 
 def section_by_id(section_id: str):
@@ -42,7 +43,7 @@ def test_program_rules_endpoint_returns_catalogue():
 
 
 def test_rules_context_is_rendered_from_program_rules():
-    assert RULES_CONTEXT == render_program_rules_context()
+    assert RULES_CONTEXT == render_rules_context(get_program_rules())
 
 
 def test_rules_context_includes_softwareprojekt_wahlbereich_caveat():

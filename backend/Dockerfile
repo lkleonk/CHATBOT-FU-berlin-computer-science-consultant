@@ -7,6 +7,8 @@ ENV UV_SYSTEM_PYTHON=1
 ENV UV_HTTP_TIMEOUT=120
 
 RUN set -eux; \
+    echo "backend build: switching Debian package sources to HTTPS"; \
+    sed -i 's|URIs: http://deb.debian.org|URIs: https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
     echo "backend build: updating apt package index using IPv4"; \
     timeout 300s apt-get -o Acquire::ForceIPv4=true update; \
     echo "backend build: installing system build dependencies"; \
@@ -39,7 +41,7 @@ COPY knowledge_base ./knowledge_base
 
 ENV PYTHONPATH=/app
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5100"]
+CMD ["python", "-m", "app.main"]
 
 # Built only by the optional legacy-rag Compose service. The normal backend
 # target above intentionally does not contain Torch, SentenceTransformer, or

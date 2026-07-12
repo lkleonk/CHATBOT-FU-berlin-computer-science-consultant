@@ -1,15 +1,15 @@
 import logging
 import re
 
-from app.prompts import CLASSIFIER_SYSTEM_PROMPT
 from app.services.model_service import ModelService
 from app.services.quota_service import DailyQuotaExceeded
-from app.services.nodes.utils import latest_user_message, parse_json_content
+from app.services.nodes.utils import degree_for, latest_user_message, parse_json_content
 from app.services.states.consultant_state import ConsultantState
 from app.services.wizardflow_service import (
     log_llm_error,
     log_llm_input,
     log_llm_output,
+    log_node_input,
     log_node_output,
 )
 
@@ -144,20 +144,22 @@ def _normalize_text(text: str) -> str:
 async def scope_classifier_node(state: ConsultantState) -> ConsultantState:
     logger.info("Scope classifier invoked")
     wizardflow_message_id = state.get("wizardflow_message_id")
+    classifier_prompt = degree_for(state).prompts.classifier_system_prompt
     message = latest_user_message(state)
     llm_message = f"Latest user message:\n{message}"
     fallback = heuristic_classify(message)
     source = "heuristic"
 
+    log_node_input(wizardflow_message_id, "scope_classifier", message)
     log_llm_input(
         wizardflow_message_id,
         "scope_classifier",
-        CLASSIFIER_SYSTEM_PROMPT,
+        classifier_prompt,
         llm_message,
     )
     try:
         response = await ModelService().invoke(
-            prompt=CLASSIFIER_SYSTEM_PROMPT,
+            prompt=classifier_prompt,
             message=llm_message,
             format=CLASSIFIER_SCHEMA,
         )

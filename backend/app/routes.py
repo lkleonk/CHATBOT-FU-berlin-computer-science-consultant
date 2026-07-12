@@ -1,14 +1,19 @@
 from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile, status
 
-from app.domain.program_rules import ProgramRulesCatalogue, get_program_rules
+from app.domain.degrees import DEFAULT_DEGREE_ID, get_degree, is_valid_degree, list_degrees
+from app.domain.program_rules import ProgramRulesCatalogue
 from app.models import (
+    DegreeInfo,
     HealthResponse,
     MessageRequest,
     ModelReply,
+    SessionCreateRequest,
     SessionResponse,
+    TracingReinitResponse,
     TranscriptUploadResponse,
     UsageResponse,
 )
+from app.services import wizardflow_service
 from app.services.model_service import ModelService
 from app.services.quota_service import daily_quota
 from app.settings import settings
@@ -16,8 +21,10 @@ from app.settings import settings
 
 session_router = APIRouter(prefix="/api/sessions", tags=["Sessions"])
 program_rules_router = APIRouter(prefix="/api/program-rules", tags=["Program rules"])
+degrees_router = APIRouter(prefix="/api/degrees", tags=["Degrees"])
 health_router = APIRouter(tags=["Health"])
 usage_router = APIRouter(prefix="/api/usage", tags=["Usage"])
+tracing_router = APIRouter(prefix="/api/tracing", tags=["Tracing"])
 
 model_service = ModelService()
 _session_service = None
@@ -33,8 +40,13 @@ def get_session_service():
 
 
 @session_router.post("", response_model=SessionResponse)
-async def create_session():
-    return {"session_id": get_session_service().create_session()}
+async def create_session(payload: SessionCreateRequest | None = None):
+    degree_id = (payload or SessionCreateRequest()).degree
+    _ensure_known_degree(degree_id)
+    return {
+        "session_id": get_session_service().create_session(degree_id),
+        "degree": degree_id,
+    }
 
 
 @session_router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -89,9 +101,50 @@ async def read_usage(request: Request):
     }
 
 
+@tracing_router.post("/reinit", response_model=TracingReinitResponse)
+async def reinit_trace_file():
+    if wizardflow_service.tracer is None and settings.WIZARDFLOW.ENABLED:
+        # The tracer is created when the agent graph module first loads
+        # (normally on first session use); mirror that lazy import so the
+        # button also works on a fresh backend.
+        import app.services.agent_graph_service  # noqa: F401
+
+    trace_path = wizardflow_service.reinit_tracing()
+    if trace_path is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error_code": "tracing_disabled",
+                "message": "WizardFlow tracing is not enabled on this backend.",
+            },
+        )
+    return {"trace_path": trace_path}
+
+
+@degrees_router.get("", response_model=list[DegreeInfo])
+async def read_degrees():
+    return [
+        DegreeInfo(id=degree.id, display_name=degree.display_name, regulation=degree.regulation)
+        for degree in list_degrees()
+    ]
+
+
 @program_rules_router.get("", response_model=ProgramRulesCatalogue)
-async def read_program_rules():
-    return get_program_rules()
+async def read_program_rules(degree: str = DEFAULT_DEGREE_ID):
+    _ensure_known_degree(degree)
+    return get_degree(degree).get_program_rules()
+
+
+def _ensure_known_degree(degree_id: str) -> None:
+    if not is_valid_degree(degree_id):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error_code": "unknown_degree",
+                "message": f"Unknown degree id: {degree_id}",
+                "known_degrees": [degree.id for degree in list_degrees()],
+            },
+        )
 
 
 @health_router.get("/health", response_model=HealthResponse)

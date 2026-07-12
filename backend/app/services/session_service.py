@@ -3,6 +3,7 @@ import uuid
 
 from fastapi import HTTPException, UploadFile
 
+from app.domain.degrees import DEFAULT_DEGREE_ID, DegreeDefinition, get_degree, get_degree_or_default
 from app.domain.study_plan import StudyPlan
 from app.models import ModelReply, TranscriptUploadResponse
 from app.pdf.extract import PdfExtractionError
@@ -40,9 +41,14 @@ class SessionService:
     def __init__(self, lifecycle: SessionLifecycleService | None = None) -> None:
         self._lifecycle = lifecycle or session_lifecycle
 
-    def create_session(self) -> str:
+    def create_session(self, degree_id: str = DEFAULT_DEGREE_ID) -> str:
+        get_degree(degree_id)  # reject unknown degree ids early
         session_id = str(uuid.uuid4())
-        logger.info("Created consultant session: %s", session_id)
+        # Seed the degree into the LangGraph checkpoint so every graph node and
+        # transcript upload resolves prompts/rules for this session's degree.
+        config = {"configurable": {"thread_id": session_id}}
+        _get_agent_app().update_state(config, {"degree_id": degree_id}, as_node="__start__")
+        logger.info("Created consultant session: %s (degree=%s)", session_id, degree_id)
         return session_id
 
     async def process_message(self, session_id: str, message_content: str) -> ModelReply:
@@ -54,7 +60,6 @@ class SessionService:
         title = _message_title(message_content)
         try:
             agent_app = _get_agent_app()
-            wizardflow_service.start_message(wizardflow_message_id, "chat")
             config = {"configurable": {"thread_id": session_id}}
             state = {
                 "messages": [{"role": "user", "content": message_content}],
@@ -129,11 +134,10 @@ class SessionService:
             ) from exc
 
         wizardflow_message_id = str(uuid.uuid4())
+        degree = self._session_degree(session_id)
         try:
-            _get_agent_app()
-            wizardflow_service.start_message(wizardflow_message_id, "transcript")
-            plan = await parse_study_plan(document.full_text, wizardflow_message_id)
-            rule_result = check_study_plan(plan, wizardflow_message_id)
+            plan = await parse_study_plan(document.full_text, wizardflow_message_id, degree)
+            rule_result = check_study_plan(plan, wizardflow_message_id, degree)
         except HTTPException:
             raise
         except Exception as exc:
@@ -160,6 +164,16 @@ class SessionService:
 
     def delete_session(self, session_id: str) -> None:
         self._lifecycle.delete_session(session_id)
+
+    def _session_degree(self, session_id: str) -> DegreeDefinition:
+        config = {"configurable": {"thread_id": session_id}}
+        try:
+            values = _get_agent_app().get_state(config).values
+            degree_id = values.get("degree_id")
+        except Exception:
+            logger.exception("Failed to read degree for session %s; using default", session_id)
+            degree_id = None
+        return get_degree_or_default(degree_id)
 
     def _persist_plan(
         self,

@@ -1,4 +1,5 @@
-from app.domain.program_rules import render_program_rules_context
+from app.domain.degrees.msc_informatik.program_rules import get_program_rules
+from app.domain.program_rules import render_rules_context
 
 
 DOMAIN_SCOPE = """
@@ -14,7 +15,7 @@ Pruefungsordnung resources.
 """.strip()
 
 
-RULES_CONTEXT = render_program_rules_context()
+RULES_CONTEXT = render_rules_context(get_program_rules())
 
 
 CLASSIFIER_SYSTEM_PROMPT = f"""
@@ -102,6 +103,47 @@ Tree:
 
 Return valid JSON only.
 """.strip()
+
+
+STUDY_PLAN_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "specialization_area": {
+            "type": ["string", "null"],
+            "enum": ["practical", "theoretical", "technical", None],
+        },
+        "modules": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "lp": {"type": "integer"},
+                    "area": {
+                        "type": "string",
+                        "enum": ["practical", "theoretical", "technical", "application", "thesis", "unknown"],
+                    },
+                    "is_wahlbereich": {"type": "boolean"},
+                    "is_ungraded": {"type": "boolean"},
+                    "is_bachelor_module": {"type": "boolean"},
+                    "is_scientific_work": {"type": "boolean"},
+                    "is_software_project": {"type": "boolean"},
+                },
+                "required": [
+                    "name",
+                    "lp",
+                    "area",
+                    "is_wahlbereich",
+                    "is_ungraded",
+                    "is_bachelor_module",
+                    "is_scientific_work",
+                    "is_software_project",
+                ],
+            },
+        },
+    },
+    "required": ["specialization_area", "modules"],
+}
 
 
 STUDY_PLAN_PARSER_SYSTEM_PROMPT = f"""

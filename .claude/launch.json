@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set NEXT_PUBLIC_ENABLE_DEV_TOOLS=true&& set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000&& npm run dev"
+      ],
+      "cwd": "frontend",
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set LLM_PROVIDER=local_ollama&& uv run --isolated --python 3.12.10 --with-requirements requirements.txt uvicorn app.main:app --port 8000"
+      ],
+      "cwd": "backend",
+      "port": 8000
+    }
+  ]
+}

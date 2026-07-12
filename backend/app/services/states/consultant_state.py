@@ -13,6 +13,7 @@ def append_messages(existing: list[dict[str, str]] | None, update: list[dict[str
 
 class ConsultantState(TypedDict, total=False):
     messages: Annotated[list[dict[str, str]], append_messages]
+    degree_id: str
     wizardflow_message_id: str
     message_type: Literal["degree_question", "course_offering_question", "plan_check", "off_topic"]
     course_lookup_keys: list[str]

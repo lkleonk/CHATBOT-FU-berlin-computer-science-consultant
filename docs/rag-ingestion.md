@@ -51,8 +51,8 @@ Only `module_catalog.md` is ingested into Qdrant. Everything else under
 
 - Degree rules (`Informatik_Master_Ablauf.txt`, the Checkliste PDF, and the
   generated `degree_rules.md`) now live in the structured catalogue at
-  `app.domain.program_rules`; `app.prompts.RULES_CONTEXT` is rendered from that
-  catalogue. Keeping them in RAG too would double up the source of truth and add
+  `app.domain.degrees.msc_informatik.program_rules`; that degree's
+  `prompts.RULES_CONTEXT` is rendered from the catalogue. Keeping them in RAG too would double up the source of truth and add
   retrieval latency for no gain.
 - `module_catalog.json` is consumed directly by the deterministic Python
   lookup in `module_catalog.py` and does not need embedding.
@@ -282,9 +282,9 @@ Run ingestion after:
 - changing the Qdrant collection name
 
 Degree-rule edits should go into deterministic Python rules
-(`app.domain.degree_rules`) and the structured human-readable catalogue
-(`app.domain.program_rules`). `app.prompts.RULES_CONTEXT` is rendered from
-`program_rules.py`. The generated `degree_rules.md` is no longer ingested, so a
+(`app.domain.degrees.<degree>.degree_rules`) and the structured human-readable
+catalogue (`app.domain.degrees.<degree>.program_rules`). Each degree's
+`prompts.RULES_CONTEXT` is rendered from its own `program_rules.py`. The generated `degree_rules.md` is no longer ingested, so a
 re-ingest is not required after rule edits.
 
 Editing `backend/app/domain/data/course_offerings.json` does not require

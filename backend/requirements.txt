@@ -8,4 +8,4 @@ paramiko==3.4.1
 sshtunnel==0.4.0
 langgraph==0.2.76
 pypdf==5.1.0
-wizardflow==0.2.0
+wizardflow==0.3.0

@@ -29,7 +29,7 @@ CHUNK_NAMESPACE = uuid.UUID("11793f0f-3f2b-4f1d-9c91-3f6b5d65f44f")
 GENERATED_ROOT = BACKEND_ROOT / "knowledge_base" / "generated"
 
 # Degree-rule sources (Informatik_Master_Ablauf.txt, Checkliste PDF, degree_rules.md)
-# live in the system prompt now (see app.prompts.RULES_CONTEXT). Only module-level
+# live in the system prompt now (see app.domain.degrees.msc_informatik.prompts). Only module-level
 # lookups still need RAG.
 INGEST_FILENAMES = {"module_catalog.md"}
 

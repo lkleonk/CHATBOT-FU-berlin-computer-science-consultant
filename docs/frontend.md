@@ -3,14 +3,44 @@
 The standalone Next.js frontend is served at `/consultant` and uses React,
 TypeScript, Material UI, and the App Router.
 
+The browser-facing backend origin comes from `NEXT_PUBLIC_API_BASE_URL`. This
+public value is embedded during `next build`, so Docker deployments must pass it
+as a build argument and rebuild the frontend image after changing it. The local
+Compose default is `http://localhost:8000`; production should use the public
+HTTPS origin handled by the reverse proxy.
+
+The optional Compose `production` profile runs Caddy on ports 80/443. Caddy
+serves the frontend and proxies backend/API-documentation paths on the same
+public origin, so `NEXT_PUBLIC_API_BASE_URL` and `CORS_ALLOWED_ORIGINS` should
+both use `https://<APP_DOMAIN>`.
+
 ## Client State
 
 - `SettingsContext` owns dark mode.
 - `UsageContext` owns the current client-IP action allowance and runtime
   retention information returned by `GET /api/usage`.
+- `DegreeContext` owns the chosen degree program. It fetches the available
+  degrees from `GET /api/degrees` (with a built-in fallback list for display
+  when the backend is unreachable) and persists the choice in `localStorage`.
+  Session creation sends the degree; the Degree Rules tab fetches
+  `GET /api/program-rules?degree=<id>`.
 - The session ID and rendered chat are kept in `sessionStorage`.
 - The welcome-dialog version is kept in `localStorage` so material disclosure
-  changes can display the dialog again.
+  changes can display the dialog again. The dialog also reopens when no degree
+  choice is stored.
+
+## Degree Choice And Switching
+
+The welcome dialog opens with card-style toggle buttons for the degree
+programs; `Start consultation` stays disabled until one is selected. After the
+welcome, the header subtitle is a compact degree switcher (`Select`). Changing
+it with an active session or chat opens `DegreeSwitchDialog`, which warns that
+the chat, uploaded study plan, and validation results will be discarded and
+offers `Download chat` plus a shortcut to the Study Plan tab to print the
+module summary first (that shortcut cancels the switch). Confirming deletes
+the backend session, clears local chat/study-plan state, and the next message
+creates a session for the new degree. With nothing to lose, the switch happens
+immediately without the dialog.
 
 ## Request Allowance
 
@@ -31,15 +61,23 @@ clears local chat and study-plan state.
 
 ## Welcome And Data Disclosure
 
-The versioned welcome dialog states that the service is unofficial, answers may
-be wrong, requests are limited, session data expires, and transcript text is
-processed by the configured LLM. When the backend reports WizardFlow tracing as
-enabled, the dialog explicitly warns that unredacted diagnostic traces may be
-retained separately from in-memory session state.
+The versioned welcome dialog collects the degree-program choice and states that
+the service is unofficial, answers may be wrong, requests are limited, session
+data expires, and transcript text is processed by the configured LLM. When the
+backend reports WizardFlow tracing as enabled, the dialog explicitly warns that
+unredacted diagnostic traces may be retained separately from in-memory session
+state.
 
 ## Developer Tools
 
 `NEXT_PUBLIC_ENABLE_DEV_TOOLS=false` hides the API base URL, raw session ID,
-health diagnostics, dummy data, and manual health refresh. It is a build-time UI
-switch, not a security boundary. Dark mode, request allowance, chat download,
-and reset conversation remain available.
+health diagnostics, dummy data, manual health refresh, and the trace-file
+button. It is a build-time UI switch, not a security boundary. Dark mode,
+request allowance, chat download, and reset conversation remain available.
+
+When the backend reports WizardFlow tracing as enabled
+(`GET /api/usage` -> `diagnostic_tracing_enabled`), the developer section also
+shows a `New Trace File` button. It calls `POST /api/tracing/reinit`, which
+rotates the backend's WizardFlow trace to a fresh timestamped file (keeping the
+graph and output configuration) and reports the new trace path. A disabled
+tracer returns HTTP 409 with `error_code == "tracing_disabled"`.

@@ -1,24 +1,9 @@
 from collections import Counter
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
-
 from app.domain.module_catalog import enrich_study_plan, normalize_module_name
+from app.domain.rule_check import RuleCheckResult, RuleIssue
 from app.domain.study_plan import StudyPlan
-
-
-class RuleIssue(BaseModel):
-    code: str
-    severity: Literal["error", "warning"]
-    message: str
-    details: dict[str, Any] = Field(default_factory=dict)
-
-
-class RuleCheckResult(BaseModel):
-    is_valid: bool
-    summary: str
-    totals: dict[str, int] = Field(default_factory=dict)
-    issues: list[RuleIssue] = Field(default_factory=list)
 
 
 INFORMATICS_AREAS = {"practical", "theoretical", "technical"}

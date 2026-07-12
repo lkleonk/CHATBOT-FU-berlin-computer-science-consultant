@@ -4,6 +4,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -27,7 +28,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DEV_TOOLS_ENABLED } from "@/config/publicConfig";
 import { useSettings } from "@/context/SettingsContext";
 import { useUsage } from "@/context/UsageContext";
-import { API_BASE_URL, getHealth } from "@/services/api";
+import { API_BASE_URL, getHealth, reinitTracing } from "@/services/api";
 import type { HealthResponse } from "@/types/api";
 
 import { downloadStoredChat } from "./chatExport";
@@ -55,6 +56,9 @@ export function SettingsTab({
   const [isResetting, setIsResetting] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [hasDownloadableChat, setHasDownloadableChat] = useState(false);
+  const [isRotatingTrace, setIsRotatingTrace] = useState(false);
+  const [tracePath, setTracePath] = useState<string | null>(null);
+  const [traceError, setTraceError] = useState<string | null>(null);
 
   const refreshHealth = useCallback(async () => {
     if (!DEV_TOOLS_ENABLED) {
@@ -81,6 +85,20 @@ export function SettingsTab({
     }, 0);
     return () => window.clearTimeout(timer);
   }, [refreshHealth]);
+
+  const startNewTraceFile = async () => {
+    setIsRotatingTrace(true);
+    setTracePath(null);
+    setTraceError(null);
+    try {
+      const result = await reinitTracing();
+      setTracePath(result.trace_path);
+    } catch (error) {
+      setTraceError(error instanceof Error ? error.message : "Starting a new trace file failed.");
+    } finally {
+      setIsRotatingTrace(false);
+    }
+  };
 
   const openResetDialog = () => {
     setResetError(null);
@@ -218,7 +236,24 @@ export function SettingsTab({
                     >
                       Refresh Health
                     </Button>
+                    {usage?.diagnostic_tracing_enabled && (
+                      <Button
+                        startIcon={<NoteAddOutlinedIcon />}
+                        onClick={() => void startNewTraceFile()}
+                        disabled={isRotatingTrace}
+                        variant="outlined"
+                      >
+                        {isRotatingTrace ? "Starting…" : "New Trace File"}
+                      </Button>
+                    )}
                   </Stack>
+
+                  {traceError && <Alert severity="error">{traceError}</Alert>}
+                  {tracePath && (
+                    <Alert severity="success">
+                      New trace file started: <code>{tracePath}</code>
+                    </Alert>
+                  )}
                 </Stack>
               </Box>
             </>

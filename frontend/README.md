@@ -1,5 +1,24 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Legal pages
+
+`/impressum` and `/datenschutz` use the same Material UI theme as the consultant.
+Configure the public provider details at build time:
+
+```env
+NEXT_PUBLIC_LEGAL_NAME=Leon Koch
+NEXT_PUBLIC_LEGAL_STREET=Street and house number
+NEXT_PUBLIC_LEGAL_CITY=Postal code and city
+NEXT_PUBLIC_LEGAL_COUNTRY=Deutschland
+NEXT_PUBLIC_LEGAL_EMAIL=contact@example.com
+```
+
+These values are rendered publicly and are not secrets. A visible warning is
+shown on the legal pages while any value is missing. The privacy text also
+contains deployment-specific sections that must be completed with the actual
+hosting provider, LLM provider, recipients, and retention periods before a
+public deployment.
+
 ## Getting Started
 
 First, run the development server:

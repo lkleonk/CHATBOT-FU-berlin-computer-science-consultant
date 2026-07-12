@@ -1,11 +1,11 @@
 import json
 import logging
 
-from app.prompts import ANSWER_COMPOSER_SYSTEM_PROMPT
 from app.services.agent_config import agent_flow_config
 from app.services.model_service import ModelService
 from app.services.quota_service import DailyQuotaExceeded
 from app.services.nodes.utils import (
+    degree_for,
     format_recent_messages,
     latest_user_message,
     parse_json_content,
@@ -56,6 +56,7 @@ def fallback_answer(state: ConsultantState) -> str:
 async def answer_composer_node(state: ConsultantState) -> ConsultantState:
     logger.info("Answer composer invoked")
     wizardflow_message_id = state.get("wizardflow_message_id")
+    composer_prompt = degree_for(state).prompts.answer_composer_system_prompt
     user_message = latest_user_message(state)
     history = format_recent_messages(
         recent_messages(state, agent_flow_config.answer_composer.history_turns)
@@ -87,12 +88,12 @@ Deterministic rule-check result:
     log_llm_input(
         wizardflow_message_id,
         "answer_composer",
-        ANSWER_COMPOSER_SYSTEM_PROMPT,
+        composer_prompt,
         message,
     )
     try:
         response = await ModelService().invoke(
-            prompt=ANSWER_COMPOSER_SYSTEM_PROMPT,
+            prompt=composer_prompt,
             message=message,
             format=ANSWER_SCHEMA,
         )

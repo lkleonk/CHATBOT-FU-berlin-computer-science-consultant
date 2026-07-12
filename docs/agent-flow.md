@@ -31,19 +31,29 @@ START
       -> plan_check               -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
-Degree rules reach the system prompt through `app.prompts.RULES_CONTEXT`, which
-is rendered from `backend/app/domain/program_rules.py`; the `plan_check` path
-skips retrieval entirely. Pure degree-rule questions on the `degree_question`
-path also skip course lookup and go straight to `AnswerComposer`.
-Course-offering questions on the `course_offering_question` path use exact
-lookup buckets from `backend/app/domain/data/course_offerings.json`. The legacy
-Qdrant retrieval and query-rewriter nodes have been removed from the runtime.
+Every session is bound to one degree program. `SessionService.create_session`
+seeds `degree_id` into the LangGraph checkpoint, and every node resolves the
+session's `DegreeDefinition` via `degree_for(state)`
+(`backend/app/services/nodes/utils.py`), falling back to `DEFAULT_DEGREE_ID`
+(`msc_informatik`). Prompts, parse schemas, enrichment, and validators all come
+from the degree registry (`backend/app/domain/degrees/`); the LLM never chooses
+the degree.
+
+Degree rules reach the system prompt through each degree's
+`prompts.RULES_CONTEXT`, rendered from that degree's `program_rules.py`; the
+`plan_check` path skips retrieval entirely. Pure degree-rule questions on the
+`degree_question` path also skip course lookup and go straight to
+`AnswerComposer`. Course-offering questions on the `course_offering_question`
+path use exact lookup buckets from the session degree's projection of
+`backend/app/domain/data/course_offerings.json`. The legacy Qdrant retrieval
+and query-rewriter nodes have been removed from the runtime.
 
 ## State Keys
 
 | State key | Producer | Consumer |
 |---|---|---|
 | `messages` | API input, `answer_composer`, `offtopic` | all LLM nodes |
+| `degree_id` | `SessionService.create_session` (checkpoint seed) | every node via `degree_for(state)` |
 | `wizardflow_message_id` | `SessionService` | every active node, WizardFlow finalization |
 | `message_type` | `scope_classifier` | graph router, downstream nodes |
 | `course_lookup_keys` | `course_key_selector` | `course_lookup`, `answer_composer` |
@@ -104,14 +114,19 @@ Purpose:
 
 Behavior:
 
-- Uses the active LLM provider.
+- Short-circuits without an LLM call when the session's degree has no tagged
+  course-offering entries (`has_offerings(degree_id)` is false), returning an
+  honest "no local course-offering data" note for the composer.
+- Uses the active LLM provider with the session degree's selector template and
+  that degree's projected lookup tree.
 - Falls back to a local heuristic if the LLM call fails.
 - Does not output course-specific slugs or title filters; title matching is left
   to the final answer over the returned buckets.
 - Receives a configurable recent conversation window
   (`AGENT_COURSE_SELECTOR_HISTORY_TURNS`, default `2`).
-- The prompt includes a semester coverage note derived from
-  `course_offerings.json`, for example that only `sose26` is currently present.
+- The prompt includes a semester coverage note derived from the degree's
+  projection of `course_offerings.json`, for example that only `sose26` is
+  currently present.
 
 ### CourseLookup
 
@@ -123,7 +138,8 @@ backend/app/services/nodes/course_lookup.py
 
 Purpose:
 
-- Validate selector keys against `course_offerings.json`.
+- Validate selector keys against the session degree's projected bucket tree
+  from `course_offerings.json`.
 - Return the whole selected buckets as deterministic `retrieved_context`.
 - Add bucket-level citations and course URL citations where URLs exist.
 - Preserve Qdrant-free behavior for normal study questions.
@@ -136,10 +152,10 @@ citations
 ```
 
 Course lookup runs only on the `course_offering_question` path. Degree rules
-are rendered from `program_rules.py` into `app.prompts.RULES_CONTEXT`; pure
-degree questions go directly from `ScopeClassifier` to `AnswerComposer`. Plan
-checks rely on the deterministic Python validator plus rules in the system
-prompt, so they do not hit Qdrant.
+are rendered from each degree's `program_rules.py` into that degree's
+`RULES_CONTEXT`; pure degree questions go directly from `ScopeClassifier` to
+`AnswerComposer`. Plan checks rely on the deterministic Python validator plus
+rules in the system prompt, so they do not hit Qdrant.
 
 ### StudyPlanParser
 
@@ -155,9 +171,12 @@ Purpose:
 
 Behavior:
 
-- Uses the active LLM provider with a structured JSON schema.
+- Uses the active LLM provider with the session degree's structured JSON schema
+  (`DegreeDefinition.study_plan_schema`).
 - Falls back to a heuristic parser if the LLM call fails.
-- Enriches parsed modules through `module_catalog.py`.
+- Enriches parsed modules through the degree's `enrich_study_plan` (the Master
+  uses `module_catalog.py`; Data Science canonicalizes names/LP from its
+  catalogue).
 
 Important:
 
@@ -176,10 +195,11 @@ Purpose:
 
 - Run deterministic validation on `parsed_study_plan`.
 
-Implementation:
+Implementation (selected via the session degree's `validate_study_plan`):
 
 ```text
-backend/app/domain/degree_rules.py
+backend/app/domain/degrees/msc_informatik/degree_rules.py
+backend/app/domain/degrees/msc_data_science/degree_rules.py
 ```
 
 Output:
@@ -188,7 +208,11 @@ Output:
 rule_check_result
 ```
 
-This node owns the actual pass/fail decision for LP totals, specialization requirements, seminar/project counts, Wahlbereich caveats, ungraded LP, Bachelor-module LP, and duplicate modules.
+This node owns the actual pass/fail decision. For the Master Informatik that
+covers LP totals, specialization requirements, seminar/project counts,
+Wahlbereich caveats, ungraded LP, Bachelor-module LP, and duplicate modules.
+For Data Science it covers Grundlagen completeness, profile inference and
+mandatory modules, elective quotas, thesis LP/admission, and duplicates.
 
 ### AnswerComposer
 
@@ -228,7 +252,8 @@ backend/app/services/nodes/offtopic.py
 
 Purpose:
 
-- Return a short redirect for messages unrelated to the FU Berlin Master Informatik.
+- Return a short redirect for messages unrelated to the session's degree
+  program (reply text comes from the degree's prompts).
 
 Behavior:
 
@@ -263,6 +288,9 @@ The compiled graph topology is registered through
 
 - LLM nodes: `llm_input`, `llm_output`, `llm_error`, and `node_output`.
 - Deterministic nodes: `node_input` and `node_output`.
+
+The `__start__` graph step is not logged. The `__end__` graph step is finalized
+as a payload-free marker.
 
 Each `llm_input` contains both the exact system `prompt` and provider `msg`.
 Transcript parser messages are intentionally unredacted. Generated JSONL files

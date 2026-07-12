@@ -73,7 +73,7 @@ def test_transcript_readable_returns_plan_and_rule_check(monkeypatch):
             pages=[ExtractedPage(page=1, text="Telematik 10 LP " + "x" * 300)],
         )
 
-    async def fake_parse(text, wizardflow_message_id=None):
+    async def fake_parse(text, wizardflow_message_id=None, degree=None):
         return StudyPlan(
             specialization_area="technical",
             modules=[PlannedModule(name="Telematik", lp=10, area="technical")],

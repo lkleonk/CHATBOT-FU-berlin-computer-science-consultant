@@ -15,6 +15,12 @@ load_dotenv(PROJECT_ROOT / ".env")
 SUPPORTED_PROVIDERS = {"academiccloud", "fu_ollama", "local_ollama"}
 
 
+def parse_comma_separated(value: str) -> list[str]:
+    """Parse a comma-separated env value while preserving its configured order."""
+    items = (item.strip().rstrip("/") for item in value.split(","))
+    return list(dict.fromkeys(item for item in items if item))
+
+
 class Settings(BaseModel):
     """Centralized env-backed configuration."""
 
@@ -24,8 +30,12 @@ class Settings(BaseModel):
         VERSION: str = "0.1.0"
 
     class Deployment(BaseModel):
-        HOSTNAME: str = os.getenv("CONSULTANT_HOST", "0.0.0.0")
-        PORT: int = int(os.getenv("CONSULTANT_PORT", "5100"))
+        HOSTNAME: str = os.getenv("CONSULTANT_HOST", "127.0.0.1")
+        PORT: int = int(os.getenv("CONSULTANT_PORT", "8000"))
+        CORS_ALLOWED_ORIGINS: list[str] = parse_comma_separated(
+            os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
+        )
+        FORWARDED_ALLOW_IPS: str = os.getenv("FORWARDED_ALLOW_IPS", "127.0.0.1")
 
     class Llm(BaseModel):
         PROVIDER: str = os.getenv("LLM_PROVIDER", "academiccloud")

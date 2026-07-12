@@ -10,12 +10,17 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
+import Link from "@mui/material/Link";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import NextLink from "next/link";
 import { useEffect, useState } from "react";
 
+import { DEGREE_STORAGE_KEY, useDegree } from "@/context/DegreeContext";
 import { useUsage } from "@/context/UsageContext";
 import { deleteSession } from "@/services/api";
 import type { Citation, MessageType, RuleCheckResult, StudyPlan } from "@/types/api";
@@ -24,6 +29,7 @@ import { ChatTab } from "./ChatTab";
 import { downloadChat } from "./chatExport";
 import { type ChatMessage } from "./chatMessages";
 import { DegreeRulesTab } from "./DegreeRulesTab";
+import { DegreeSwitchDialog } from "./DegreeSwitchDialog";
 import { LowRequestWarningDialog } from "./LowRequestWarningDialog";
 import { RequestUsageDialog } from "./RequestUsageDialog";
 import { SettingsTab } from "./SettingsTab";
@@ -269,7 +275,9 @@ function readStoredStudyPlan(): StudyPlan | null {
 
 export function ConsultantShell() {
   const { usage } = useUsage();
+  const { degreeId, effectiveDegreeId, degrees, selectDegree } = useDegree();
   const [activeTab, setActiveTab] = useState(0);
+  const [pendingDegreeId, setPendingDegreeId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [latestRuleCheck, setLatestRuleCheck] = useState<RuleCheckResult | null>(null);
   const [latestStudyPlan, setLatestStudyPlan] = useState<StudyPlan | null>(null);
@@ -294,7 +302,8 @@ export function ConsultantShell() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const seenVersion = window.localStorage.getItem(WELCOME_VERSION_STORAGE_KEY);
-      setWelcomeOpen(seenVersion !== CURRENT_WELCOME_VERSION);
+      const hasStoredDegree = Boolean(window.localStorage.getItem(DEGREE_STORAGE_KEY));
+      setWelcomeOpen(seenVersion !== CURRENT_WELCOME_VERSION || !hasStoredDegree);
       setWelcomeChecked(true);
     }, 0);
 
@@ -337,7 +346,7 @@ export function ConsultantShell() {
     setWizardFlowPromoOpen(false);
   };
 
-  const closeWelcome = () => {
+  const closeWelcome = (selectedDegreeId: string) => {
     window.localStorage.setItem(WELCOME_VERSION_STORAGE_KEY, CURRENT_WELCOME_VERSION);
     if (usage && usage.used > 0 && usage.remaining <= 10) {
       window.sessionStorage.setItem(
@@ -345,12 +354,22 @@ export function ConsultantShell() {
         "shown",
       );
     }
+    // A different choice than the stored one invalidates any existing
+    // degree-specific session data.
+    if (selectedDegreeId !== degreeId && (sessionId || chatMessages.length > 0)) {
+      void handleClearLocalState();
+    }
+    selectDegree(selectedDegreeId);
     setWelcomeOpen(false);
   };
 
   const handleClearLocalState = async () => {
     if (sessionId && sessionId !== "dummy-session") {
-      await deleteSession(sessionId);
+      try {
+        await deleteSession(sessionId);
+      } catch {
+        // The backend session expires on its own; local reset must not block on it.
+      }
     }
     window.sessionStorage.removeItem(SESSION_ID_STORAGE_KEY);
     window.sessionStorage.removeItem(CHAT_MESSAGES_STORAGE_KEY);
@@ -360,6 +379,29 @@ export function ConsultantShell() {
     setChatMessages([]);
     setResetToken((current) => current + 1);
     setActiveTab(0);
+  };
+
+  const requestDegreeSwitch = (nextDegreeId: string) => {
+    if (nextDegreeId === effectiveDegreeId) {
+      return;
+    }
+    if (!sessionId && chatMessages.length === 0) {
+      // Nothing to lose; switch immediately.
+      selectDegree(nextDegreeId);
+      setResetToken((current) => current + 1);
+      return;
+    }
+    setPendingDegreeId(nextDegreeId);
+  };
+
+  const confirmDegreeSwitch = async () => {
+    const target = pendingDegreeId;
+    setPendingDegreeId(null);
+    if (!target) {
+      return;
+    }
+    await handleClearLocalState();
+    selectDegree(target);
   };
 
   const handleLoadDummyData = () => {
@@ -408,9 +450,30 @@ export function ConsultantShell() {
             <SchoolOutlinedIcon color="primary" />
             <Box>
               <Typography variant="h1">Modulio</Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Master Informatik
-              </Typography>
+              {degrees.length > 1 ? (
+                <Select
+                  value={degrees.some((degree) => degree.id === effectiveDegreeId) ? effectiveDegreeId : ""}
+                  onChange={(event) => requestDegreeSwitch(event.target.value)}
+                  variant="standard"
+                  disableUnderline
+                  inputProps={{ "aria-label": "Degree program" }}
+                  sx={{
+                    fontSize: (theme) => theme.typography.body2.fontSize,
+                    color: "text.secondary",
+                    "& .MuiSelect-select": { py: 0, pr: 3 },
+                  }}
+                >
+                  {degrees.map((degree) => (
+                    <MenuItem key={degree.id} value={degree.id}>
+                      {degree.display_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              ) : (
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {degrees[0]?.display_name ?? "Degree program"}
+                </Typography>
+              )}
             </Box>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -551,13 +614,61 @@ export function ConsultantShell() {
           )}
         </Box>
       </Box>
+      <Box
+        component="footer"
+        data-print-hidden="true"
+        sx={{
+          flexShrink: 0,
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          px: 2,
+          py: 0.75,
+        }}
+      >
+        <Box
+          component="nav"
+          aria-label="Rechtliche Hinweise"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+            color: "text.secondary",
+            fontSize: 12,
+          }}
+        >
+          <Link component={NextLink} href="/impressum" color="inherit" underline="hover">
+            Impressum
+          </Link>
+          <Box component="span" aria-hidden sx={{ opacity: 0.55 }}>
+            /
+          </Box>
+          <Link component={NextLink} href="/datenschutz" color="inherit" underline="hover">
+            Datenschutz
+          </Link>
+        </Box>
+      </Box>
       <WelcomeDialog
         open={welcomeOpen}
         onClose={closeWelcome}
-        onViewUsage={() => {
-          closeWelcome();
+        onViewUsage={(selectedDegreeId) => {
+          closeWelcome(selectedDegreeId);
           setUsageDialogOpen(true);
         }}
+      />
+      <DegreeSwitchDialog
+        open={pendingDegreeId !== null}
+        targetDegree={degrees.find((degree) => degree.id === pendingDegreeId) ?? null}
+        hasChatMessages={chatMessages.length > 0}
+        hasStudyPlan={latestStudyPlan !== null}
+        onDownloadChat={() => downloadChat(chatMessages)}
+        onOpenStudyPlan={() => {
+          setPendingDegreeId(null);
+          setActiveTab(1);
+        }}
+        onCancel={() => setPendingDegreeId(null)}
+        onConfirm={() => void confirmDegreeSwitch()}
       />
       <LowRequestWarningDialog
         open={lowRequestWarningOpen}

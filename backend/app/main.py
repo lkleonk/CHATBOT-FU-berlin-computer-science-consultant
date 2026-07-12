@@ -5,7 +5,14 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import health_router, program_rules_router, session_router, usage_router
+from app.routes import (
+    degrees_router,
+    health_router,
+    program_rules_router,
+    session_router,
+    tracing_router,
+    usage_router,
+)
 from app.services.ssh_manager import SSHManager
 from app.settings import settings
 
@@ -49,7 +56,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.DEPLOYMENT.CORS_ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=[
@@ -62,9 +69,17 @@ app.add_middleware(
 
 app.include_router(session_router)
 app.include_router(program_rules_router)
+app.include_router(degrees_router)
 app.include_router(usage_router)
+app.include_router(tracing_router)
 app.include_router(health_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.DEPLOYMENT.HOSTNAME, port=settings.DEPLOYMENT.PORT)
+    uvicorn.run(
+        app,
+        host=settings.DEPLOYMENT.HOSTNAME,
+        port=settings.DEPLOYMENT.PORT,
+        proxy_headers=True,
+        forwarded_allow_ips=settings.DEPLOYMENT.FORWARDED_ALLOW_IPS,
+    )
