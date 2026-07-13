@@ -1,0 +1,738 @@
+[
+  {
+    "id": "introduction_to_profile_areas",
+    "name": "Introduction to Profile Areas",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "statistics_for_data_science",
+    "name": "Statistics for Data Science",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "machine_learning_for_data_science",
+    "name": "Machine Learning for Data Science",
+    "lp": 10,
+    "aliases": [
+      "ML for Data Science"
+    ]
+  },
+  {
+    "id": "programming_for_data_science",
+    "name": "Programming for Data Science",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "data_science_in_life_sciences",
+    "name": "Data Science in Life Sciences",
+    "lp": 15,
+    "aliases": []
+  },
+  {
+    "id": "forschungspraxis",
+    "name": "Forschungspraxis",
+    "lp": 10,
+    "aliases": [
+      "Research Practice"
+    ]
+  },
+  {
+    "id": "ethical_foundations_of_data_science",
+    "name": "Ethical Foundations of Data Science",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_data_science_a",
+    "name": "Softwareprojekt Data Science A",
+    "lp": 10,
+    "aliases": [
+      "Software Project Data Science A"
+    ]
+  },
+  {
+    "id": "spezielle_aspekte_ds_life_sciences",
+    "name": "Spezielle Aspekte der Data Science in Life Sciences",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "aktuelle_forschungsthemen_ds_life_sciences",
+    "name": "Aktuelle Forschungsthemen der Data Science in Life Sciences",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "masterseminar_ds_life_sciences",
+    "name": "Masterseminar Data Science in Life Sciences",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "ausgewaehlte_themen_ds_life_sciences",
+    "name": "Ausgewählte Themen der Data Science in Life Sciences",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "machine_learning_in_bioinformatics",
+    "name": "Machine Learning in Bioinformatics",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "big_data_analysis_in_bioinformatics",
+    "name": "Big Data Analysis in Bioinformatics",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "applied_machine_learning_in_bioinformatics",
+    "name": "Applied Machine Learning in Bioinformatics",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "spezielle_aspekte_ds_technologies",
+    "name": "Spezielle Aspekte der Data Science Technologies",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "aktuelle_forschungsthemen_ds_technologies",
+    "name": "Aktuelle Forschungsthemen der Data Science Technologies",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "ausgewaehlte_themen_ds_technologies_a",
+    "name": "Ausgewählte Themen der Data Science Technologies A",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "ausgewaehlte_themen_ds_technologies_b",
+    "name": "Ausgewählte Themen der Data Science Technologies B",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "masterseminar_ds_technologies",
+    "name": "Masterseminar in Data Science Technologies",
+    "lp": 5,
+    "aliases": [
+      "Masterseminar Data Science Technologies"
+    ]
+  },
+  {
+    "id": "softwareprojekt_data_science_b",
+    "name": "Softwareprojekt Data Science B",
+    "lp": 10,
+    "aliases": [
+      "Software Project Data Science B"
+    ]
+  },
+  {
+    "id": "datenbanksysteme_data_science",
+    "name": "Datenbanksysteme Data Science",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "verteilte_systeme",
+    "name": "Verteilte Systeme",
+    "lp": 5,
+    "aliases": [
+      "Distributed Systems"
+    ]
+  },
+  {
+    "id": "mobilkommunikation",
+    "name": "Mobilkommunikation",
+    "lp": 5,
+    "aliases": [
+      "Mobile Communication"
+    ]
+  },
+  {
+    "id": "telematik",
+    "name": "Telematik",
+    "lp": 10,
+    "aliases": [
+      "Telematics"
+    ]
+  },
+  {
+    "id": "hoehere_algorithmik",
+    "name": "Höhere Algorithmik",
+    "lp": 10,
+    "aliases": [
+      "Advanced Algorithms"
+    ]
+  },
+  {
+    "id": "rechnersicherheit",
+    "name": "Rechnersicherheit",
+    "lp": 10,
+    "aliases": [
+      "Computer Security"
+    ]
+  },
+  {
+    "id": "mustererkennung",
+    "name": "Mustererkennung",
+    "lp": 5,
+    "aliases": [
+      "Pattern Recognition"
+    ]
+  },
+  {
+    "id": "netzbasierte_informationssysteme",
+    "name": "Netzbasierte Informationssysteme",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "kuenstliche_intelligenz",
+    "name": "Künstliche Intelligenz",
+    "lp": 5,
+    "aliases": [
+      "Artificial Intelligence"
+    ]
+  },
+  {
+    "id": "spezielle_aspekte_der_datenverwaltung",
+    "name": "Spezielle Aspekte der Datenverwaltung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "interdisziplinaere_zugaenge_data_science_a",
+    "name": "Interdisziplinäre Zugänge im Rahmen von Data Science A",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "interdisziplinaere_zugaenge_data_science_b",
+    "name": "Interdisziplinäre Zugänge im Rahmen von Data Science B",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "masterarbeit_data_science",
+    "name": "Masterarbeit mit begleitendem Kolloquium",
+    "lp": 30,
+    "aliases": [
+      "Masterarbeit",
+      "Master Thesis",
+      "Master's Thesis"
+    ]
+  },
+  {
+    "id": "aktuelle_forschungsthemen_der_praktischen_informatik",
+    "name": "Aktuelle Forschungsthemen der Praktischen Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "ausgewahlte_themen_der_praktischen_informatik",
+    "name": "Ausgewählte Themen der Praktischen Informatik",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "bildverarbeitung",
+    "name": "Bildverarbeitung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "computergrafik",
+    "name": "Computergrafik",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "computer_vision",
+    "name": "Computer-Vision",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "datenbanktechnologie",
+    "name": "Datenbanktechnologie",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "empirische_bewertung_in_der_informatik",
+    "name": "Empirische Bewertung in der Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "existenzgrundung_in_der_it_industrie",
+    "name": "Existenzgründung in der IT-Industrie",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "grundlagen_des_softwaretestens",
+    "name": "Grundlagen des Softwaretestens",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "grundlagen_des_managements_von_it_projekten",
+    "name": "Grundlagen des Managements von IT-Projekten",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "medizinische_bildverarbeitung",
+    "name": "Medizinische Bildverarbeitung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "modellgetriebene_softwareentwicklung",
+    "name": "Modellgetriebene Softwareentwicklung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "praktiken_professioneller_softwareentwicklung",
+    "name": "Praktiken professioneller Softwareentwicklung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "projektmanagement",
+    "name": "Projektmanagement",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "projektmanagement_vertiefung",
+    "name": "Projektmanagement - Vertiefung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "semantisches_geschaftsprozessmanagement",
+    "name": "Semantisches Geschäftsprozessmanagement",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_praktische_informatik_a",
+    "name": "Softwareprojekt Praktische Informatik A",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_praktische_informatik_b",
+    "name": "Softwareprojekt Praktische Informatik B",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "softwareprozesse",
+    "name": "Softwareprozesse",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "spezielle_aspekte_der_praktischen_informatik",
+    "name": "Spezielle Aspekte der Praktischen Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "spezielle_aspekte_der_softwareentwicklung",
+    "name": "Spezielle Aspekte der Softwareentwicklung",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "ubersetzerbau",
+    "name": "Übersetzerbau",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_praktische_informatik_a",
+    "name": "Wissenschaftliches Arbeiten Praktische Informatik A",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_praktische_informatik_b",
+    "name": "Wissenschaftliches Arbeiten Praktische Informatik B",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "xml_technologien",
+    "name": "XML-Technologien",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "aktuelle_forschungsthemen_der_theoretischen_informatik",
+    "name": "Aktuelle Forschungsthemen der Theoretischen Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "algorithmische_geometrie",
+    "name": "Algorithmische Geometrie",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "ausgewahlte_themen_der_theoretischen_informatik",
+    "name": "Ausgewählte Themen der Theoretischen Informatik",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "fortgeschrittene_themen_der_theoretischen_informatik",
+    "name": "Fortgeschrittene Themen der Theoretischen Informatik",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "kryptographie_und_sicherheit_in_verteilten_systemen",
+    "name": "Kryptographie und Sicherheit in Verteilten Systemen",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "modelchecking",
+    "name": "Modelchecking",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "semantik_von_programmiersprachen",
+    "name": "Semantik von Programmiersprachen",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_theoretische_informatik_a",
+    "name": "Softwareprojekt - Theoretische Informatik A",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_theoretische_informatik_b",
+    "name": "Softwareprojekt - Theoretische Informatik B",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "spezielle_aspekte_der_theoretischen_informatik",
+    "name": "Spezielle Aspekte der Theoretischen Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_theoretische_informatik_a",
+    "name": "Wissenschaftliches Arbeiten Theoretische Informatik A",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_theoretische_informatik_b",
+    "name": "Wissenschaftliches Arbeiten Theoretische Informatik B",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "aktuelle_forschungsthemen_der_technischen_informatik",
+    "name": "Aktuelle Forschungsthemen der Technischen Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "ausgewahlte_themen_der_technischen_informatik",
+    "name": "Ausgewählte Themen der Technischen Informatik",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "betriebssysteme",
+    "name": "Betriebssysteme",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "mikroprozessor_praktikum",
+    "name": "Mikroprozessor-Praktikum",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "robotik",
+    "name": "Robotik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_technische_informatik_a",
+    "name": "Softwareprojekt - Technische Informatik A",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_technische_informatik_b",
+    "name": "Softwareprojekt - Technische Informatik B",
+    "lp": 10,
+    "aliases": []
+  },
+  {
+    "id": "spezielle_aspekte_der_technischen_informatik",
+    "name": "Spezielle Aspekte der Technischen Informatik",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_technische_informatik_a",
+    "name": "Wissenschaftliches Arbeiten Technische Informatik A",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_technische_informatik_b",
+    "name": "Wissenschaftliches Arbeiten Technische Informatik B",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "masterarbeit",
+    "name": "Masterarbeit",
+    "lp": 30,
+    "aliases": []
+  },
+  {
+    "id": "cluster_computing",
+    "name": "Cluster Computing",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "bild_und_videocodierung",
+    "name": "Bild- und Videocodierung",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "cybersecurity_and_ai_iv_angriffe",
+    "name": "Cybersecurity and AI IV: Angriffe",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_telematik",
+    "name": "Softwareprojekt: Telematik",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_verteilte_systeme",
+    "name": "Softwareprojekt: Verteilte Systeme",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_proseminar_internet_of_things_security_technische_informatik",
+    "name": "Seminar/Proseminar: Internet of Things & Security (Technische Informatik)",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_proseminar_telematik",
+    "name": "Seminar/Proseminar: Telematik",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "angewandte_biometrie",
+    "name": "Angewandte Biometrie",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "human_centered_data_science",
+    "name": "Human Centered Data Science",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "ethics_and_epistemology_of_ai",
+    "name": "Ethics and Epistemology of AI",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "advanced_data_visualization_for_artificial_intelligence",
+    "name": "Advanced Data Visualization for Artificial Intelligence",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "empirische_methoden_im_software_engineering",
+    "name": "Empirische Methoden im Software Engineering",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "markovketten",
+    "name": "Markovketten",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_datenverwaltung",
+    "name": "Softwareprojekt: Datenverwaltung",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_semantische_technologien",
+    "name": "Softwareprojekt: Semantische Technologien",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_amos_projekt",
+    "name": "Softwareprojekt: AMOS-Projekt",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_secure_identity",
+    "name": "Softwareprojekt: Secure Identity",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_open_source_source_development",
+    "name": "Softwareprojekt: Open Source Source Development",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_reinforcement_learning_in_computer_chess_and_beyond_towards_absolute_sustainability",
+    "name": "Seminar: Reinforcement Learning in Computer Chess and Beyond: Towards Absolute Sustainability",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "projektseminar_probleme_bei_planungssystemen_der_nachsten_generation_mit_schwerpunkt_auf_navigationssystemen",
+    "name": "Projektseminar: Probleme bei Planungssystemen der nächsten Generation, mit Schwerpunkt auf Navigationssystemen",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_beitrage_zum_software_engineering",
+    "name": "Seminar: Beiträge zum Software Engineering",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_proseminar_agile_methoden_technische_praktiken",
+    "name": "Seminar/Proseminar: Agile Methoden & Technische Praktiken",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_security_engineering",
+    "name": "Seminar: Security Engineering",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_proseminar_new_trends_in_informationsystems_ntis",
+    "name": "Seminar/Proseminar: New Trends in Informationsystems (NTIS)",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_continual_learning",
+    "name": "Seminar: Continual Learning",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_proseminar_how_to_startup",
+    "name": "Seminar/Proseminar: How to Startup",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_netzwerke_dynamische_modelle_und_ml_fur_datenintegration_in_den_lebenswissenschaften",
+    "name": "Seminar: Netzwerke, dynamische Modelle und ML für Datenintegration in den Lebenswissenschaften",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "elektronische_krankenakten_und_ihre_nutzung_in_der_aktuellen_forschung",
+    "name": "Elektronische Krankenakten und ihre Nutzung in der aktuellen Forschung",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_proseminar_time_series_modelling",
+    "name": "Seminar/Proseminar: Time Series Modelling",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "projektmanagement_in_agilen_umgebungen_teil_2_sose",
+    "name": "Projektmanagement in agilen Umgebungen Teil 2 (SoSe)",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_aktuelle_themen_der_kryptographie",
+    "name": "Seminar: Aktuelle Themen der Kryptographie",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "kryptoanalyse_asymmetrischer_verfahren",
+    "name": "Kryptoanalyse asymmetrischer Verfahren",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "advanced_topics_on_post_quantum_cryptography",
+    "name": "Advanced topics on Post quantum cryptography",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "approximationsalgorithmen",
+    "name": "Approximationsalgorithmen",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_anwendungen_von_algorithmen",
+    "name": "Softwareprojekt: Anwendungen von Algorithmen",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "seminar_uber_algorithmen",
+    "name": "Seminar über Algorithmen",
+    "lp": null,
+    "aliases": []
+  }
+]

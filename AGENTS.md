@@ -16,7 +16,7 @@ Public website: `https://cs-modulio.com`
 
 This is a FU Berlin study consultant for multiple degree programs with a backend-first architecture and a standalone Next.js frontend. Supported degrees live in a registry (`backend/app/domain/degrees/`): currently `msc_informatik` (M.Sc. Informatik, SPO 2014) and `msc_data_science` (M.Sc. Data Science, FU-Mitteilungen 18/2021). A `bsc_informatik` package is planned once its §7(3)/(4) module lists are available.
 
-It answers questions using exact local course-offering lookup plus rules in prompts, while preserving optional local RAG code for future/manual retrieval experiments. It validates proposed study plans with deterministic per-degree Python rules. The LLM may parse and explain, but the LLM must not be trusted for final LP validation. Every session is bound to exactly one degree; the LLM never chooses or infers the degree.
+It answers questions using exact local course-offering lookup plus rules in prompts. It validates proposed study plans with deterministic per-degree Python rules. The LLM may parse and explain, but the LLM must not be trusted for final LP validation. Every session is bound to exactly one degree; the LLM never chooses or infers the degree.
 
 ## Important Paths
 
@@ -40,7 +40,9 @@ fu_berlin_cs_consultant/
         rule_check.py           # shared RuleIssue/RuleCheckResult
         study_plan.py
         module_catalog.py
-        data/course_offerings.json
+        data/courses.json              # shared canonical courses
+        data/degree_modules/           # degree-specific credit mappings
+        data/course_offerings/         # one JSON file per semester
         degrees/
           __init__.py           # registry: list_degrees(), get_degree(), DEFAULT_DEGREE_ID
           definition.py         # DegreeDefinition + DegreePrompts contract
@@ -49,7 +51,6 @@ fu_berlin_cs_consultant/
       services/
       pdf/
     scripts/
-    knowledge_base/generated/
     tests/
   frontend/
     Dockerfile
@@ -71,7 +72,6 @@ Technical docs:
 ```text
 docs/study-plan-data.md
 docs/agent-flow.md
-docs/rag-ingestion.md
 docs/agent-flow.html
 ```
 
@@ -120,7 +120,7 @@ the frontend picker. It must not consume quota or invoke the LLM.
 `POST /api/sessions/{session_id}/transcript` accepts a multipart PDF upload
 (field name `file`). See the "PDF Transcript Upload" section.
 
-`GET /api/program-rules` returns the structured display catalogue for the frontend Degree Rules tab, selected by the `degree` query parameter (default `msc_informatik`). It should not require Qdrant, embeddings, LangGraph, or an LLM to answer.
+`GET /api/program-rules` returns the structured display catalogue for the frontend Degree Rules tab, selected by the `degree` query parameter (default `msc_informatik`). It should not require LangGraph or an LLM to answer.
 
 `GET /api/usage` returns the current client-IP user-action allowance, UTC reset
 time, configured session inactivity TTL, and whether diagnostic WizardFlow
@@ -155,15 +155,6 @@ production `caddy` service and handles TLS, the `www` redirect, backend
 proxying, and the static export. `frontend/Caddyfile.preview` belongs only to the
 optional `frontend-preview` service; it is a minimal local static-file server
 and is not used in the production request path.
-
-Qdrant is behind the optional `legacy-rag` Compose profile. Normal
-`docker compose up` should not start Qdrant. Use
-`docker compose --profile legacy-rag up -d qdrant` only for manual legacy RAG
-ingestion or retrieval experiments.
-
-The normal backend image installs `backend/requirements.txt`, which excludes
-Torch, SentenceTransformer, and Qdrant. The optional ingestion image target
-installs `backend/requirements-legacy-rag.txt`.
 
 Compose uses `.env` as the backend env file. Keep `.env.example` aligned when adding required runtime variables.
 
@@ -206,16 +197,14 @@ state (`degree_for(state)` in `services/nodes/utils.py`, falling back to
 validator from the `DegreeDefinition`. Degree rules reach the system prompt
 through each degree's `prompts.RULES_CONTEXT`, rendered from that degree's
 `program_rules.py` via the shared `render_rules_context()`. The `plan_check`
-path does not need retrieval before parsing. Pure degree-rule questions on the
+path does not need course lookup before parsing. Pure degree-rule questions on the
 `degree_question` path skip course lookup and go straight to `AnswerComposer`.
 Course-offering lookup on the `course_offering_question` path reads exact
-buckets from the per-degree projection of
-`backend/app/domain/data/course_offerings.json`, using keys like
+ buckets from the per-degree projection of the canonical course catalogue and
+semester files under `backend/app/domain/data/course_offerings/`, using keys like
 `sose26/technical/swp`. When a degree has no tagged course-offering entries,
 `CourseKeySelector` short-circuits (no LLM call) with an honest "no local
-course-offering data" note. The legacy Qdrant retrieval and query-rewriter
-nodes have been removed; manual ingestion and vector-service code remain
-available.
+course-offering data" note.
 
 `MemorySaver` is used for phase 1, so session state is in memory and lost on
 backend restart. Sessions also expire after 48 hours of inactivity through
@@ -265,7 +254,7 @@ AGENT_ANSWER_COMPOSER_HISTORY_TURNS
 
 Do not duplicate available semesters in settings. The course selector derives
 semester coverage from the session degree's projection of
-`backend/app/domain/data/course_offerings.json`.
+the canonical course catalogue and semester offering files.
 
 ## Degree Registry
 
@@ -283,8 +272,7 @@ __init__.py        -> assembles the DegreeDefinition
 `DegreeDefinition` fields beyond prompts/rules: `study_plan_schema` (parser LLM
 output schema), `enrich_study_plan` (deterministic post-parse enrichment),
 `course_areas` (area vocabulary for course-offering placements), and
-`course_modules` (canonical id -> display name map, or `None` when the degree
-has no canonical module list).
+`course_modules` (canonical id -> display name map).
 
 Validation styles differ by degree and should stay per-degree functions behind
 the common interface, not a generic rule engine:
@@ -301,41 +289,40 @@ course-offering validation pick it up from the registry.
 
 ## Course Offerings Data
 
-`backend/app/domain/data/course_offerings.json` is a flat list of offered
-courses. Each course appears once per semester and carries a `degrees` map
-tagging every degree it counts toward. A degree's value is a placement list
-(single object allowed as shorthand) because one course can sit in multiple
-areas of the same degree:
+The catalogue has three layers:
+
+```text
+backend/app/domain/data/courses.json                    # shared course identity/name/LP/aliases
+backend/app/domain/data/degree_modules/<degree>.json    # degree credit mappings and validation flags
+backend/app/domain/data/course_offerings/<semester>.json # type, schedule, description, URL
+```
+
+Each course has one global ID, even if it appears in only one known semester.
+Degree mappings state how that course is creditable for a particular regulation;
+an offering file records only its semester-specific delivery details:
 
 ```json
 {
-  "semester": "sose26",
+  "course_id": "telematik",
   "type": "vl",
-  "title": "Telematik",
   "lp": 10,
-  "schedule": null, "description": null, "url": null,
-  "degrees": {
-    "msc_informatik": [{ "area": "technical", "module_catalog_name": "Telematik" }],
-    "msc_data_science": [{ "area": "technologies", "module_ids": ["telematik"] }]
-  }
+  "schedule": null,
+  "description": null,
+  "url": null
 }
 ```
 
-Placement rules, enforced at load time by
-`app.domain.course_offerings.validate_course_entries` (and guarded by
+Cross-file rules, enforced at load time by
+`app.domain.course_offerings.validate_course_catalog` (and guarded by
 `tests/test_course_offerings.py::test_real_data_file_is_valid`):
 
-- `area` must be in the degree's `course_areas` vocabulary
-  (`msc_informatik`: technical/practical/theoretical/application;
-  `msc_data_science`: grundlagen/life_sciences/technologies).
-- Degrees with `course_modules` require `module_ids` (or `module_id`
-  shorthand) referencing known canonical ids; degrees without one require
-  `module_catalog_name` and must not carry module ids.
-- A placement may list several `module_ids` when one offering is creditable as
-  multiple canonical modules (e.g. Softwareprojekt Data Science A or B).
-- Placement-level `lp` overrides the entry-level default for that degree.
-- `is_bachelor_module: true` marks Bachelor lectures creditable in a Master;
-  the lookup context renders the 15 LP cap caveat.
+- IDs must resolve across all three layers.
+- Credit mappings must use a known degree module and one of that degree's areas.
+- A course may map to multiple modules/areas within one degree.
+- Offering-level LP remains a semester-specific override when the delivery
+  differs from the canonical module LP.
+- Bachelor-module markers remain part of degree credit mappings so the lookup
+  context renders the 15 LP cap caveat.
 
 `project_offerings(degree_id)` builds the per-degree
 `semester -> area -> course_type` bucket tree deterministically; the LLM
@@ -460,7 +447,7 @@ Purpose:
 - Human-readable catalogue of degree-rule sections, items, sources, and related validation issue codes.
 - Stable JSON projection through `GET /api/program-rules`.
 
-Do not make `backend/knowledge_base/generated/degree_rules.md` the source for the frontend. That Markdown is RAG-facing generated documentation. The frontend should call the API and render structured JSON.
+The frontend should call the API and render structured JSON; it must not own or duplicate degree-rule validation.
 
 Ownership split:
 
@@ -468,8 +455,9 @@ Ownership split:
 degrees/<d>/degree_rules.py    -> executable validation logic
 degrees/<d>/program_rules.py   -> structured human-readable rule catalogue
 degrees/<d>/prompts.py         -> RULES_CONTEXT rendered from that degree's catalogue
-course_offerings.json          -> shared tagged course-offering source (per-degree projection)
-module_catalog.md              -> optional RAG-ingested artifact for manual/future retrieval
+data/courses.json              -> shared canonical course facts
+data/degree_modules/<d>.json   -> degree-specific credit mappings and validation metadata
+data/course_offerings/<term>.json -> semester-specific delivery data
 frontend/services/api          -> API client only, no validation-rule ownership
 ```
 
@@ -479,10 +467,6 @@ If rule behavior changes, update in the affected degree package:
 2. `program_rules.py`
 3. focused tests (`test_rule_checker.py` for msc_informatik,
    `test_data_science_rules.py` for msc_data_science)
-
-Re-ingesting RAG is no longer required for rule edits because the rule sources
-are no longer ingested. Only `module_catalog.md` is in the Qdrant collection,
-and Qdrant is not used by the active study-question graph.
 
 The Softwareprojekt and Wissenschaftliches Arbeiten Wahlbereich caveats must stay visible in both validation and display rules.
 
@@ -576,47 +560,6 @@ Frontend conventions:
 - Do not put degree-rule validation logic in TypeScript. The frontend renders backend data and validation results.
 - If i18n is added later, use `next-intl` and update all locale files together.
 
-## RAG
-
-Manual ingestion script:
-
-```text
-backend/scripts/ingest_resources.py
-```
-
-Run from `fu_berlin_cs_consultant/` after Docker services are running:
-
-```bash
-docker compose --profile legacy-rag up -d qdrant
-docker compose --profile legacy-rag run --rm legacy-rag-ingest
-```
-
-Default collection:
-
-```text
-fu_cs_consultant_knowledge
-```
-
-Default embedding model:
-
-```text
-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-```
-
-Generated knowledge artifacts:
-
-```text
-backend/knowledge_base/generated/degree_rules.md
-backend/knowledge_base/generated/module_catalog.md
-backend/knowledge_base/generated/module_catalog.json
-```
-
-If rule behavior changes, update deterministic code and the structured display
-catalogue in `program_rules.py`; `RULES_CONTEXT` is rendered from that catalogue.
-RAG ingestion is not required for active rule or course-offering answers.
-
-`knowledge_base/generated/` is a generated retrieval corpus, not the frontend source of truth. The Degree Rules tab should use `program_rules.py` through `GET /api/program-rules`.
-
 ## LLM Providers
 
 Configured in `backend/app/settings.py`.
@@ -695,8 +638,6 @@ For production, first rebuild `frontend/out/` locally and deploy the updated
 repository revision, then run the production Compose profile; only `backend`
 and Caddy run. Use `docker compose logs -f backend caddy` when production
 runtime behavior is unclear.
-Use `docker compose --profile legacy-rag up -d qdrant` only when testing manual
-legacy RAG ingestion.
 
 The backend Dockerfile intentionally wraps apt update/install in timeouts. If apt times out, investigate Docker network access to Debian mirrors before changing Python dependencies.
 
@@ -714,7 +655,6 @@ When behavior changes, update the relevant docs:
 
 - Agent routing or node responsibilities: `docs/agent-flow.md` and `docs/agent-flow.html`
 - Study plan state/schema/persistence: `docs/study-plan-data.md`
-- RAG sources/chunking/metadata: `docs/rag-ingestion.md`
 - Frontend architecture/API assumptions: add or update `docs/frontend.md` once frontend scaffolding exists
 - Setup/API commands: `README.md`
 - Implementation checklist: `implementation.md`

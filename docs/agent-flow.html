@@ -282,10 +282,9 @@
     <div class="callout">
       <strong>Lookup scope:</strong> active course-offering lookup reads the session
       degree's projection of
-      <code>backend/app/domain/data/course_offerings.json</code> through keys like
+      <code>backend/app/domain/data/course_offerings/&lt;semester&gt;.json</code> through keys like
       <code>sose26/technical/swp</code>. Degrees without tagged offerings get an honest
-      "no local course-offering data" note without an LLM selector call. The legacy
-      Qdrant retrieval and query-rewriter nodes have been removed from the runtime.
+      "no local course-offering data" note without an LLM selector call.
       <code>degree_question</code> messages skip lookup and are answered from the
       degree's <code>RULES_CONTEXT</code>, rendered from that degree's
       <code>program_rules.py</code>.

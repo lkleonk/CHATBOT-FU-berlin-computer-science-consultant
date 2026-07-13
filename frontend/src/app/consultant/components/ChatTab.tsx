@@ -402,7 +402,10 @@ export function ChatTab({
           }}
         >
           <InfoOutlinedIcon sx={{ mt: "1px", fontSize: 16, flexShrink: 0 }} />
-          <Typography variant="caption">
+          <Typography variant="caption" sx={{ display: { xs: "block", sm: "none" } }}>
+            Unofficial service. Please verify important information.
+          </Typography>
+          <Typography variant="caption" sx={{ display: { xs: "none", sm: "block" } }}>
             Unofficial service. Answers may be incomplete or incorrect. Please verify important
             information using official FU Berlin regulations or the responsible advising office.
           </Typography>

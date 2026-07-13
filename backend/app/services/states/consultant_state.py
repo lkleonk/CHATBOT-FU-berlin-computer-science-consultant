@@ -21,7 +21,7 @@ class ConsultantState(TypedDict, total=False):
     course_lookup_needs_clarification: bool
     course_lookup_clarification_question: str | None
     course_lookup_message: str | None
-    retrieved_context: str | None
+    course_context: str | None
     citations: list[dict[str, Any]]
     parsed_study_plan: dict[str, Any] | None
     rule_check_result: dict[str, Any] | None

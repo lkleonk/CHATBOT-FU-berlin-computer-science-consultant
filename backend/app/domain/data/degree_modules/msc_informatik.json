@@ -1,0 +1,858 @@
+{
+  "modules": [
+    {
+      "id": "aktuelle_forschungsthemen_der_praktischen_informatik",
+      "course_id": "aktuelle_forschungsthemen_der_praktischen_informatik",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "ausgewahlte_themen_der_praktischen_informatik",
+      "course_id": "ausgewahlte_themen_der_praktischen_informatik",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "bildverarbeitung",
+      "course_id": "bildverarbeitung",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "computergrafik",
+      "course_id": "computergrafik",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "computer_vision",
+      "course_id": "computer_vision",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "datenbanktechnologie",
+      "course_id": "datenbanktechnologie",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "empirische_bewertung_in_der_informatik",
+      "course_id": "empirische_bewertung_in_der_informatik",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "existenzgrundung_in_der_it_industrie",
+      "course_id": "existenzgrundung_in_der_it_industrie",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": true,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "grundlagen_des_softwaretestens",
+      "course_id": "grundlagen_des_softwaretestens",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "grundlagen_des_managements_von_it_projekten",
+      "course_id": "grundlagen_des_managements_von_it_projekten",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": true,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "kunstliche_intelligenz",
+      "course_id": "kuenstliche_intelligenz",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "medizinische_bildverarbeitung",
+      "course_id": "medizinische_bildverarbeitung",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "modellgetriebene_softwareentwicklung",
+      "course_id": "modellgetriebene_softwareentwicklung",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "mustererkennung",
+      "course_id": "mustererkennung",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "netzbasierte_informationssysteme",
+      "course_id": "netzbasierte_informationssysteme",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "praktiken_professioneller_softwareentwicklung",
+      "course_id": "praktiken_professioneller_softwareentwicklung",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "projektmanagement",
+      "course_id": "projektmanagement",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "projektmanagement_vertiefung",
+      "course_id": "projektmanagement_vertiefung",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "rechnersicherheit",
+      "course_id": "rechnersicherheit",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "semantisches_geschaftsprozessmanagement",
+      "course_id": "semantisches_geschaftsprozessmanagement",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "softwareprojekt_praktische_informatik_a",
+      "course_id": "softwareprojekt_praktische_informatik_a",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": true
+    },
+    {
+      "id": "softwareprojekt_praktische_informatik_b",
+      "course_id": "softwareprojekt_praktische_informatik_b",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": true
+    },
+    {
+      "id": "softwareprozesse",
+      "course_id": "softwareprozesse",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "spezielle_aspekte_der_praktischen_informatik",
+      "course_id": "spezielle_aspekte_der_praktischen_informatik",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "spezielle_aspekte_der_datenverwaltung",
+      "course_id": "spezielle_aspekte_der_datenverwaltung",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "spezielle_aspekte_der_softwareentwicklung",
+      "course_id": "spezielle_aspekte_der_softwareentwicklung",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "ubersetzerbau",
+      "course_id": "ubersetzerbau",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "verteilte_systeme",
+      "course_id": "verteilte_systeme",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "wissenschaftliches_arbeiten_praktische_informatik_a",
+      "course_id": "wissenschaftliches_arbeiten_praktische_informatik_a",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": true,
+      "is_software_project": false
+    },
+    {
+      "id": "wissenschaftliches_arbeiten_praktische_informatik_b",
+      "course_id": "wissenschaftliches_arbeiten_praktische_informatik_b",
+      "area": "practical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": true,
+      "is_software_project": false
+    },
+    {
+      "id": "xml_technologien",
+      "course_id": "xml_technologien",
+      "area": "practical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "aktuelle_forschungsthemen_der_theoretischen_informatik",
+      "course_id": "aktuelle_forschungsthemen_der_theoretischen_informatik",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "algorithmische_geometrie",
+      "course_id": "algorithmische_geometrie",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "ausgewahlte_themen_der_theoretischen_informatik",
+      "course_id": "ausgewahlte_themen_der_theoretischen_informatik",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "fortgeschrittene_themen_der_theoretischen_informatik",
+      "course_id": "fortgeschrittene_themen_der_theoretischen_informatik",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "hohere_algorithmik",
+      "course_id": "hoehere_algorithmik",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "kryptographie_und_sicherheit_in_verteilten_systemen",
+      "course_id": "kryptographie_und_sicherheit_in_verteilten_systemen",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "modelchecking",
+      "course_id": "modelchecking",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "semantik_von_programmiersprachen",
+      "course_id": "semantik_von_programmiersprachen",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "softwareprojekt_theoretische_informatik_a",
+      "course_id": "softwareprojekt_theoretische_informatik_a",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": true
+    },
+    {
+      "id": "softwareprojekt_theoretische_informatik_b",
+      "course_id": "softwareprojekt_theoretische_informatik_b",
+      "area": "theoretical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": true
+    },
+    {
+      "id": "spezielle_aspekte_der_theoretischen_informatik",
+      "course_id": "spezielle_aspekte_der_theoretischen_informatik",
+      "area": "theoretical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "wissenschaftliches_arbeiten_theoretische_informatik_a",
+      "course_id": "wissenschaftliches_arbeiten_theoretische_informatik_a",
+      "area": "theoretical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": true,
+      "is_software_project": false
+    },
+    {
+      "id": "wissenschaftliches_arbeiten_theoretische_informatik_b",
+      "course_id": "wissenschaftliches_arbeiten_theoretische_informatik_b",
+      "area": "theoretical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": true,
+      "is_software_project": false
+    },
+    {
+      "id": "aktuelle_forschungsthemen_der_technischen_informatik",
+      "course_id": "aktuelle_forschungsthemen_der_technischen_informatik",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "ausgewahlte_themen_der_technischen_informatik",
+      "course_id": "ausgewahlte_themen_der_technischen_informatik",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "betriebssysteme",
+      "course_id": "betriebssysteme",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "mikroprozessor_praktikum",
+      "course_id": "mikroprozessor_praktikum",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "mobilkommunikation",
+      "course_id": "mobilkommunikation",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "robotik",
+      "course_id": "robotik",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "softwareprojekt_technische_informatik_a",
+      "course_id": "softwareprojekt_technische_informatik_a",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": true
+    },
+    {
+      "id": "softwareprojekt_technische_informatik_b",
+      "course_id": "softwareprojekt_technische_informatik_b",
+      "area": "technical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": true
+    },
+    {
+      "id": "spezielle_aspekte_der_technischen_informatik",
+      "course_id": "spezielle_aspekte_der_technischen_informatik",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "telematik",
+      "course_id": "telematik",
+      "area": "technical",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    },
+    {
+      "id": "wissenschaftliches_arbeiten_technische_informatik_a",
+      "course_id": "wissenschaftliches_arbeiten_technische_informatik_a",
+      "area": "technical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": true,
+      "is_software_project": false
+    },
+    {
+      "id": "wissenschaftliches_arbeiten_technische_informatik_b",
+      "course_id": "wissenschaftliches_arbeiten_technische_informatik_b",
+      "area": "technical",
+      "is_ungraded": true,
+      "is_bachelor_module": false,
+      "is_scientific_work": true,
+      "is_software_project": false
+    },
+    {
+      "id": "masterarbeit",
+      "course_id": "masterarbeit",
+      "area": "thesis",
+      "is_ungraded": false,
+      "is_bachelor_module": false,
+      "is_scientific_work": false,
+      "is_software_project": false
+    }
+  ],
+  "offering_credits": [
+    {
+      "course_id": "cluster_computing",
+      "placements": [
+        {
+          "module_id": "aktuelle_forschungsthemen_der_technischen_informatik"
+        },
+        {
+          "module_id": "aktuelle_forschungsthemen_der_praktischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "bild_und_videocodierung",
+      "placements": [
+        {
+          "module_id": "aktuelle_forschungsthemen_der_technischen_informatik"
+        },
+        {
+          "module_id": "aktuelle_forschungsthemen_der_praktischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "cybersecurity_and_ai_iv_angriffe",
+      "placements": [
+        {
+          "module_id": "aktuelle_forschungsthemen_der_technischen_informatik"
+        },
+        {
+          "module_id": "aktuelle_forschungsthemen_der_praktischen_informatik"
+        },
+        {
+          "module_id": "aktuelle_forschungsthemen_der_theoretischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "mobilkommunikation",
+      "placements": [
+        {
+          "module_id": "mobilkommunikation"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_telematik",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_technische_informatik_a"
+        },
+        {
+          "module_id": "softwareprojekt_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_verteilte_systeme",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_technische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_internet_of_things_security_technische_informatik",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_technische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_telematik",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_technische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "bildverarbeitung",
+      "placements": [
+        {
+          "module_id": "bildverarbeitung"
+        }
+      ]
+    },
+    {
+      "course_id": "computergrafik",
+      "placements": [
+        {
+          "module_id": "computergrafik"
+        }
+      ]
+    },
+    {
+      "course_id": "angewandte_biometrie",
+      "placements": [
+        {
+          "module_id": "aktuelle_forschungsthemen_der_praktischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "human_centered_data_science",
+      "placements": [
+        {
+          "module_id": "spezielle_aspekte_der_praktischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "ethics_and_epistemology_of_ai",
+      "placements": [
+        {
+          "module_id": "spezielle_aspekte_der_praktischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "advanced_data_visualization_for_artificial_intelligence",
+      "placements": [
+        {
+          "module_id": "spezielle_aspekte_der_praktischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "empirische_methoden_im_software_engineering",
+      "placements": [
+        {
+          "module_id": "empirische_bewertung_in_der_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "markovketten",
+      "placements": [
+        {
+          "module_id": "spezielle_aspekte_der_praktischen_informatik"
+        },
+        {
+          "module_id": "ausgewahlte_themen_der_theoretischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_datenverwaltung",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_semantische_technologien",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_amos_projekt",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_secure_identity",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_open_source_source_development",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_reinforcement_learning_in_computer_chess_and_beyond_towards_absolute_sustainability",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        },
+        {
+          "module_id": "wissenschaftliches_arbeiten_theoretische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "projektseminar_probleme_bei_planungssystemen_der_nachsten_generation_mit_schwerpunkt_auf_navigationssystemen",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_beitrage_zum_software_engineering",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_agile_methoden_technische_praktiken",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_security_engineering",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_new_trends_in_informationsystems_ntis",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_continual_learning",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_how_to_startup",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_netzwerke_dynamische_modelle_und_ml_fur_datenintegration_in_den_lebenswissenschaften",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        },
+        {
+          "module_id": "wissenschaftliches_arbeiten_theoretische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "elektronische_krankenakten_und_ihre_nutzung_in_der_aktuellen_forschung",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_time_series_modelling",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "projektmanagement_in_agilen_umgebungen_teil_2_sose",
+      "placements": [
+        {
+          "module_id": "grundlagen_des_managements_von_it_projekten"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_aktuelle_themen_der_kryptographie",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_praktische_informatik_a"
+        },
+        {
+          "module_id": "wissenschaftliches_arbeiten_theoretische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "kryptoanalyse_asymmetrischer_verfahren",
+      "placements": [
+        {
+          "module_id": "aktuelle_forschungsthemen_der_theoretischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "advanced_topics_on_post_quantum_cryptography",
+      "placements": [
+        {
+          "module_id": "aktuelle_forschungsthemen_der_theoretischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "approximationsalgorithmen",
+      "placements": [
+        {
+          "module_id": "ausgewahlte_themen_der_theoretischen_informatik"
+        }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_anwendungen_von_algorithmen",
+      "placements": [
+        {
+          "module_id": "softwareprojekt_theoretische_informatik_a"
+        }
+      ]
+    },
+    {
+      "course_id": "seminar_uber_algorithmen",
+      "placements": [
+        {
+          "module_id": "wissenschaftliches_arbeiten_theoretische_informatik_a"
+        }
+      ]
+    }
+  ]
+}

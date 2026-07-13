@@ -15,7 +15,7 @@ The first version intentionally supports only PDFs with machine-readable text. O
 ## Non-Goals
 
 - Do not add a public ingestion endpoint.
-- Do not ingest uploaded PDFs into the global Qdrant knowledge base.
+- Do not persist uploaded PDFs outside their session processing flow.
 - Do not modify files under `ressources/`.
 - Do not use OCR in the first implementation.
 - Do not trust the LLM for final LP validation.
@@ -72,7 +72,7 @@ Response:
 }
 ```
 
-This is not a global ingestion endpoint. It does not update Qdrant or generated RAG files.
+This is not a global ingestion endpoint. It does not update the canonical course catalogue.
 
 The existing message endpoint can then reference session attachments implicitly:
 
@@ -302,7 +302,7 @@ Backend tests should cover:
 - text extraction rejects an empty/scanned-style PDF
 - session attachment context is available to message processing
 - plan-check messages can use attachment context
-- no Qdrant ingestion is triggered
+- no catalogue mutation is triggered
 
 Frontend tests or manual checks should cover:
 

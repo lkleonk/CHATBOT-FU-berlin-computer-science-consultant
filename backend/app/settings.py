@@ -42,7 +42,7 @@ class Settings(BaseModel):
 
     class Quota(BaseModel):
         DAILY_LLM_INVOCATIONS: int = int(os.getenv("DAILY_LLM_INVOCATIONS", "200"))
-        DAILY_USER_ACTIONS: int = int(os.getenv("DAILY_USER_ACTIONS", "100"))
+        DAILY_USER_ACTIONS: int = int(os.getenv("DAILY_USER_ACTIONS", "30"))
 
     class Sessions(BaseModel):
         INACTIVITY_TTL_SECONDS: int = int(os.getenv("SESSION_INACTIVITY_TTL_SECONDS", "172800"))
@@ -82,19 +82,6 @@ class Settings(BaseModel):
         MAX_TOKENS: int = int(os.getenv("LOCAL_OLLAMA_MAX_TOKENS", "1200"))
         TIMEOUT: float = float(os.getenv("LOCAL_OLLAMA_TIMEOUT", "120"))
 
-    class Qdrant(BaseModel):
-        HOST: str = os.getenv("QDRANT_HOST", "qdrant")
-        PORT: int = int(os.getenv("QDRANT_PORT", "6333"))
-        COLLECTION: str = os.getenv("QDRANT_COLLECTION", "fu_cs_consultant_knowledge")
-        EMBEDDING_MODEL: str = os.getenv(
-            "QDRANT_EMBEDDING_MODEL",
-            "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        )
-        VECTOR_SIZE: int = int(os.getenv("QDRANT_VECTOR_SIZE", "384"))
-
-    class Rag(BaseModel):
-        RESOURCES_DIR: Path = Path(os.getenv("RESOURCES_DIR", str(PROJECT_ROOT / "ressources")))
-
     class WizardFlow(BaseModel):
         ENABLED: bool = os.getenv("WIZARDFLOW_ENABLED", "true").strip().lower() in {
             "1",
@@ -114,8 +101,6 @@ class Settings(BaseModel):
     ACADEMICCLOUD: AcademicCloud = AcademicCloud()
     FU_OLLAMA: FuOllama = FuOllama()
     LOCAL_OLLAMA: LocalOllama = LocalOllama()
-    QDRANT: Qdrant = Qdrant()
-    RAG: Rag = Rag()
     WIZARDFLOW: WizardFlow = WizardFlow()
 
     def provider_name(self) -> str:

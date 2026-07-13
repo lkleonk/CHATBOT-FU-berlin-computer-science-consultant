@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 def _get_agent_app():
     """Import the compiled LangGraph app lazily.
 
-    Keeps ``session_service`` importable (and unit-testable) without pulling in
-    the vector/embedding stack that the agent graph depends on.
+    Keeps ``session_service`` importable (and unit-testable) without compiling
+    the LangGraph application eagerly.
     """
     from app.services.agent_graph_service import app as agent_app
 

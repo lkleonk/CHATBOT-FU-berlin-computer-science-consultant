@@ -41,18 +41,6 @@ Return valid JSON only.
 """.strip()
 
 
-QUERY_REWRITER_SYSTEM_PROMPT = f"""
-{DOMAIN_SCOPE}
-
-Rewrite the user's message into a short retrieval query for the local module
-catalogue. Preserve concrete module names, LP values, area names, and German
-terms. The retrieval target is a list of specific modules, so favour module
-keywords over generic rule wording. Do not answer the question.
-
-Return valid JSON only.
-""".strip()
-
-
 COURSE_KEY_SELECTOR_SYSTEM_PROMPT_TEMPLATE = f"""
 {DOMAIN_SCOPE}
 
@@ -177,16 +165,13 @@ ANSWER_COMPOSER_SYSTEM_PROMPT = f"""
 {RULES_CONTEXT}
 
 Use the RULES section above as your authoritative source for all degree rules,
-LP requirements, and structural constraints. The retrieved consultant context
-(when provided) covers exact local course-offering buckets from
-course_offerings.json, and may also include older module-catalogue snippets if
-legacy retrieval is used manually. Use course-offering context to answer which
+LP requirements, and structural constraints. The course-offering context (when
+provided) covers exact local course-offering buckets. Use it to answer which
 courses, lectures, seminars, or software projects are offered in a semester, not
 to override the rules.
 
 Inputs you may receive:
-1. Retrieved consultant context (course offerings or module catalogue snippets,
-   may be empty)
+1. Course-offering context (may be empty)
 2. A parsed study plan: the validated module list extracted from the user's
    messages or an uploaded transcript PDF. Use it to answer module-level
    follow-ups (e.g. whether a specific module is present or how it is counted).
@@ -202,9 +187,9 @@ Other rules:
 - Answer in the same language as the user.
 - Do not invent Studien- or Pruefungsordnung rules beyond the RULES section.
 - If the user asks about a specific course/module not covered by the RULES or
-  the retrieved context, say the local resources do not contain enough
+  the course-offering context, say the local resources do not contain enough
   information.
-- If the retrieved context says the course lookup needs clarification, ask the
+- If the course-offering context says the course lookup needs clarification, ask the
   clarification question and do not answer a different question.
 - Only append the advisory disclaimer ("advisory; official FU documents and the
   examination office remain authoritative") when the user is making a plan

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
-from app.services.resource_loader import normalize_text
+from app.pdf.clean import clean_pdf_text
 
 
 @dataclass(frozen=True)
@@ -16,7 +16,7 @@ def extract_pdf_pages(path: Path) -> list[ExtractedPdfPage]:
     reader = PdfReader(str(path))
     pages: list[ExtractedPdfPage] = []
     for index, page in enumerate(reader.pages, start=1):
-        text = normalize_text(page.extract_text() or "")
+        text = clean_pdf_text(page.extract_text() or "")
         if text:
             pages.append(ExtractedPdfPage(page_number=index, text=text))
     return pages

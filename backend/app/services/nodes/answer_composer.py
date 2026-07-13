@@ -44,7 +44,7 @@ async def answer_composer_node(state: ConsultantState) -> ConsultantState:
     history = format_recent_messages(
         recent_messages(state, agent_flow_config.answer_composer.history_turns)
     )
-    context = state.get("retrieved_context") or "(no retrieved context)"
+    context = state.get("course_context") or "(no course-offering context)"
     rule_result = state.get("rule_check_result")
     parsed_plan = state.get("parsed_study_plan")
 
@@ -55,7 +55,7 @@ User message:
 Recent conversation:
 {history}
 
-Retrieved consultant context:
+Course-offering context:
 {context}
 
 Course lookup keys:

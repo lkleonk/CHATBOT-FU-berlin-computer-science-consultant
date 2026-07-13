@@ -2,7 +2,7 @@ from app.domain.degrees.definition import DegreeDefinition, DegreePrompts
 from app.domain.degrees.msc_informatik import prompts
 from app.domain.degrees.msc_informatik.degree_rules import validate_study_plan
 from app.domain.degrees.msc_informatik.program_rules import get_program_rules
-from app.domain.module_catalog import enrich_study_plan
+from app.domain.module_catalog import course_modules, enrich_study_plan
 
 
 DEGREE = DegreeDefinition(
@@ -24,5 +24,5 @@ DEGREE = DegreeDefinition(
     study_plan_schema=prompts.STUDY_PLAN_SCHEMA,
     enrich_study_plan=enrich_study_plan,
     course_areas=("technical", "practical", "theoretical", "application"),
-    course_modules=None,
+    course_modules=course_modules(),
 )

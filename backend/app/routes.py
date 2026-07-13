@@ -149,10 +149,7 @@ def _ensure_known_degree(degree_id: str) -> None:
 
 @health_router.get("/health", response_model=HealthResponse)
 async def health_check():
-    services: dict[str, str] = {
-        "llm_provider": settings.LLM.PROVIDER,
-        "qdrant": "disabled (legacy/manual RAG only)",
-    }
+    services: dict[str, str] = {"llm_provider": settings.LLM.PROVIDER}
     status = "healthy"
 
     if await model_service.check_connection():

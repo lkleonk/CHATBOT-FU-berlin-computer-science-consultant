@@ -55,40 +55,7 @@ services:
       backend:
         condition: service_started
 
-  qdrant:
-    profiles: ["legacy-rag"]
-    image: qdrant/qdrant:latest
-    container_name: fu_cs_consultant_qdrant
-    restart: unless-stopped
-    ports:
-      - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${QDRANT_HTTP_PORT:-6335}:6333"
-      - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${QDRANT_GRPC_PORT:-6336}:6334"
-    volumes:
-      - qdrant_data:/qdrant/storage
-
-  legacy-rag-ingest:
-    profiles: ["legacy-rag"]
-    build:
-      context: ./backend
-      target: legacy-rag
-    env_file:
-      - path: .env
-        required: false
-      - path: .env.local
-        required: false
-    environment:
-      QDRANT_HOST: ${QDRANT_HOST:-qdrant}
-      QDRANT_PORT: ${QDRANT_PORT:-6333}
-    volumes:
-      - ./ressources:/app/ressources:ro
-    depends_on:
-      qdrant:
-        condition: service_started
-    command: ["python", "scripts/ingest_resources.py"]
-
 volumes:
-  qdrant_data:
-    driver: local
   caddy_data:
     driver: local
   caddy_config:

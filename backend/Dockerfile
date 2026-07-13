@@ -22,7 +22,7 @@ RUN set -eux; \
 
 WORKDIR /app
 
-COPY requirements.txt requirements-legacy-rag.txt ./
+COPY requirements.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux; \
     echo "backend build: installing uv package manager"; \
@@ -37,21 +37,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY app ./app
 COPY scripts ./scripts
-COPY knowledge_base ./knowledge_base
 
 ENV PYTHONPATH=/app
 
 CMD ["python", "-m", "app.main"]
-
-# Built only by the optional legacy-rag Compose service. The normal backend
-# target above intentionally does not contain Torch, SentenceTransformer, or
-# Qdrant dependencies.
-FROM base AS legacy-rag
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    set -eux; \
-    echo "legacy-rag build: installing optional ingestion requirements"; \
-    uv pip install --system -r requirements-legacy-rag.txt; \
-    echo "legacy-rag build: optional ingestion dependencies installed"
 
 FROM base AS runtime

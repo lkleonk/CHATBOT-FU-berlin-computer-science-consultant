@@ -21,7 +21,7 @@ Study plan check (visualizes the proposed study plan, then validates it against 
 ## Scope
 
 - No Postgres in phase 1.
-- Manual RAG ingestion only; active course-offering lookup is exact JSON lookup, not Qdrant.
+- Course-offering lookup uses the local canonical course catalogue and exact semester data.
 - LLM provider can be AcademicCloud or FU/local Ollama.
 - Answers are advisory. Official FU Berlin documents and the examination office remain authoritative for real study decisions.
 
@@ -40,7 +40,6 @@ fu_berlin_cs_consultant/
 │   │   └── services/            # LLM providers, vector store, agent graph
 │   │       ├── nodes/           # Agent graph nodes (course lookup, rule checker, ...)
 │   │       └── states/          # Agent graph state
-│   ├── knowledge_base/generated/ # Generated rules & module catalog
 │   ├── scripts/                 # PDF extraction & resource ingestion
 │   ├── tests/                   # Pytest suite
 │   └── Dockerfile
@@ -64,16 +63,12 @@ fu_berlin_cs_consultant/
 ```text
 Static frontend preview -> http://localhost:3000/consultant
 FastAPI backend          -> http://localhost:8000
-Qdrant           -> optional legacy-rag profile, localhost:6335 on host when enabled
 ```
 
 These are local defaults from `.env.example`. The host bind address and all
 published ports are configurable without changing the Compose file.
 
 The normal backend installation uses `backend/requirements.txt` and does not
-install Torch, SentenceTransformer, or Qdrant. Those packages are isolated in
-`backend/requirements-legacy-rag.txt` and are installed only by the optional
-manual-ingestion environment or Docker target.
 
 ## Environment
 
@@ -199,10 +194,10 @@ available. The chat download is produced locally as Markdown and never sent to
 the backend.
 
 Semester coverage is not configured manually. The course selector derives
-available semesters from the session degree's projection of
-`backend/app/domain/data/course_offerings.json`. That file is a flat list of
-courses, each tagged with the degree programs it counts toward; it is validated
-at backend startup (unknown degree ids, areas, or module ids fail loudly).
+available semesters from the session degree's projection of the canonical course
+catalogue and `backend/app/domain/data/course_offerings/<semester>.json` files.
+The backend validates their cross-file course IDs, degree module mappings, and
+area assignments at startup.
 
 ## Local Development With Docker Compose
 
@@ -274,7 +269,7 @@ Prerequisites:
 - A Droplet with Docker Engine and the Docker Compose plugin installed.
 - A domain whose DNS record points to the Droplet.
 - A firewall allowing SSH, HTTP, HTTPS, and optionally HTTPS/UDP for HTTP/3.
-  Do not expose application or Qdrant ports publicly.
+  Do not expose application ports publicly.
 
 Build the static export on the local machine with the production public API
 origin. `frontend/out/` is a tracked deployment artifact, so include its
@@ -418,40 +413,6 @@ wizardflow json traces/<trace-file>.jsonl
 Trace files contain unredacted system prompts, chat messages, and extracted
 transcript text. Treat `backend/traces/` as sensitive local data; it is excluded
 from Git.
-
-## Manual Ingestion
-
-Ingestion rebuilds the Qdrant collection from local files. There is intentionally no public ingest endpoint.
-Qdrant is currently not wired into the active study-question graph; course
-offerings are read directly from `backend/app/domain/data/course_offerings.json`.
-
-Qdrant is disabled during normal `docker compose up`. Start it only when you
-want to run the legacy/manual ingestion workflow:
-
-```bash
-docker compose --profile legacy-rag up -d qdrant
-```
-
-```bash
-docker compose --profile legacy-rag run --rm legacy-rag-ingest
-```
-
-Only original files under `ressources/`:
-
-```bash
-docker compose --profile legacy-rag run --rm legacy-rag-ingest \
-  python scripts/ingest_resources.py --skip-generated
-```
-
-The optional ingestion image installs `backend/requirements-legacy-rag.txt`,
-including the CPU-only Torch build, SentenceTransformer, and Qdrant client. The
-normal backend image remains runtime-only.
-
-The default ingestion includes:
-
-- `ressources/*.txt`
-- `ressources/*.pdf`
-- `backend/knowledge_base/generated/*.md`
 
 ## API
 

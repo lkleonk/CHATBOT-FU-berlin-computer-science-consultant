@@ -1,19 +1,15 @@
-import json
 import re
 import unicodedata
 from functools import lru_cache
-from pathlib import Path
 
 from pydantic import BaseModel
 
+from app.domain.catalog_data import course_lp, course_name, module_entries_by_id, module_names
 from app.domain.study_plan import PlannedModule, StudyPlan, normalize_area
-from app.settings import BACKEND_ROOT
-
-
-CATALOG_PATH = BACKEND_ROOT / "knowledge_base" / "generated" / "module_catalog.json"
 
 
 class ModuleRecord(BaseModel):
+    id: str
     name: str
     area: str
     lp: int
@@ -34,11 +30,27 @@ def normalize_module_name(name: str) -> str:
 
 @lru_cache(maxsize=1)
 def load_catalog() -> dict[str, ModuleRecord]:
-    if not CATALOG_PATH.exists():
-        return {}
-    data = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
-    records = [ModuleRecord.model_validate(item) for item in data]
+    records = [
+        ModuleRecord.model_validate(
+            {
+                "id": module_id,
+                "name": course_name(str(entry["course_id"])),
+                "lp": course_lp(str(entry["course_id"])),
+                "is_ungraded": False,
+                "is_bachelor_module": False,
+                "is_scientific_work": False,
+                "is_software_project": False,
+                **entry,
+            }
+        )
+        for module_id, entry in module_entries_by_id("msc_informatik").items()
+    ]
     return {normalize_module_name(record.name): record for record in records}
+
+
+def course_modules() -> dict[str, str]:
+    """Canonical M.Sc. Informatik module IDs for course-offering references."""
+    return module_names("msc_informatik")
 
 
 def find_module(name: str) -> ModuleRecord | None:

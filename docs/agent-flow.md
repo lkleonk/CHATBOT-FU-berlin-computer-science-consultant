@@ -41,12 +41,11 @@ the degree.
 
 Degree rules reach the system prompt through each degree's
 `prompts.RULES_CONTEXT`, rendered from that degree's `program_rules.py`; the
-`plan_check` path skips retrieval entirely. Pure degree-rule questions on the
+`plan_check` path skips course lookup entirely. Pure degree-rule questions on the
 `degree_question` path also skip course lookup and go straight to
 `AnswerComposer`. Course-offering questions on the `course_offering_question`
 path use exact lookup buckets from the session degree's projection of
-`backend/app/domain/data/course_offerings.json`. The legacy Qdrant retrieval
-and query-rewriter nodes have been removed from the runtime.
+`backend/app/domain/data/course_offerings/<semester>.json`.
 
 ## State Keys
 
@@ -61,7 +60,7 @@ and query-rewriter nodes have been removed from the runtime.
 | `course_lookup_needs_clarification` | `course_key_selector` | `course_lookup`, `answer_composer` |
 | `course_lookup_clarification_question` | `course_key_selector` | `course_lookup`, `answer_composer` |
 | `course_lookup_message` | `course_key_selector` | `course_lookup`, `answer_composer` |
-| `retrieved_context` | `course_lookup` | `answer_composer` |
+| `course_context` | `course_lookup` | `answer_composer` |
 | `citations` | `course_lookup` | API response, `answer_composer` context |
 | `parsed_study_plan` | `study_plan_parser` | `rule_checker` |
 | `rule_check_result` | `rule_checker` | `answer_composer`, API response |
@@ -125,7 +124,7 @@ Behavior:
 - Receives a configurable recent conversation window
   (`AGENT_COURSE_SELECTOR_HISTORY_TURNS`, default `2`).
 - The prompt includes a semester coverage note derived from the degree's
-  projection of `course_offerings.json`, for example that only `sose26` is
+  projection of the semester offering files, for example that only `sose26` is
   currently present.
 
 ### CourseLookup
@@ -139,15 +138,14 @@ backend/app/services/nodes/course_lookup.py
 Purpose:
 
 - Validate selector keys against the session degree's projected bucket tree
-  from `course_offerings.json`.
-- Return the whole selected buckets as deterministic `retrieved_context`.
+  from the canonical course catalogue and semester offering files.
+- Return the whole selected buckets as deterministic `course_context`.
 - Add bucket-level citations and course URL citations where URLs exist.
-- Preserve Qdrant-free behavior for normal study questions.
 
 Output:
 
 ```text
-retrieved_context
+course_context
 citations
 ```
 
@@ -155,7 +153,7 @@ Course lookup runs only on the `course_offering_question` path. Degree rules
 are rendered from each degree's `program_rules.py` into that degree's
 `RULES_CONTEXT`; pure degree questions go directly from `ScopeClassifier` to
 `AnswerComposer`. Plan checks rely on the deterministic Python validator plus
-rules in the system prompt, so they do not hit Qdrant.
+rules in the system prompt, so they do not use course lookup.
 
 ### StudyPlanParser
 
@@ -231,13 +229,13 @@ Inputs:
 - Latest user message
 - Configurable recent conversation window
   (`AGENT_ANSWER_COMPOSER_HISTORY_TURNS`, default `4`)
-- Retrieved context from exact course-offering lookup, when applicable
+- Course-offering context from exact local lookup, when applicable
 - Optional deterministic rule-check result
 
 Rules:
 
 - Answer in the same language as the user.
-- Use only retrieved context and deterministic validation results.
+- Use only course-offering context and deterministic validation results.
 - Do not invent Studienordnung or Pruefungsordnung rules.
 - State uncertainty when the local resources do not answer the question.
 - Keep the answer advisory.
@@ -308,8 +306,7 @@ LLM-dependent nodes use local fallbacks where possible:
 Course lookup failures return an empty context, empty citations, or a concise
 clarification/missing-data note.
 
-This keeps the API responsive even when the LLM fails. Qdrant availability no
-longer affects the active study-question flow.
+This keeps the API responsive even when the LLM fails.
 
 ## HTML Overview
 

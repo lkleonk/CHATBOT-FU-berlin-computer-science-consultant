@@ -31,7 +31,7 @@ async def course_lookup_node(state: ConsultantState) -> ConsultantState:
             "Which semester should I use for the course offering lookup?"
         )
         result: ConsultantState = {
-            "retrieved_context": f"Course lookup needs clarification: {question}",
+            "course_context": f"Course lookup needs clarification: {question}",
             "citations": [],
         }
         log_node_output(wizardflow_message_id, "course_lookup", result)
@@ -45,7 +45,7 @@ async def course_lookup_node(state: ConsultantState) -> ConsultantState:
     if not keys:
         context = format_course_lookup_context([], invalid_keys=invalid_keys, notes=notes)
         result = {
-            "retrieved_context": context,
+            "course_context": context,
             "citations": [],
         }
         log_node_output(wizardflow_message_id, "course_lookup", result)
@@ -61,7 +61,7 @@ async def course_lookup_node(state: ConsultantState) -> ConsultantState:
 
     logger.info("Course lookup returned %d bucket(s)", len(buckets))
     result = {
-        "retrieved_context": context,
+        "course_context": context,
         "citations": citations,
     }
     log_node_output(wizardflow_message_id, "course_lookup", result)

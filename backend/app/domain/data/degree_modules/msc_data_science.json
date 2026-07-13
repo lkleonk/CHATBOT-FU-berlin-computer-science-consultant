@@ -1,0 +1,277 @@
+{
+  "modules": [
+    {
+      "id": "introduction_to_profile_areas",
+      "course_id": "introduction_to_profile_areas"
+    },
+    {
+      "id": "statistics_for_data_science",
+      "course_id": "statistics_for_data_science"
+    },
+    {
+      "id": "machine_learning_for_data_science",
+      "course_id": "machine_learning_for_data_science"
+    },
+    {
+      "id": "programming_for_data_science",
+      "course_id": "programming_for_data_science"
+    },
+    {
+      "id": "data_science_in_life_sciences",
+      "course_id": "data_science_in_life_sciences"
+    },
+    {
+      "id": "forschungspraxis",
+      "course_id": "forschungspraxis"
+    },
+    {
+      "id": "ethical_foundations_of_data_science",
+      "course_id": "ethical_foundations_of_data_science"
+    },
+    {
+      "id": "softwareprojekt_data_science_a",
+      "course_id": "softwareprojekt_data_science_a"
+    },
+    {
+      "id": "spezielle_aspekte_ds_life_sciences",
+      "course_id": "spezielle_aspekte_ds_life_sciences"
+    },
+    {
+      "id": "aktuelle_forschungsthemen_ds_life_sciences",
+      "course_id": "aktuelle_forschungsthemen_ds_life_sciences"
+    },
+    {
+      "id": "masterseminar_ds_life_sciences",
+      "course_id": "masterseminar_ds_life_sciences"
+    },
+    {
+      "id": "ausgewaehlte_themen_ds_life_sciences",
+      "course_id": "ausgewaehlte_themen_ds_life_sciences"
+    },
+    {
+      "id": "machine_learning_in_bioinformatics",
+      "course_id": "machine_learning_in_bioinformatics"
+    },
+    {
+      "id": "big_data_analysis_in_bioinformatics",
+      "course_id": "big_data_analysis_in_bioinformatics"
+    },
+    {
+      "id": "applied_machine_learning_in_bioinformatics",
+      "course_id": "applied_machine_learning_in_bioinformatics"
+    },
+    {
+      "id": "spezielle_aspekte_ds_technologies",
+      "course_id": "spezielle_aspekte_ds_technologies"
+    },
+    {
+      "id": "aktuelle_forschungsthemen_ds_technologies",
+      "course_id": "aktuelle_forschungsthemen_ds_technologies"
+    },
+    {
+      "id": "ausgewaehlte_themen_ds_technologies_a",
+      "course_id": "ausgewaehlte_themen_ds_technologies_a"
+    },
+    {
+      "id": "ausgewaehlte_themen_ds_technologies_b",
+      "course_id": "ausgewaehlte_themen_ds_technologies_b"
+    },
+    {
+      "id": "masterseminar_ds_technologies",
+      "course_id": "masterseminar_ds_technologies"
+    },
+    {
+      "id": "softwareprojekt_data_science_b",
+      "course_id": "softwareprojekt_data_science_b"
+    },
+    {
+      "id": "datenbanksysteme_data_science",
+      "course_id": "datenbanksysteme_data_science"
+    },
+    {
+      "id": "verteilte_systeme",
+      "course_id": "verteilte_systeme"
+    },
+    {
+      "id": "mobilkommunikation",
+      "course_id": "mobilkommunikation"
+    },
+    {
+      "id": "telematik",
+      "course_id": "telematik"
+    },
+    {
+      "id": "hoehere_algorithmik",
+      "course_id": "hoehere_algorithmik"
+    },
+    {
+      "id": "rechnersicherheit",
+      "course_id": "rechnersicherheit"
+    },
+    {
+      "id": "mustererkennung",
+      "course_id": "mustererkennung"
+    },
+    {
+      "id": "netzbasierte_informationssysteme",
+      "course_id": "netzbasierte_informationssysteme"
+    },
+    {
+      "id": "kuenstliche_intelligenz",
+      "course_id": "kuenstliche_intelligenz"
+    },
+    {
+      "id": "spezielle_aspekte_der_datenverwaltung",
+      "course_id": "spezielle_aspekte_der_datenverwaltung"
+    },
+    {
+      "id": "interdisziplinaere_zugaenge_data_science_a",
+      "course_id": "interdisziplinaere_zugaenge_data_science_a"
+    },
+    {
+      "id": "interdisziplinaere_zugaenge_data_science_b",
+      "course_id": "interdisziplinaere_zugaenge_data_science_b"
+    },
+    {
+      "id": "masterarbeit_data_science",
+      "course_id": "masterarbeit_data_science"
+    }
+  ],
+  "groups": {
+    "grundlagen": [
+      "introduction_to_profile_areas",
+      "statistics_for_data_science",
+      "machine_learning_for_data_science",
+      "programming_for_data_science"
+    ],
+    "life_sciences_mandatory": [
+      "data_science_in_life_sciences",
+      "forschungspraxis",
+      "ethical_foundations_of_data_science"
+    ],
+    "technologies_mandatory": [
+      "softwareprojekt_data_science_a"
+    ],
+    "life_sciences_elective": [
+      "spezielle_aspekte_ds_life_sciences",
+      "aktuelle_forschungsthemen_ds_life_sciences",
+      "masterseminar_ds_life_sciences",
+      "ausgewaehlte_themen_ds_life_sciences",
+      "machine_learning_in_bioinformatics",
+      "big_data_analysis_in_bioinformatics",
+      "applied_machine_learning_in_bioinformatics"
+    ],
+    "technologies_elective": [
+      "spezielle_aspekte_ds_technologies",
+      "aktuelle_forschungsthemen_ds_technologies",
+      "ausgewaehlte_themen_ds_technologies_a",
+      "ausgewaehlte_themen_ds_technologies_b",
+      "masterseminar_ds_technologies",
+      "softwareprojekt_data_science_b",
+      "datenbanksysteme_data_science",
+      "verteilte_systeme",
+      "mobilkommunikation",
+      "telematik",
+      "hoehere_algorithmik",
+      "rechnersicherheit",
+      "mustererkennung",
+      "netzbasierte_informationssysteme",
+      "kuenstliche_intelligenz",
+      "spezielle_aspekte_der_datenverwaltung"
+    ],
+    "interdisciplinary": [
+      "interdisziplinaere_zugaenge_data_science_a",
+      "interdisziplinaere_zugaenge_data_science_b"
+    ]
+  },
+  "profiles": {
+    "life_sciences": {
+      "id": "life_sciences",
+      "display_name": "Data Science in Life Sciences",
+      "mandatory_ids": [
+        "data_science_in_life_sciences",
+        "forschungspraxis",
+        "ethical_foundations_of_data_science"
+      ],
+      "marker_ids": [
+        "data_science_in_life_sciences",
+        "forschungspraxis"
+      ],
+      "own_elective_ids": [
+        "spezielle_aspekte_ds_life_sciences",
+        "aktuelle_forschungsthemen_ds_life_sciences",
+        "masterseminar_ds_life_sciences",
+        "ausgewaehlte_themen_ds_life_sciences",
+        "machine_learning_in_bioinformatics",
+        "big_data_analysis_in_bioinformatics",
+        "applied_machine_learning_in_bioinformatics"
+      ],
+      "other_elective_ids": [
+        "spezielle_aspekte_ds_technologies",
+        "aktuelle_forschungsthemen_ds_technologies",
+        "ausgewaehlte_themen_ds_technologies_a",
+        "ausgewaehlte_themen_ds_technologies_b",
+        "masterseminar_ds_technologies",
+        "softwareprojekt_data_science_b",
+        "datenbanksysteme_data_science",
+        "verteilte_systeme",
+        "mobilkommunikation",
+        "telematik",
+        "hoehere_algorithmik",
+        "rechnersicherheit",
+        "mustererkennung",
+        "netzbasierte_informationssysteme",
+        "kuenstliche_intelligenz",
+        "spezielle_aspekte_der_datenverwaltung",
+        "interdisziplinaere_zugaenge_data_science_a",
+        "interdisziplinaere_zugaenge_data_science_b"
+      ],
+      "own_elective_lp": 15,
+      "other_elective_lp": 15
+    },
+    "technologies": {
+      "id": "technologies",
+      "display_name": "Data Science Technologies",
+      "mandatory_ids": [
+        "softwareprojekt_data_science_a",
+        "ethical_foundations_of_data_science"
+      ],
+      "marker_ids": [
+        "softwareprojekt_data_science_a"
+      ],
+      "own_elective_ids": [
+        "spezielle_aspekte_ds_technologies",
+        "aktuelle_forschungsthemen_ds_technologies",
+        "ausgewaehlte_themen_ds_technologies_a",
+        "ausgewaehlte_themen_ds_technologies_b",
+        "masterseminar_ds_technologies",
+        "softwareprojekt_data_science_b",
+        "datenbanksysteme_data_science",
+        "verteilte_systeme",
+        "mobilkommunikation",
+        "telematik",
+        "hoehere_algorithmik",
+        "rechnersicherheit",
+        "mustererkennung",
+        "netzbasierte_informationssysteme",
+        "kuenstliche_intelligenz",
+        "spezielle_aspekte_der_datenverwaltung"
+      ],
+      "other_elective_ids": [
+        "spezielle_aspekte_ds_life_sciences",
+        "aktuelle_forschungsthemen_ds_life_sciences",
+        "masterseminar_ds_life_sciences",
+        "ausgewaehlte_themen_ds_life_sciences",
+        "machine_learning_in_bioinformatics",
+        "big_data_analysis_in_bioinformatics",
+        "applied_machine_learning_in_bioinformatics",
+        "interdisziplinaere_zugaenge_data_science_a",
+        "interdisziplinaere_zugaenge_data_science_b"
+      ],
+      "own_elective_lp": 30,
+      "other_elective_lp": 15
+    }
+  },
+  "thesis_module_id": "masterarbeit_data_science",
+  "offering_credits": []
+}

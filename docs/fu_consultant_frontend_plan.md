@@ -167,7 +167,7 @@ POST /api/sessions/{session_id}/message
   - [ ] assistant replies
   - [ ] loading state
   - [ ] errors
-  - [ ] citations returned by RAG
+  - [ ] citations returned by exact course lookup
   - [ ] rule-check result summary when present
 - [ ] Keep the input pinned at the bottom of the Chat tab.
 - [ ] Do not include medical widgets from the parent app.
@@ -193,8 +193,7 @@ GET /api/program-rules
   - [ ] related issue codes, likely in a developer/details area
 - [ ] Include the Softwareprojekt Wahlbereich caveat.
 - [ ] Include the Wissenschaftliches Arbeiten Wahlbereich caveat.
-- [ ] Do not parse `backend/knowledge_base/generated/degree_rules.md` in the frontend.
-- [ ] Do not query Qdrant just to render rules.
+- [ ] Render degree rules only through `GET /api/program-rules`.
 - [ ] Do not duplicate backend validation logic in TypeScript.
 
 ## Phase 7: Study Plan Tab, Temporary Version

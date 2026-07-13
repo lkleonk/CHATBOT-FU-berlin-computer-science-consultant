@@ -18,7 +18,7 @@ function citationTitle(citation: Citation) {
 function isCourseOfferingCitation(citation: Citation) {
   const heading = citation.section_heading ?? "";
   const isLookupBucket = /^[^/]+\/[^/]+\/[^/]+$/.test(heading);
-  return citation.source.includes("course_offerings.json") || isLookupBucket;
+  return citation.source.includes("course_offerings/") || isLookupBucket;
 }
 
 export function CitationList({ citations }: CitationListProps) {

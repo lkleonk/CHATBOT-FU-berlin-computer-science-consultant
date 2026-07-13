@@ -36,6 +36,15 @@ export function ChatExportDialog({ open, messages, onClose, onDownload }: ChatEx
             variant="contained"
             startIcon={<DescriptionOutlinedIcon />}
             onClick={() => onDownload("markdown")}
+            sx={{
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? theme.palette.primary.dark : theme.palette.primary.main,
+              color: (theme) =>
+                theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.primary.contrastText,
+              "&:hover": {
+                bgcolor: (theme) => theme.palette.primary.dark,
+              },
+            }}
           >
             Markdown (.md)
           </Button>
@@ -44,6 +53,16 @@ export function ChatExportDialog({ open, messages, onClose, onDownload }: ChatEx
             variant="outlined"
             startIcon={<TextSnippetOutlinedIcon />}
             onClick={() => onDownload("text")}
+            sx={{
+              color: (theme) =>
+                theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.primary.main,
+              borderColor: "primary.dark",
+              "&:hover": {
+                borderColor: "primary.dark",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark" ? theme.palette.primary.dark : theme.palette.primary.light,
+              },
+            }}
           >
             Plain text (.txt)
           </Button>

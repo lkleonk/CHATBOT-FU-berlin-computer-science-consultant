@@ -20,7 +20,7 @@ wizardflow_message_id
 message_type
 course_lookup_keys
 course_lookup_needs_clarification
-retrieved_context
+course_context
 citations
 parsed_study_plan
 rule_check_result

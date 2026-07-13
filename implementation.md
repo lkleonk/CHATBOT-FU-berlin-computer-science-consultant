@@ -28,12 +28,10 @@ Phase 1 goal: backend-only LLM consultant for FU Berlin Informatik Master questi
 
 [x] Add `fu_berlin_cs_consultant/docker-compose.yml`.
 [x] Add backend service.
-[x] Add optional Qdrant service behind the `legacy-rag` Compose profile.
 [x] Do not add frontend service.
 [x] Do not add Postgres initially; use in-memory LangGraph/session state for phase 1.
 [x] Add `backend/Dockerfile`.
 [x] Add `backend/requirements.txt`.
-[x] Keep Torch, SentenceTransformer, and Qdrant in optional `backend/requirements-legacy-rag.txt` only.
 [x] Add `.env.example`.
 
 ## LLM Providers
@@ -46,41 +44,7 @@ Phase 1 goal: backend-only LLM consultant for FU Berlin Informatik Master questi
 [x] Support `ACADEMICCLOUD_BASE_URL`, `ACADEMICCLOUD_API_KEY`, `ACADEMICCLOUD_MODEL`.
 [x] Support `LOCAL_OLLAMA_HOST`, `LOCAL_OLLAMA_MODEL`.
 [x] Support `FU_OLLAMA_MODEL` and auto SSH tunnel via `FU_SSH_HOST`, `FU_SSH_PORT`, `FU_SSH_USER`, `FU_SSH_PASSWORD`, `FU_REMOTE_BIND_ADDRESS`, `FU_REMOTE_BIND_PORT`.
-[x] Add `/health` checks for the active LLM provider. Qdrant is reported as disabled legacy/manual RAG.
-
-## RAG Ingestion, Manual Only
-
-[x] Add `backend/scripts/extract_pdf.py`.
-[x] Add `backend/scripts/ingest_resources.py`.
-[x] Ingest from `fu_berlin_cs_consultant/ressources/`.
-[x] Support `.txt`.
-[x] Support `.pdf` via `pypdf`.
-[x] Normalize extracted text.
-[x] Chunk by semantic sections where possible.
-[x] Store source metadata:
-[x] filename
-[x] document title
-[x] chunk id
-[x] page number if PDF
-[x] section heading if available
-[x] content hash
-[x] Use a dedicated Qdrant collection, e.g. `fu_cs_consultant_knowledge`.
-[x] Use multilingual embeddings for German/English queries.
-[x] Make ingestion rebuild the collection deterministically.
-[x] Do not add a `POST /api/ingest` route.
-
-Manual ingestion command target:
-
-```bash
-docker compose --profile legacy-rag run --rm legacy-rag-ingest
-```
-
-## Knowledge Artifacts
-
-[x] Add `backend/knowledge_base/generated/`.
-[x] Generate or hand-curate `degree_rules.md` from `Informatik_Master_Ablauf.txt`.
-[x] Generate or hand-curate `module_catalog.md` from the checklist PDF.
-[x] Generate `module_catalog.json` for deterministic module lookup.
+[x] Add `/health` checks for the active LLM provider.
 [x] Keep original source files untouched in `ressources/`.
 
 ## Domain Logic
@@ -115,7 +79,7 @@ docker compose --profile legacy-rag run --rm legacy-rag-ingest
 [x] message_type
 [x] course_lookup_keys
 [x] course_lookup_needs_clarification
-[x] retrieved_context
+[x] course_context
 [x] parsed_study_plan
 [x] rule_check_result
 [x] reply
@@ -146,9 +110,8 @@ START
       -> plan_check               -> StudyPlanParser -> RuleChecker -> AnswerComposer -> END
 ```
 
-The legacy Qdrant retrieval and query-rewriter nodes have been removed. Current
-course offerings are read from
-`backend/app/domain/data/course_offerings.json` with keys such as
+Current course offerings are read from the canonical catalogue plus
+`backend/app/domain/data/course_offerings/<semester>.json` with keys such as
 `sose26/technical/swp`.
 
 ## WizardFlow Tracing
@@ -170,7 +133,7 @@ course offerings are read from
 
 [x] Add `app/prompts.py`.
 [x] Define consultant identity: FU Berlin Informatik Master study consultant.
-[x] Require grounded answers from retrieved context.
+[x] Require grounded answers from exact course-offering context.
 [x] Require uncertainty when resources do not answer.
 [x] Support German and English.
 [x] For plan checks, force structured JSON extraction before deterministic validation.
@@ -210,14 +173,12 @@ course offerings are read from
 [x] Test too many Bachelor-module LP.
 [x] Test too few scientific work modules.
 [x] Test too many software projects.
-[x] Add `backend/tests/test_resource_ingestion.py`.
 [x] Add `backend/tests/test_agent_routes.py` for routing labels.
 
 ## Docs
 
 [x] Add `fu_berlin_cs_consultant/README.md`.
 [x] Document Docker startup.
-[x] Document manual ingestion.
 [x] Document env vars for AcademicCloud and FU Ollama.
 [x] Document API examples.
 [x] State clearly that this is advisory and should reference official FU rules.
@@ -226,13 +187,11 @@ course offerings are read from
 
 [ ] Build Docker image.
 [ ] Start backend + frontend.
-[ ] Optional: start Qdrant with `docker compose --profile legacy-rag up -d qdrant`.
-[ ] Run manual ingestion.
 [ ] Confirm `/health`.
 [ ] Ask a simple course-offering lookup question.
 [ ] Ask a study-plan validation question.
 [x] Run tests.
-[x] Run the full backend suite from runtime-only requirements without legacy RAG dependencies.
+[x] Run the full backend suite from runtime-only requirements.
 [x] Confirm no files outside `fu_berlin_cs_consultant/` changed.
 
 ## Multi-Degree Support
@@ -248,7 +207,7 @@ Phase 1 — degree framework:
 
 Phase 2 — shared course offerings:
 
-[x] Convert `course_offerings.json` to a flat tagged list (placement lists per degree, `lp` override, `module_id(s)`, `is_bachelor_module`).
+[x] Split course data into shared courses, degree credit mappings, and per-semester offering files.
 [x] Deterministic per-degree projection to `semester/area/type` bucket trees; selector/lookup nodes are degree-scoped.
 [x] Load-time validation against the registry (area vocabulary, canonical module ids).
 [x] Migration-equivalence test against the pre-migration Master buckets fixture.
@@ -258,7 +217,7 @@ Phase 3 — degree packages:
 
 [x] `msc_data_science`: canonical module catalogue, profile-inference checklist validator, rules catalogue, prompts, tests.
 [ ] `bsc_informatik`: blocked on the §7(3) Pflicht and §7(4) Wahlpflicht module lists (SPO 2023).
-[ ] Tag Data Science entries in `course_offerings.json` once the curated offerings data is ready.
+[ ] Add curated Data Science semester offerings once the source data is ready.
 
 Phase 4 — frontend:
 
