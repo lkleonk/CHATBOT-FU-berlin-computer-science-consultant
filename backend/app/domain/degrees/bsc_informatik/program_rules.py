@@ -21,6 +21,21 @@ ABV_AMENDMENT = ProgramRuleSource(
     path="https://www.fu-berlin.de/service/zuvdocs/amtsblatt/2025/ab052025.pdf",
 )
 
+CROSS_UNIVERSITY_SOURCES = [
+    ProgramRuleSource(
+        label="HU Berlin Gast- und Nebenhoererschaft",
+        path="https://www.hu-berlin.de/studium/nach-dem-studium/lebenslanges-lernen/gasthoerer-und-nebenhoererschaft",
+    ),
+    ProgramRuleSource(
+        label="TU Berlin Gast- und Nebenhoererschaft",
+        path="https://www.tu.berlin/studierendensekretariat/themen-a-z/gast-und-nebenhoererschaft/",
+    ),
+    ProgramRuleSource(
+        label="Pruefungsausschuss Informatik (Anrechnung von Leistungen)",
+        path="https://www.mi.fu-berlin.de/w/Inf/PruefungsAusschuss",
+    ),
+]
+
 CORE_MODULES = (
     ("Konzepte der Programmierung", 9),
     ("Diskrete Strukturen für Informatik", 9),
@@ -141,6 +156,135 @@ def get_program_rules() -> ProgramRulesCatalogue:
                     ProgramRuleItem(label="No content overlap", text="ABV work must not overlap in content with modules counted in the Informatik degree area or free-elective area."),
                 ],
                 sources=[STUDY_REGULATIONS, ABV_REGULATIONS, ABV_AMENDMENT],
+            ),
+            ProgramRuleSection(
+                id="cross-university-courses",
+                title="Courses at HU Berlin and TU Berlin (Nebenhörerschaft)",
+                description=(
+                    "Modules taken as a cross-registered student ('Nebenhörer:in', also called "
+                    "Zweithörerschaft) at Humboldt-Universität or Technische Universität Berlin can be "
+                    "recognized for the B.Sc. Informatik, most directly in the Free-Elective Area, and "
+                    "in some cases as a specific compulsory-elective or ABV module. The steps below "
+                    "describe the practical process."
+                ),
+                items=[
+                    ProgramRuleItem(
+                        label="Legal basis",
+                        text=(
+                            "Berlin's universities (FU, HU, TU, UdK) allow students to attend and be "
+                            "examined in individual courses at a partner university as a Nebenhörer:in, "
+                            "in addition to normal enrollment at their home university."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Step 1 - Find a course",
+                        text=(
+                            "Browse the host university's Vorlesungsverzeichnis for a module that "
+                            "interests you and fits your Stundenplan: the "
+                            "[TU Berlin Moses Vorlesungsverzeichnis](https://moseskonto.tu-berlin.de/moses/verzeichnis/veranstaltungen/vkpl_stg.html) "
+                            "or the [HU Berlin Agnes Vorlesungsverzeichnis](https://agnes.hu-berlin.de/lupo/rds?state=change&type=5&"
+                            "moduleParameter=abstgvSearch&nextdir=change&next=search.vm&subdir=stg&clean=y&"
+                            "category=curricula.search&navigationPosition=lectures%2Ccurriculaschedules&"
+                            "breadcrumb=curriculaschedules&topitem=lectures&subitem=curriculaschedules) "
+                            "(if the deep link is broken, start at [agnes.hu-berlin.de](https://agnes.hu-berlin.de/))."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Step 2 - Optional pre-check with the Prüfungsausschuss",
+                        text=(
+                            "Ask the Prüfungsausschussvorsitzende:r by email or in person whether the "
+                            "course could be credited. As of July 2026 this is Prof. Dr.-Ing. Volker "
+                            "Roth (volker.roth@fu-berlin.de; see his "
+                            "[contact page](https://www.mi.fu-berlin.de/inf/groups/ag-si/members/volkerroth.html) "
+                            "for details and appointment booking). "
+                            "The chair may not have time or may decline to assess a course you have not "
+                            "taken yet; trying first and then deciding is still recommended."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Step 3 - Ask the teacher",
+                        text=(
+                            "Email the teacher of the HU/TU module and ask whether you may participate "
+                            "as Nebenhörer:in. Attach the filled Nebenhörer application form: the "
+                            "[HU form (PDF)](https://www.hu-berlin.de/fileadmin/Mediathek/Zentrale_Seiten/Studium/Dokumente/Studium_Anmeldung_Gasthorerschaft_Nebenhoererschaft_20210323.pdf) "
+                            "or the [TU form (PDF)](https://www.static.tu.berlin/fileadmin/www/10002460/Bewerben_und_Einschreiben/GH_NH/Nebenhoererschein_SLM.pdf)."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Step 4 - Submit the Nebenhörer application",
+                        text=(
+                            "If the teacher agrees and signs, send the document to the responsible "
+                            "office to validate the Nebenhörerantrag; the office is named on the form "
+                            "and on the general information pages (see the "
+                            "[HU Nebenhörerschaft page](https://www.hu-berlin.de/studium/nach-dem-studium/lebenslanges-lernen/gasthoerer-und-nebenhoererschaft) "
+                            "and the [TU Nebenhörerschaft page](https://www.tu.berlin/studierendensekretariat/themen-a-z/gast-und-nebenhoererschaft/)). "
+                            "The office can take time to answer - follow up by email if needed, and "
+                            "attend the course from the start even while the confirmation is pending."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Taking the exam",
+                        text=(
+                            "Attend the course and sit the exam at the host university like one of its "
+                            "own students; the host university issues a Leistungsnachweis with grade and "
+                            "workload (LP or ECTS)."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Step 5 - Recognition at FU",
+                        text=(
+                            "At the end of the semester, register the recognition request online on the "
+                            "[MVS platform](https://kvv.imp.fu-berlin.de/mvs2/) - the procedure is "
+                            "explained under 'Anrechnung von Leistungen' (Anerkennung, RSPO §7, "
+                            "B SPO §10(14)) on the "
+                            "[Prüfungsausschuss Informatik page](https://www.mi.fu-berlin.de/w/Inf/PruefungsAusschuss) - "
+                            "and then book an in-person appointment with the "
+                            "Prüfungsausschussvorsitzende:r to explain why you took the course and how "
+                            "it should count. Bring the Leistungsnachweis and the HU/TU module "
+                            "description (Modulbeschreibung)."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Free-elective recognition",
+                        text=(
+                            "Courses in a scientific subject that meaningfully supplement the degree fit "
+                            "the Free-Elective Area (10 LP) without needing to match an existing FU "
+                            "module."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Compulsory-elective equivalence",
+                        text=(
+                            "If a HU/TU course substantially matches one of the compulsory-elective "
+                            "modules on the legally defined list ('passt in eine Modulhülle'), the "
+                            "Prüfungsausschuss can recognize it as that module instead, counting toward "
+                            "the 12 LP compulsory-elective area."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="ABV recognition",
+                        text=(
+                            "Suitable HU/TU courses may also be recognized within ABV competence areas, "
+                            "subject to the same no-content-overlap rule as other ABV modules."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="No double counting",
+                        text=(
+                            "Recognized external credit follows the same no-double-counting rule as FU "
+                            "modules: the same content can only be counted once in the plan."
+                        ),
+                    ),
+                    ProgramRuleItem(
+                        label="Links and contacts change",
+                        text=(
+                            "Chairs rotate and URLs move; if a link no longer works, start from the "
+                            "HU/TU Nebenhörerschaft pages or the FU Informatik Prüfungsausschuss page. "
+                            "The final recognition decision always lies with the Prüfungsausschuss."
+                        ),
+                    ),
+                ],
+                sources=CROSS_UNIVERSITY_SOURCES,
             ),
             ProgramRuleSection(
                 id="bachelorarbeit",
