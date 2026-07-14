@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
+docker-compose.override.yml
 
 # Python caches and test output
 __pycache__/
@@ -14,6 +16,8 @@ __pycache__/
 .coverage
 htmlcov/
 backend/traces/
+# WizardFlow writes traces/ relative to the working directory.
+/traces/
 
 # Virtual environments
 .venv/
