@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:prod": "next build",
+    "build:local": "cross-env NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 NEXT_PUBLIC_ENABLE_DEV_TOOLS=true next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "cross-env": "^10.1.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",

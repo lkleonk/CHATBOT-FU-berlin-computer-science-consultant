@@ -197,9 +197,15 @@ preview:
 cp .env.example .env
 # Add ACADEMICCLOUD_API_KEY or the selected provider's credentials to
 # .env.local. Both files are ignored by Git.
-cd frontend && npm run build && cd ..
+cd frontend && npm run build:local && cd ..
 docker compose --profile frontend-preview up --build
 ```
+
+`npm run build:local` bakes `http://localhost:8000` as the API base URL and
+enables the developer tools. Both `build:local` and `build:prod` work the same
+on Linux, macOS, and Windows (`build:local` sets its variables via `cross-env`).
+Do not commit `frontend/out/` from a local build; the tracked export must
+always come from `npm run build:prod` (see the production section below).
 
 The default local endpoints are:
 
@@ -212,7 +218,7 @@ API docs: http://localhost:8000/docs
 Changing `NEXT_PUBLIC_API_BASE_URL` requires a static export rebuild. Use:
 
 ```bash
-cd frontend && npm run build && cd ..
+cd frontend && npm run build:local && cd ..
 docker compose --profile frontend-preview up --build -d
 ```
 
@@ -266,12 +272,16 @@ Build the static export on the local machine with the production public API
 origin. `frontend/out/` is a tracked deployment artifact, so include its
 refreshed contents in the deployment revision before updating the server.
 
-```powershell
+```bash
 cd frontend
-$env:NEXT_PUBLIC_API_BASE_URL = "https://cs-modulio.com"
-npm run build
+npm run build:prod
 cd ..
 ```
+
+`build:prod` (like plain `npm run build`) takes the production values from the
+tracked `frontend/.env.production`, so no environment juggling is needed. After
+testing with `build:local`, always run `build:prod` before committing
+`frontend/out/`.
 
 Create the production environment on the server and restrict its permissions:
 
