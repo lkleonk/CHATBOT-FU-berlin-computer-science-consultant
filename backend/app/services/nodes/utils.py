@@ -100,6 +100,41 @@ def looks_german(text: str) -> bool:
     return bool(re.search(r"\b(der|die|das|und|ich|ist|sind|module|vertiefung|prüf|pruef|lp)\b", lowered))
 
 
+ADVISORY_DISCLAIMER_DE = (
+    "Hinweis: Diese Auskunft ist unverbindlich – maßgeblich sind die "
+    "offiziellen FU-Dokumente und das Prüfungsbüro."
+)
+ADVISORY_DISCLAIMER_EN = (
+    "Advisory: official FU documents and the examination office remain authoritative."
+)
+
+# Any sentence that reads like the advisory disclaimer, regardless of the
+# model's phrasing or language.
+_DISCLAIMER_SENTENCE_RE = re.compile(
+    r"\s*[^.!?\n]*\b("
+    r"official FU documents"
+    r"|offiziellen?\s+FU[- ]Dokumenten?"
+    r"|examination office remains? authoritative"
+    r"|Pr(?:ü|ue)fungsb(?:ü|ue)ro\s+(?:bleib|sind|ist)"
+    r")\b[^.!?\n]*[.!?]?",
+    re.IGNORECASE,
+)
+_ORPHAN_ADVISORY_RE = re.compile(r"\s*\b(?:advisory|hinweis)\b\s*[:;.,]?\s*$", re.IGNORECASE)
+
+
+def strip_advisory_disclaimer(reply: str) -> tuple[str, bool]:
+    """Remove model-emitted advisory disclaimers; report whether one was found.
+
+    The canonical, correctly localized disclaimer is re-appended by the answer
+    composer, so the model's own (often English, oddly placed) phrasing never
+    reaches the user.
+    """
+
+    stripped, count = _DISCLAIMER_SENTENCE_RE.subn("", reply)
+    stripped = _ORPHAN_ADVISORY_RE.sub("", stripped).strip()
+    return stripped, count > 0
+
+
 _URL_RE = re.compile(r"https?://[^\s<>\"')\]]+")
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 # Markdown links first so their URLs are not re-matched as bare URLs.

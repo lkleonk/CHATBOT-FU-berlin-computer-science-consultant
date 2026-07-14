@@ -3,8 +3,10 @@
 import Link from "@mui/material/Link";
 import type { ReactNode } from "react";
 
-// Matches Markdown links [label](https://...) first, bare http(s) URLs second.
-const LINK_RE = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)|https?:\/\/[^\s<>"')\]]+/g;
+// Matches Markdown links [label](https://... | mailto:...) first, then bare
+// http(s) URLs, then bare email addresses.
+const LINK_RE =
+  /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)|https?:\/\/[^\s<>"')\]]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 
 // Punctuation directly after a bare URL is almost always sentence punctuation.
 const TRAILING_PUNCTUATION_RE = /[.,;:!?]+$/;
@@ -28,29 +30,29 @@ export function LinkifiedText({ text, linkColor }: LinkifiedTextProps) {
     const label = match[1];
     const markdownUrl = match[2];
     if (label && markdownUrl) {
+      const isMailto = markdownUrl.startsWith("mailto:");
       nodes.push(
         <Link
           key={index}
           href={markdownUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          {...(isMailto ? {} : { target: "_blank", rel: "noopener noreferrer" })}
           sx={linkColor ? { color: linkColor, textDecorationColor: "inherit" } : undefined}
         >
           {label}
         </Link>,
       );
     } else {
+      const isEmail = !match[0].startsWith("http");
       const trailing = match[0].match(TRAILING_PUNCTUATION_RE)?.[0] ?? "";
-      const url = trailing ? match[0].slice(0, -trailing.length) : match[0];
+      const target = trailing ? match[0].slice(0, -trailing.length) : match[0];
       nodes.push(
         <Link
           key={index}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={isEmail ? `mailto:${target}` : target}
+          {...(isEmail ? {} : { target: "_blank", rel: "noopener noreferrer" })}
           sx={{ wordBreak: "break-all", ...(linkColor ? { color: linkColor, textDecorationColor: "inherit" } : {}) }}
         >
-          {url}
+          {target}
         </Link>,
       );
       if (trailing) {

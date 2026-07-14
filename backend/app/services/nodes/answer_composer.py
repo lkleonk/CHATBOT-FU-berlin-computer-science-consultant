@@ -5,12 +5,16 @@ from app.services.agent_config import agent_flow_config
 from app.services.model_service import ModelService
 from app.services.quota_service import DailyQuotaExceeded
 from app.services.nodes.utils import (
+    ADVISORY_DISCLAIMER_DE,
+    ADVISORY_DISCLAIMER_EN,
     degree_for,
     format_recent_messages,
     latest_user_message,
+    looks_german,
     parse_json_content,
     recent_messages,
     sanitize_reply_links,
+    strip_advisory_disclaimer,
 )
 from app.services.states.consultant_state import ConsultantState
 from app.services.wizardflow_service import (
@@ -97,6 +101,10 @@ Deterministic rule-check result:
         raise AnswerGenerationError("The answer composer failed to generate a response.") from exc
 
     reply = sanitize_reply_links(reply, f"{composer_prompt}\n{message}")
+    reply, model_added_disclaimer = strip_advisory_disclaimer(reply)
+    if model_added_disclaimer or state.get("message_type") == "plan_check":
+        disclaimer = ADVISORY_DISCLAIMER_DE if looks_german(user_message) else ADVISORY_DISCLAIMER_EN
+        reply = f"{reply}\n\n{disclaimer}"
     result: ConsultantState = {
         "reply": reply,
         "messages": [{"role": "assistant", "content": reply}],
