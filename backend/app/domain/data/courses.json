@@ -734,5 +734,119 @@
     "name": "Seminar über Algorithmen",
     "lp": null,
     "aliases": []
+  },
+  {
+    "id": "betriebs_und_kommunikationssysteme",
+    "name": "Betriebs- und Kommunikationssysteme",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "datenbanksysteme_bsc",
+    "name": "Datenbanksysteme",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "programmierpraktikum_bsc",
+    "name": "Programmierpraktikum",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "statistik_fuer_informatik",
+    "name": "Statistik für Informatik",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "informationssicherheit_bsc",
+    "name": "Informationssicherheit",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "softwaretechnik_bsc",
+    "name": "Softwaretechnik",
+    "lp": 9,
+    "aliases": []
+  },
+  {
+    "id": "wissenschaftliches_arbeiten_in_der_informatik",
+    "name": "Wissenschaftliches Arbeiten in der Informatik",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "algorithmen_und_datenstrukturen_bsc",
+    "name": "Algorithmen und Datenstrukturen",
+    "lp": 9,
+    "aliases": []
+  },
+  {
+    "id": "lineare_algebra_fuer_informatik",
+    "name": "Lineare Algebra für Informatik",
+    "lp": 9,
+    "aliases": []
+  },
+  {
+    "id": "grundlagen_des_datenschutzrechts",
+    "name": "Grundlagen des Datenschutzrechts",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "vertiefung_theoretische_informatik",
+    "name": "Vertiefung Theoretische Informatik",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "architektur_eingebetteter_systeme",
+    "name": "Architektur eingebetteter Systeme",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "funktionale_programmierung",
+    "name": "Funktionale Programmierung",
+    "lp": 6,
+    "aliases": []
+  },
+  {
+    "id": "mensch_computer_interaktion",
+    "name": "Mensch-Computer Interaktion",
+    "lp": 6,
+    "aliases": ["Human Computer Interaction I"]
+  },
+  {
+    "id": "proseminar_theoretische_informatik",
+    "name": "Proseminar: Theoretische Informatik",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "analysis_ii",
+    "name": "Analysis II",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "lineare_algebra_ii",
+    "name": "Lineare Algebra II",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "computerorientierte_mathematik_ii",
+    "name": "Computerorientierte Mathematik II",
+    "lp": 5,
+    "aliases": []
+  },
+  {
+    "id": "stochastik_i",
+    "name": "Stochastik I",
+    "lp": null,
+    "aliases": []
   }
 ]

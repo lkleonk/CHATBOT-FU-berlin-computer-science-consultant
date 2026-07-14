@@ -9,6 +9,7 @@ LP values canonical while allowing a course to count differently per degree.
 import re
 from functools import lru_cache
 from typing import Any
+from urllib.parse import urlparse
 
 from app.domain.catalog_data import (
     COURSE_OFFERINGS_DIR,
@@ -20,10 +21,36 @@ from app.domain.catalog_data import (
 
 
 LOOKUP_KEY_SEPARATOR = "/"
-VALID_COURSE_TYPES = {"vl", "swp", "seminar"}
+VALID_COURSE_TYPES = {"vl", "swp", "praktikum", "seminar"}
 REQUIRED_OFFERING_FIELDS = {"course_id", "type", "lp", "schedule", "description", "url"}
 MARKDOWN_LINK_RE = re.compile(r"^\[[^\]]+\]\((https?://[^)]+)\)$")
 SEMESTER_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+
+COURSE_TYPE_LABELS = {
+    "vl": "Lecture",
+    "swp": "Software project",
+    "praktikum": "Practical course",
+    "seminar": "Seminar",
+}
+AREA_LABELS = {
+    "msc_informatik": {
+        "practical": "Practical Informatics",
+        "theoretical": "Theoretical Informatics",
+        "technical": "Technical Informatics",
+        "application": "Application Area",
+    },
+    "msc_data_science": {
+        "grundlagen": "Foundations",
+        "life_sciences": "Life Sciences",
+        "technologies": "Technologies",
+    },
+    "bsc_informatik": {
+        "compulsory": "Compulsory Informatics",
+        "compulsory_elective": "Compulsory-elective Informatics",
+        "free_elective": "Free elective",
+        "abv": "ABV",
+    },
+}
 
 
 def normalize_course_url(value: Any) -> str | None:
@@ -33,7 +60,37 @@ def normalize_course_url(value: Any) -> str | None:
     if not stripped:
         return None
     markdown_match = MARKDOWN_LINK_RE.match(stripped)
-    return markdown_match.group(1) if markdown_match else stripped
+    url = markdown_match.group(1) if markdown_match else stripped
+    parsed = urlparse(url)
+    return url if parsed.scheme in {"http", "https"} and parsed.netloc else None
+
+
+def course_type_label(course_type: str) -> str:
+    """Return the display label for a stable course-type ID."""
+    return COURSE_TYPE_LABELS.get(course_type, course_type.replace("_", " ").title())
+
+
+def area_label(degree_id: str, area: str) -> str:
+    """Return the degree-specific display label for a stable area ID."""
+    return AREA_LABELS.get(degree_id, {}).get(area, area.replace("_", " ").title())
+
+
+def semester_label(semester: str) -> str:
+    """Format known semester IDs without rejecting future valid IDs."""
+    sose_match = re.fullmatch(r"sose(\d{2}|\d{4})", semester)
+    if sose_match:
+        return f"SoSe {_semester_year(sose_match.group(1))}"
+
+    wise_match = re.fullmatch(r"wise(\d{2}|\d{4})-(\d{2}|\d{4})", semester)
+    if wise_match:
+        start, end = (_semester_year(part) for part in wise_match.groups())
+        return f"WiSe {start}/{str(end)[-2:]}"
+
+    return semester
+
+
+def _semester_year(value: str) -> int:
+    return int(value) if len(value) == 4 else 2000 + int(value)
 
 
 def load_course_entries() -> list[dict[str, Any]]:
@@ -119,6 +176,8 @@ def validate_course_catalog() -> None:
                 seen_areas.add(area)
                 if placement.get("lp") is not None and not isinstance(placement["lp"], int):
                     raise ValueError(f"{degree_id} credit mapping {course_id!r} lp must be an integer or null.")
+                if placement.get("description") is not None and not isinstance(placement["description"], str):
+                    raise ValueError(f"{degree_id} credit mapping {course_id!r} description must be a string or null.")
                 if "is_bachelor_module" in placement and not isinstance(placement["is_bachelor_module"], bool):
                     raise ValueError(f"{degree_id} credit mapping {course_id!r} is_bachelor_module must be a boolean.")
             credit_map[course_id] = placements
@@ -182,7 +241,7 @@ def _project_offerings_cached(degree_id: str) -> dict[str, Any]:
                 "module_catalog_name": degree.course_modules[placement["module_id"]],
                 "lp": placement.get("lp") if placement.get("lp") is not None else offering.get("lp"),
                 "schedule": offering.get("schedule"),
-                "description": offering.get("description"),
+                "description": placement.get("description", offering.get("description")),
                 "url": offering.get("url"),
             }
             if placement.get("is_bachelor_module") or module.get("is_bachelor_module"):
@@ -339,4 +398,6 @@ def _grading_hint(course_type: str) -> str:
         return "Seminar/Wissenschaftliches Arbeiten; treat as ungraded for advisory answers."
     if course_type == "swp":
         return "Softwareprojekt A is graded and Softwareprojekt B is ungraded; use the module catalog name when present."
+    if course_type == "praktikum":
+        return "Practical-course offering; consult the module details for assessment information."
     return "No grading hint available."

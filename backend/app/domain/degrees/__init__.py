@@ -7,6 +7,7 @@ never chooses the degree.
 """
 
 from app.domain.degrees.definition import DegreeDefinition
+from app.domain.degrees.bsc_informatik import DEGREE as BSC_INFORMATIK
 from app.domain.degrees.msc_data_science import DEGREE as MSC_DATA_SCIENCE
 from app.domain.degrees.msc_informatik import DEGREE as MSC_INFORMATIK
 
@@ -14,6 +15,7 @@ from app.domain.degrees.msc_informatik import DEGREE as MSC_INFORMATIK
 _DEGREES: dict[str, DegreeDefinition] = {
     MSC_INFORMATIK.id: MSC_INFORMATIK,
     MSC_DATA_SCIENCE.id: MSC_DATA_SCIENCE,
+    BSC_INFORMATIK.id: BSC_INFORMATIK,
 }
 
 DEFAULT_DEGREE_ID = MSC_INFORMATIK.id

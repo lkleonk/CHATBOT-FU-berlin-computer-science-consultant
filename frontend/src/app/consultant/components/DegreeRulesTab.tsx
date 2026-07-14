@@ -1,7 +1,9 @@
 "use client";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LaunchOutlinedIcon from "@mui/icons-material/LaunchOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -17,6 +19,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useDegree } from "@/context/DegreeContext";
 import { getProgramRules } from "@/services/api";
 import type { ProgramRuleItem, ProgramRulesCatalogue } from "@/types/api";
+
+const MODULIO_ESCAPE_URL = "https://degree-escape-room.vercel.app/";
 
 function itemRange(item: ProgramRuleItem) {
   if (item.minimum !== null && item.maximum !== null && item.minimum === item.maximum) {
@@ -61,7 +65,7 @@ export function DegreeRulesTab() {
 
   return (
     <Box sx={{ height: "100%", overflowY: "auto", px: { xs: 1.5, md: 3 }, py: 2 }}>
-      <Stack spacing={2} sx={{ maxWidth: 1100, mx: "auto" }}>
+        <Stack spacing={2} sx={{ maxWidth: 1100, mx: "auto" }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={1}
@@ -81,9 +85,47 @@ export function DegreeRulesTab() {
           <Button startIcon={<RefreshOutlinedIcon />} onClick={() => void loadRules()}>
             Refresh
           </Button>
-        </Stack>
+          </Stack>
 
-        {isLoading && (
+          <Box
+            component="section"
+            aria-label="Degree escape room"
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "flex-start", sm: "center" },
+              justifyContent: "space-between",
+              gap: 1.5,
+              px: 2,
+              py: 1.5,
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 2,
+              bgcolor: "background.paper",
+            }}
+          >
+            <Stack direction="row" spacing={1.25} sx={{ alignItems: "flex-start" }}>
+              <SportsEsportsOutlinedIcon color="primary" sx={{ mt: 0.25 }} />
+              <Box>
+                <Typography variant="h3">Learn the degree through play</Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
+                  Explore the degree structure in Modulio&apos;s external escape room.
+                </Typography>
+              </Box>
+            </Stack>
+            <Button
+              variant="outlined"
+              endIcon={<LaunchOutlinedIcon />}
+              href={MODULIO_ESCAPE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ flexShrink: 0 }}
+            >
+              Play the escape room
+            </Button>
+          </Box>
+
+          {isLoading && (
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary" }}>
             <CircularProgress size={18} />
             <Typography variant="body2">Loading degree rules</Typography>
@@ -154,6 +196,15 @@ export function DegreeRulesTab() {
                               label={source.label}
                               size="small"
                               variant="outlined"
+                              {...(source.path.startsWith("http")
+                                ? {
+                                    component: "a",
+                                    href: source.path,
+                                    target: "_blank",
+                                    rel: "noreferrer",
+                                    clickable: true,
+                                  }
+                                : {})}
                             />
                           ))}
                         </Stack>

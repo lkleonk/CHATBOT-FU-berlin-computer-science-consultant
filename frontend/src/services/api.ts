@@ -1,5 +1,6 @@
 import type {
   ApiErrorDetail,
+  CourseOfferingsCatalogue,
   DegreeInfo,
   HealthResponse,
   ModelReply,
@@ -212,6 +213,11 @@ export function getApiErrorDetail(error: unknown): ApiErrorDetail | null {
 export async function getProgramRules(degree?: string): Promise<ProgramRulesCatalogue> {
   const query = degree ? `?degree=${encodeURIComponent(degree)}` : "";
   return requestJson<ProgramRulesCatalogue>(`/api/program-rules${query}`);
+}
+
+export async function getCourseOfferings(degree?: string): Promise<CourseOfferingsCatalogue> {
+  const query = degree ? `?degree=${encodeURIComponent(degree)}` : "";
+  return requestJson<CourseOfferingsCatalogue>(`/api/course-offerings${query}`);
 }
 
 export async function getUsage(): Promise<UsageResponse> {

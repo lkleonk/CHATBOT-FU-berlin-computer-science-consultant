@@ -21,6 +21,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
@@ -35,6 +36,10 @@ import type { HealthResponse } from "@/types/api";
 import { loadStoredChatMessages } from "./chatMessages";
 
 const dialogPreviewButtonSx = {
+  minHeight: 44,
+  px: 2,
+  justifyContent: "flex-start",
+  flex: { xs: "1 1 100%", sm: "1 1 260px" },
   color: "text.primary",
   borderColor: "divider",
   bgcolor: "background.paper",
@@ -42,6 +47,12 @@ const dialogPreviewButtonSx = {
     borderColor: "text.secondary",
     bgcolor: "action.hover",
   },
+};
+
+const developerActionButtonSx = {
+  minHeight: 44,
+  px: 2,
+  flex: { xs: "1 1 100%", sm: "0 1 auto" },
 };
 
 type SettingsTabProps = {
@@ -63,7 +74,14 @@ export function SettingsTab({
   onShowWelcome,
   onOpenChatExport,
 }: SettingsTabProps) {
-  const { darkMode, toggleDarkMode } = useSettings();
+  const {
+    darkMode,
+    toggleDarkMode,
+    courseRegistryPreviewEnabled,
+    setCourseRegistryPreviewEnabled,
+    studyPlanPreviewEnabled,
+    setStudyPlanPreviewEnabled,
+  } = useSettings();
   const { usage } = useUsage();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
@@ -202,11 +220,16 @@ export function SettingsTab({
             <>
               <Divider />
               <Box>
-                <Typography variant="h3" sx={{ mb: 1 }}>
+                <Typography variant="h3" sx={{ mb: 1.25 }}>
                   Developer
                 </Typography>
-                <Stack spacing={1.25}>
-                  <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
+                <Paper variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: "background.paper" }}>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: "text.secondary" }}>
+                      Backend connection
+                    </Typography>
+                    <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", mt: 0.5 }}>
                     <Chip label={`API: ${API_BASE_URL}`} variant="outlined" />
                     <Chip label={`Session: ${sessionId ?? "none"}`} variant="outlined" />
                     {health && (
@@ -216,10 +239,12 @@ export function SettingsTab({
                       />
                     )}
                   </Stack>
+                  </Box>
 
                   {healthError && <Alert severity="error">{healthError}</Alert>}
 
                   {health && (
+                    <Box sx={{ px: 1.5, border: 1, borderColor: "divider", borderRadius: 1.5 }}>
                     <List dense disablePadding>
                       {Object.entries(health.services).map(([service, status]) => (
                         <ListItem key={service} disableGutters>
@@ -234,6 +259,7 @@ export function SettingsTab({
                         </ListItem>
                       ))}
                     </List>
+                    </Box>
                   )}
 
                   <Stack
@@ -246,6 +272,7 @@ export function SettingsTab({
                       onClick={() => void refreshHealth()}
                       disabled={isRefreshing}
                       variant="outlined"
+                      sx={developerActionButtonSx}
                     >
                       Refresh Health
                     </Button>
@@ -255,6 +282,7 @@ export function SettingsTab({
                         onClick={() => void startNewTraceFile()}
                         disabled={isRotatingTrace}
                         variant="outlined"
+                        sx={developerActionButtonSx}
                       >
                         {isRotatingTrace ? "Starting…" : "New Trace File"}
                       </Button>
@@ -269,16 +297,60 @@ export function SettingsTab({
                   )}
 
                   <Box>
-                    <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 700 }}>
+                    <Typography variant="overline" sx={{ color: "text.secondary" }}>
+                      Local previews
+                    </Typography>
+                    <Stack spacing={1.25} sx={{ mt: 0.5 }}>
+                    <Box sx={{ p: 1.5, border: 1, borderColor: "divider", borderRadius: 1.5 }}>
+                    <Typography variant="body1" sx={{ mb: 0.25, fontWeight: 700 }}>
+                      Course Registry preview
+                    </Typography>
+                    <FormControlLabel
+                      sx={{ m: 0, mt: 0.25 }}
+                      control={
+                        <Switch
+                          checked={courseRegistryPreviewEnabled}
+                          onChange={(_, checked) => setCourseRegistryPreviewEnabled(checked)}
+                        />
+                      }
+                      label="Use bundled dummy data"
+                    />
+                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                      Lets the Course Registry run without a backend. The bundled example offerings are clearly marked as dummy data.
+                    </Typography>
+                    </Box>
+
+                    <Box sx={{ p: 1.5, border: 1, borderColor: "divider", borderRadius: 1.5 }}>
+                    <Typography variant="body1" sx={{ mb: 0.25, fontWeight: 700 }}>
+                      Study Plan preview
+                    </Typography>
+                    <FormControlLabel
+                      sx={{ m: 0, mt: 0.25 }}
+                      control={
+                        <Switch
+                          checked={studyPlanPreviewEnabled}
+                          onChange={(_, checked) => setStudyPlanPreviewEnabled(checked)}
+                        />
+                      }
+                      label="Use partial transcript demo data"
+                    />
+                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                      Loads a small M.Sc. Informatik subset from the local Max Mustermann demo transcript. It is not a complete transcript or a rule-check result.
+                    </Typography>
+                    </Box>
+                    </Stack>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="overline" sx={{ color: "text.secondary" }}>
                       Dialog previews
                     </Typography>
                     <Stack
                       direction={{ xs: "column", sm: "row" }}
                       useFlexGap
-                      sx={{ flexWrap: "wrap", gap: 1.25 }}
+                      sx={{ flexWrap: "wrap", gap: 1.25, mt: 0.5 }}
                     >
                       <Button
-                        size="small"
                         startIcon={<DataUsageOutlinedIcon />}
                         onClick={onShowUsagePreview}
                         variant="outlined"
@@ -287,7 +359,6 @@ export function SettingsTab({
                         Show daily request allowance dialog
                       </Button>
                       <Button
-                        size="small"
                         startIcon={<ErrorOutlineOutlinedIcon />}
                         onClick={onShowFailedChatRequest}
                         variant="outlined"
@@ -296,7 +367,6 @@ export function SettingsTab({
                         Show failed chat request dialog
                       </Button>
                       <Button
-                        size="small"
                         startIcon={<SchoolOutlinedIcon />}
                         onClick={onShowWelcome}
                         variant="outlined"
@@ -307,6 +377,7 @@ export function SettingsTab({
                     </Stack>
                   </Box>
                 </Stack>
+                </Paper>
               </Box>
             </>
           )}

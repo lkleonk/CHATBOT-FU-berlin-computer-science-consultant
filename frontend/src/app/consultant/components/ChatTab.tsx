@@ -40,6 +40,13 @@ type ChatTabProps = {
   onMessagesChange: (messages: ChatMessage[]) => void;
 };
 
+function formatResetTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
 function countRuleIssues(result: RuleCheckResult) {
   return {
     errors: result.issues.filter((issue) => issue.severity === "error").length,
@@ -54,7 +61,7 @@ export function ChatTab({
   onStudyPlan,
   onMessagesChange,
 }: ChatTabProps) {
-  const { updateQuota } = useUsage();
+  const { usage, updateQuota } = useUsage();
   const { effectiveDegreeId } = useDegree();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -104,7 +111,11 @@ export function ChatTab({
     });
   }, [messages, isLoading]);
 
-  const canSend = useMemo(() => input.trim().length > 0 && !isLoading, [input, isLoading]);
+  const quotaExhausted = usage !== null && usage.remaining <= 0;
+  const canSend = useMemo(
+    () => input.trim().length > 0 && !isLoading && !quotaExhausted,
+    [input, isLoading, quotaExhausted],
+  );
 
   const showError = useCallback((message: string) => {
     setError(message);
@@ -124,7 +135,7 @@ export function ChatTab({
 
   const handleSubmit = useCallback(async () => {
     const content = input.trim();
-    if (!content || isLoading) {
+    if (!content || isLoading || quotaExhausted) {
       return;
     }
 
@@ -174,6 +185,7 @@ export function ChatTab({
     isLoading,
     onRuleCheckResult,
     onStudyPlan,
+    quotaExhausted,
     showError,
     updateQuota,
   ]);
@@ -355,7 +367,7 @@ export function ChatTab({
             ensureSession={ensureSession}
             onUploaded={handleTranscriptUploaded}
             onError={showError}
-            disabled={isLoading}
+            disabled={isLoading || quotaExhausted}
           />
           <TextField
             fullWidth
@@ -364,8 +376,14 @@ export function ChatTab({
             maxRows={5}
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Message or upload a transcript PDF"
-            disabled={isLoading}
+            placeholder={
+              quotaExhausted
+                ? usage
+                  ? `Daily limit reached — resets at ${formatResetTime(usage.reset_at)}`
+                  : "Daily limit reached"
+                : "Message or upload a transcript PDF"
+            }
+            disabled={isLoading || quotaExhausted}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();

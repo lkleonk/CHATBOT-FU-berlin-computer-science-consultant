@@ -4,6 +4,7 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlineOutlined
 import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
@@ -30,9 +31,11 @@ import { ChatExportDialog } from "./ChatExportDialog";
 import { downloadChat, type ChatExportFormat } from "./chatExport";
 import { loadStoredChatMessages, type ChatMessage } from "./chatMessages";
 import { ChatErrorDialog, DEFAULT_CHAT_ERROR_MESSAGE } from "./ChatErrorDialog";
+import { CourseRegistryTab } from "./CourseRegistryTab";
 import { DegreeRulesTab } from "./DegreeRulesTab";
 import { DegreeSwitchDialog } from "./DegreeSwitchDialog";
 import { LowRequestWarningDialog } from "./LowRequestWarningDialog";
+import { QuotaExhaustedDialog } from "./QuotaExhaustedDialog";
 import { RequestUsageDialog } from "./RequestUsageDialog";
 import { SettingsTab } from "./SettingsTab";
 import { StudyPlanTab } from "./StudyPlanTab";
@@ -50,6 +53,7 @@ const tabs = [
   { label: "Chat", icon: <ChatBubbleOutlineIcon />, id: "chat" },
   { label: "Study Plan", icon: <FactCheckOutlinedIcon />, id: "study-plan" },
   { label: "Degree Rules", icon: <RuleOutlinedIcon />, id: "degree-rules" },
+  { label: "Course Registry", icon: <MenuBookOutlinedIcon />, id: "course-registry" },
   { label: "Settings", icon: <SettingsOutlinedIcon />, id: "settings" },
 ];
 
@@ -101,6 +105,7 @@ export function ConsultantShell() {
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const [lowRequestWarningOpen, setLowRequestWarningOpen] = useState(false);
+  const [quotaExhaustedOpen, setQuotaExhaustedOpen] = useState(false);
   const [wizardFlowPromoOpen, setWizardFlowPromoOpen] = useState(false);
   const [chatExportOpen, setChatExportOpen] = useState(false);
   const [chatMessagesToExport, setChatMessagesToExport] = useState<ChatMessage[]>([]);
@@ -132,6 +137,7 @@ export function ConsultantShell() {
       welcomeOpen ||
       !usage ||
       usage.used === 0 ||
+      usage.remaining <= 0 ||
       usage.remaining > 10
     ) {
       return;
@@ -147,7 +153,21 @@ export function ConsultantShell() {
   }, [usage, welcomeChecked, welcomeOpen]);
 
   useEffect(() => {
-    if (!welcomeChecked || welcomeOpen || lowRequestWarningOpen) {
+    if (!welcomeChecked || welcomeOpen || !usage || usage.remaining > 0) {
+      return;
+    }
+
+    const exhaustedKey = `fu-consultant-quota-exhausted-${usage.reset_at}`;
+    if (window.sessionStorage.getItem(exhaustedKey)) {
+      return;
+    }
+    window.sessionStorage.setItem(exhaustedKey, "shown");
+    const timer = window.setTimeout(() => setQuotaExhaustedOpen(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [usage, welcomeChecked, welcomeOpen]);
+
+  useEffect(() => {
+    if (!welcomeChecked || welcomeOpen || lowRequestWarningOpen || quotaExhaustedOpen) {
       return;
     }
     if (window.localStorage.getItem(WIZARDFLOW_PROMO_STORAGE_KEY)) {
@@ -155,7 +175,7 @@ export function ConsultantShell() {
     }
     const timer = window.setTimeout(() => setWizardFlowPromoOpen(true), 1200);
     return () => window.clearTimeout(timer);
-  }, [welcomeChecked, welcomeOpen, lowRequestWarningOpen]);
+  }, [welcomeChecked, welcomeOpen, lowRequestWarningOpen, quotaExhaustedOpen]);
 
   const dismissWizardFlowPromo = () => {
     window.localStorage.setItem(WIZARDFLOW_PROMO_STORAGE_KEY, "1");
@@ -417,13 +437,22 @@ export function ConsultantShell() {
           {activeTab === 2 && <DegreeRulesTab />}
         </Box>
         <Box
-          id="settings-panel"
+          id="course-registry-panel"
           role="tabpanel"
           hidden={activeTab !== 3}
+          aria-labelledby="course-registry-tab"
+          sx={{ height: "100%", minHeight: 0 }}
+        >
+          {activeTab === 3 && <CourseRegistryTab />}
+        </Box>
+        <Box
+          id="settings-panel"
+          role="tabpanel"
+          hidden={activeTab !== 4}
           aria-labelledby="settings-tab"
           sx={{ height: "100%", minHeight: 0 }}
         >
-          {activeTab === 3 && (
+          {activeTab === 4 && (
             <SettingsTab
               sessionId={sessionId}
               onClearLocalState={handleClearLocalState}
@@ -499,6 +528,15 @@ export function ConsultantShell() {
         onViewUsage={() => {
           setLowRequestWarningOpen(false);
           setUsageDialogOpen(true);
+        }}
+      />
+      <QuotaExhaustedDialog
+        open={quotaExhaustedOpen}
+        resetAt={usage?.reset_at ?? null}
+        onClose={() => setQuotaExhaustedOpen(false)}
+        onBrowseRegistry={() => {
+          setQuotaExhaustedOpen(false);
+          setActiveTab(3);
         }}
       />
       <RequestUsageDialog open={usageDialogOpen} onClose={() => setUsageDialogOpen(false)} />

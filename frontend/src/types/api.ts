@@ -141,3 +141,38 @@ export type ProgramRulesCatalogue = {
   source_note: string;
   sections: ProgramRuleSection[];
 };
+
+export type CourseOfferingItem = {
+  title: string;
+  module_catalog_name?: string | null;
+  lp: number | null;
+  schedule?: string | null;
+  description?: string | null;
+  url?: string | null;
+  is_bachelor_module?: boolean | null;
+};
+
+export type CourseOfferingType = {
+  id: string;
+  label: string;
+  courses: CourseOfferingItem[];
+};
+
+export type CourseOfferingArea = {
+  id: string;
+  label: string;
+  course_types: CourseOfferingType[];
+};
+
+export type CourseOfferingSemester = {
+  id: string;
+  label: string;
+  areas: CourseOfferingArea[];
+};
+
+export type CourseOfferingsCatalogue = {
+  degree_program: string;
+  regulation: string;
+  source_note: string;
+  semesters: CourseOfferingSemester[];
+};

@@ -21,7 +21,7 @@ export function ChatErrorDialog({ open, message, onClose }: ChatErrorDialogProps
       <DialogContent>
         <DialogContentText>{message}</DialogContentText>
         <DialogContentText sx={{ mt: 1.25 }}>
-          We couldn't get a response this time. Please try again in a moment.
+          We couldn&apos;t get a response this time. Please try again in a moment.
         </DialogContentText>
       </DialogContent>
       <DialogActions>

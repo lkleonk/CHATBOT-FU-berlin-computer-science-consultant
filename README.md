@@ -6,7 +6,7 @@ Website: [cs-modulio.com](https://cs-modulio.com)
 
 Full-stack prototype for a FU Berlin computer-science study consultant, named **LeoPunkt** (a nod to *Leistungspunkte* — the LP credits it helps you track).
 
-The app supports multiple degree programs through a backend degree registry — currently the M.Sc. Informatik (SPO 2014) and the M.Sc. Data Science (FU-Mitteilungen 18/2021). Users pick their degree in the welcome dialog and can switch later from the header; each session is bound to one degree. The app answers questions from local resources and can check a proposed study plan against deterministic per-degree rules. It includes a standalone Next.js frontend and a FastAPI backend. It reuses architecture patterns from the parent `llm_chatbot` project, but all code lives inside `fu_berlin_cs_consultant/`.
+The app supports multiple degree programs through a backend degree registry — currently the M.Sc. Informatik (SPO 2014), the M.Sc. Data Science (FU-Mitteilungen 18/2021), and the B.Sc. Informatik (FU-Mitteilungen 23/2023). Users pick their degree in the welcome dialog and can switch later from the header; each session is bound to one degree. The app answers questions from local resources, offers a read-only Course Registry of locally listed semester offerings, and can check a proposed study plan against deterministic per-degree rules. The B.Sc. Informatik includes its 2023 degree rules and locally supplied SoSe 2026 offerings; availability in other semesters is unknown, 0084d maths courses are free-elective candidates only, and deterministic plan validation is still pending. It includes a standalone Next.js frontend and a FastAPI backend. It reuses architecture patterns from the parent `llm_chatbot` project, but all code lives inside `fu_berlin_cs_consultant/`.
 
 ## Screenshots
 
@@ -57,18 +57,6 @@ fu_berlin_cs_consultant/
 ├── docker-compose.yml
 └── .env.example
 ```
-
-## Services
-
-```text
-Static frontend preview -> http://localhost:3000/consultant
-FastAPI backend          -> http://localhost:8000
-```
-
-These are local defaults from `.env.example`. The host bind address and all
-published ports are configurable without changing the Compose file.
-
-The normal backend installation uses `backend/requirements.txt` and does not
 
 ## Environment
 
@@ -154,8 +142,8 @@ DAILY_USER_ACTIONS=100
 The LLM limit is global. Every call made through `ModelService` consumes one
 invocation, so one chat action can consume multiple invocations. The user-action
 limit applies per client IP to chat messages and transcript uploads. Creating or
-deleting a session, reading program rules, and checking health do not consume
-user actions.
+deleting a session, reading program rules or course offerings, and checking
+health do not consume user actions.
 
 `GET /api/usage` exposes the current client-IP action allowance without
 consuming it. Successful chat and transcript responses also carry
@@ -257,7 +245,10 @@ resolution.
 The production Compose profile adds Caddy. Caddy terminates HTTPS, serves the
 locally built static frontend export, and proxies backend paths over the
 internal Compose network. There is no Node.js frontend process on the Droplet.
-The backend port remains published only on host loopback for diagnostics:
+The frontend is built locally and shipped as a static artifact specifically to
+keep the build off the Droplet, which is resource-constrained; the server only
+serves files and runs the backend. The backend port remains published only on
+host loopback for diagnostics:
 
 ```text
 Internet -> Caddy :80/:443 -> frontend/out static files
@@ -434,6 +425,12 @@ Read the degree-rule catalogue for one degree:
 
 ```bash
 curl "http://localhost:8000/api/program-rules?degree=msc_informatik"
+```
+
+Read locally listed course offerings for one degree:
+
+```bash
+curl "http://localhost:8000/api/course-offerings?degree=msc_informatik"
 ```
 
 Delete a session and its in-memory LangGraph state:

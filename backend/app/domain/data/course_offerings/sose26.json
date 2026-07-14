@@ -312,6 +312,158 @@
       "schedule": "Mi 14:00-16:00; Erster Termin: 15.04.2026; Ort: T9/049 Seminarraum (Takustr. 9)",
       "description": null,
       "url": null
+    },
+    {
+      "course_id": "betriebs_und_kommunikationssysteme",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Mo 12:00-14:00; zusätzliche Termine siehe LV-Details; Erster Termin: 13.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0086eA1.10. Vorlesung 19300701 (Barry Linnert). Übung 19300704 (Barry Linnert), one group: Mo 14:00-16:00; Di 12:00-14:00 or 14:00-16:00; Mi 08:00-10:00, 12:00-14:00 or 14:00-16:00; Do 10:00-12:00, 12:00-14:00 or 16:00-18:00. First exercise: 13.04.2026; T9/K38 Rechnerpoolraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "datenbanksysteme_bsc",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Di 14:00-16:00 and Do 14:00-16:00; zusätzliche Termine siehe LV-Details; Erster Termin: 14.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0086eA1.11. Vorlesung 19301501 (Agnès Voisard). Übung 19301502 (N.N.), one group: Mi 12:00-14:00; Do 10:00-12:00 or 12:00-14:00; Fr 10:00-12:00 or 12:00-14:00. First exercise: 15.04.2026; T9/SR 005 Übungsraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "programmierpraktikum_bsc",
+      "type": "praktikum",
+      "lp": 5,
+      "schedule": "Termine siehe LV-Details; Erster Termin: 08.05.2026; Ort: T9/K38 Rechnerpoolraum (Takustr. 9)",
+      "description": "FU module 0086eA1.12. Seminar am PC 19335804: Programmierpraktikum (Lutz Prechelt).",
+      "url": null
+    },
+    {
+      "course_id": "statistik_fuer_informatik",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Mo 14:00-16:00; zusätzliche Termine siehe LV-Details; Erster Termin: 13.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0086eA1.13. Vorlesung 19335701 (Katinka Wolter). Übung 19335702 (Katinka Wolter), one group: Mo 12:00-14:00; Di 14:00-16:00; Mi 12:00-14:00 or 14:00-16:00; Do 10:00-12:00; Fr 10:00-12:00, 12:00-14:00 or 14:00-16:00. First exercise: 13.04.2026; T9/053 Seminarraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "informationssicherheit_bsc",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Mi 14:00-16:00; Erster Termin: 15.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0086eA1.14. Vorlesung 19335601 (Volker Roth). Tutorium 19335605 (Volker Roth), one group: Mo 12:00-14:00; Di 12:00-16:00; Do 14:00-16:00 or 16:00-18:00; Fr 10:00-12:00, 10:00-14:00 or 12:00-14:00. First tutorial: 13.04.2026; T9/K36 Rechnerpoolraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "softwaretechnik_bsc",
+      "type": "vl",
+      "lp": 9,
+      "schedule": "Vorlesung: Mo 10:00-12:00 and Do 12:00-14:00; zusätzliche Termine siehe LV-Details; Erster Termin: 13.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0086eA1.15. Vorlesung 19301401 (Lutz Prechelt). Übung 19301402 (Linus Ververs), one group: Di 08:00-10:00, 10:00-12:00 or 14:00-16:00; Fr 08:00-10:00, 10:00-12:00 or 14:00-16:00. First exercise: 14.04.2026; T9/051 Seminarraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "wissenschaftliches_arbeiten_in_der_informatik",
+      "type": "seminar",
+      "lp": 6,
+      "schedule": "Vorlesung: Di 16:00-18:00; Erster Termin: 14.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0086eA1.16. Vorlesung 19319701 (Claudia Müller-Birn). Complete it with one active seminar/proseminar listed in the same compulsory bucket; cancelled seminars are excluded.",
+      "url": null
+    },
+    {
+      "course_id": "proseminar_theoretische_informatik",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Mi 14:00-16:00; Erster Termin: 15.04.2026; Ort: T9/055 Seminarraum (Takustr. 9)",
+      "description": "FU event 19301710. Proseminar: Theoretische Informatik (Wolfgang Mulzer), selectable within Wissenschaftliches Arbeiten in der Informatik.",
+      "url": null
+    },
+    {
+      "course_id": "algorithmen_und_datenstrukturen_bsc",
+      "type": "vl",
+      "lp": 9,
+      "schedule": "Vorlesung: Di 16:00-18:00 and Fr 12:00-14:00; zusätzliche Termine siehe LV-Details; Erster Termin: 14.04.2026; Ort: Hs 1a Hörsaal (Habelschwerdter Allee 45)",
+      "description": "FU module 0086eA1.4. Vorlesung 19300101 (Kristin Knorr). Übung 19300102 (Kristin Knorr), one group: Mo 14:00-16:00 or 16:00-18:00; Mi 08:00-10:00, 12:00-14:00, 14:00-16:00 or 16:00-18:00; Do 08:00-10:00 or 16:00-18:00; Fr 08:00-10:00 or 14:00-16:00. First exercise: 13.04.2026; T9/055 Seminarraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "lineare_algebra_fuer_informatik",
+      "type": "vl",
+      "lp": 9,
+      "schedule": "Vorlesung: Termine siehe LV-Details; Erster Termin: 16.04.2026; Ort: Hs 1b Hörsaal (Habelschwerdter Allee 45)",
+      "description": "FU module 0086eA1.5. Vorlesung 19301001 (Max Willert). Übung 19301002 (Max Willert), one group: Mo 08:00-10:00, 10:00-12:00, 14:00-16:00 or 16:00-18:00; Di 08:00-10:00, 10:00-12:00, 12:00-14:00, 14:00-16:00 or 16:00-18:00. First exercise: 13.04.2026; T9/049 Seminarraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "grundlagen_des_datenschutzrechts",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Mi 16:00-18:00; Erster Termin: 15.04.2026; Ort: T9/049 Seminarraum (Takustr. 9)",
+      "description": "FU module 0086eB1.10. Vorlesung 19307201 (Philip Scholz). Übung 19307202 (Philip Scholz): Mi 18:00-20:00; first exercise: 15.04.2026; T9/049 Seminarraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "vertiefung_theoretische_informatik",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Mi 10:00-12:00; Erster Termin: 15.04.2026; Ort: T9/046 Seminarraum (Takustr. 9)",
+      "description": "FU module 0086eB1.11. Vorlesung 19336401 (Günther Rothe). Übung 19336402 (Mahmoud Elashmawi), one group: Fr 10:00-12:00 or 16:00-18:00; first exercise: 17.04.2026; T9/046 Seminarraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "architektur_eingebetteter_systeme",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Fr 12:00-14:00; Erster Termin: 17.04.2026; Ort: T9/051 Seminarraum (Takustr. 9)",
+      "description": "FU module 0086eB1.2. Vorlesung 19335901 (Jochen Schiller). Übung 19335902 (Jochen Schiller), one group: Di 12:00-14:00 or 14:00-16:00; first exercise: 14.04.2026; T9/K63 Hardwarepraktikum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "funktionale_programmierung",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Di 14:00-16:00; zusätzliche Termine siehe LV-Details; Erster Termin: 14.04.2026; Ort: T9/SR 005 Übungsraum (Takustr. 9)",
+      "description": "FU module 0086eB1.5. Vorlesung 19336001 (Max Willert). Übung 19336002 (Max Willert): Mo 10:00-12:00; first exercise: 13.04.2026; T9/SR 005 Übungsraum (Takustr. 9).",
+      "url": null
+    },
+    {
+      "course_id": "mensch_computer_interaktion",
+      "type": "vl",
+      "lp": 6,
+      "schedule": "Vorlesung: Di 10:00-12:00; zusätzliche Termine siehe LV-Details; Erster Termin: 14.04.2026; Ort: T9/055 Seminarraum (Takustr. 9)",
+      "description": "FU module 0086eB1.8. Vorlesung 19330601 (Claudia Müller-Birn). Übung 19330602, Human Computer Interaction I (Malte Heiser): Do 10:00-12:00; first exercise: 16.04.2026; A7/SR 031 (Arnimallee 7).",
+      "url": null
+    },
+    {
+      "course_id": "analysis_ii",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Vorlesung: Di 10:00-12:00 and Do 10:00-12:00; zusätzliche Termine siehe LV-Details; Erster Termin: 14.04.2026; Ort: A3/Hs 001 Hörsaal (Arnimallee 3-5)",
+      "description": "FU module 0084dA1.2. Vorlesung 19211601 (Elena Mäder-Baumdicker). Übung 19211602 (Elena Mäder-Baumdicker, Marita Thomas), one group: Mo 10:00-12:00; Mi 14:00-16:00; Do 08:00-10:00 or 16:00-18:00. First exercise: 13.04.2026; Arnimallee 14, 1.1.53. Listed as a free-elective candidate only; credit recognition and relevance require confirmation.",
+      "url": null
+    },
+    {
+      "course_id": "lineare_algebra_ii",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Vorlesung: Mo 12:00-14:00 and Mi 12:00-14:00; zusätzliche Termine siehe LV-Details; Erster Termin: 13.04.2026; Ort: A3/Hs 001 Hörsaal (Arnimallee 3-5)",
+      "description": "FU module 0084dA1.5. Vorlesung 19211701 (Georg Loho). Übung 19211702 (Jan-Hendrik de Wiljes), one group: Do 08:00-10:00; Fr 08:00-10:00 or 10:00-12:00. First exercise: 16.04.2026; A3/SR 120 (Arnimallee 3-5). Listed as a free-elective candidate only; credit recognition and relevance require confirmation.",
+      "url": null
+    },
+    {
+      "course_id": "computerorientierte_mathematik_ii",
+      "type": "vl",
+      "lp": 5,
+      "schedule": "Vorlesung: Fr 12:00-14:00; zusätzliche Termine siehe LV-Details; Erster Termin: 17.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0084dA1.7. Vorlesung 19211901, Computerorientierte Mathematik II (5 LP) (Ilja Klebanov). Übung 19211902 (N.N.), one group: Di 10:00-12:00; Mi 12:00-14:00; Fr 08:00-10:00. First exercise: 14.04.2026; A6/SR 009 Seminarraum (Arnimallee 6). Listed as a free-elective candidate only; credit recognition and relevance require confirmation.",
+      "url": null
+    },
+    {
+      "course_id": "stochastik_i",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Vorlesung: Mo 14:00-16:00 and Mi 08:00-10:00; zusätzliche Termine siehe LV-Details; Erster Termin: 13.04.2026; Ort: A6/SR 031 Seminarraum (Arnimallee 6)",
+      "description": "FU module 0084dA1.8. Vorlesung 19200601 (Nicolas Perkowski). Übung 19200602 (Nicolas Perkowski), one group: Mo 12:00-14:00 or 16:00-18:00. First exercise: 13.04.2026; A3/SR 120 (Arnimallee 3-5). Listed as a free-elective candidate only; credit recognition and relevance require confirmation.",
+      "url": null
     }
   ]
 }

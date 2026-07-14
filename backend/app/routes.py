@@ -1,8 +1,16 @@
 from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile, status
 
+from app.domain.course_offerings import (
+    area_label,
+    course_type_label,
+    normalize_course_url,
+    project_offerings,
+    semester_label,
+)
 from app.domain.degrees import DEFAULT_DEGREE_ID, get_degree, is_valid_degree, list_degrees
 from app.domain.program_rules import ProgramRulesCatalogue
 from app.models import (
+    CourseOfferingsCatalogue,
     DegreeInfo,
     HealthResponse,
     MessageRequest,
@@ -21,6 +29,7 @@ from app.settings import settings
 
 session_router = APIRouter(prefix="/api/sessions", tags=["Sessions"])
 program_rules_router = APIRouter(prefix="/api/program-rules", tags=["Program rules"])
+course_offerings_router = APIRouter(prefix="/api/course-offerings", tags=["Course offerings"])
 degrees_router = APIRouter(prefix="/api/degrees", tags=["Degrees"])
 health_router = APIRouter(tags=["Health"])
 usage_router = APIRouter(prefix="/api/usage", tags=["Usage"])
@@ -133,6 +142,52 @@ async def read_degrees():
 async def read_program_rules(degree: str = DEFAULT_DEGREE_ID):
     _ensure_known_degree(degree)
     return get_degree(degree).get_program_rules()
+
+
+@course_offerings_router.get("", response_model=CourseOfferingsCatalogue)
+async def read_course_offerings(degree: str = DEFAULT_DEGREE_ID):
+    _ensure_known_degree(degree)
+    degree_definition = get_degree(degree)
+    semesters = []
+    for semester_id, areas in project_offerings(degree).items():
+        rendered_areas = []
+        for area_id, course_types in areas.items():
+            rendered_types = []
+            for course_type_id, courses in course_types.items():
+                rendered_types.append(
+                    {
+                        "id": course_type_id,
+                        "label": course_type_label(course_type_id),
+                        "courses": [
+                            {**course, "url": normalize_course_url(course.get("url"))}
+                            for course in courses
+                        ],
+                    }
+                )
+            rendered_areas.append(
+                {
+                    "id": area_id,
+                    "label": area_label(degree, area_id),
+                    "course_types": rendered_types,
+                }
+            )
+        semesters.append(
+            {
+                "id": semester_id,
+                "label": semester_label(semester_id),
+                "areas": rendered_areas,
+            }
+        )
+
+    return {
+        "degree_program": degree_definition.display_name,
+        "regulation": degree_definition.regulation,
+        "source_note": (
+            "Courses currently present in the local course catalogue and semester-offering data. "
+            "Verify details in the official FU Berlin course catalogue."
+        ),
+        "semesters": semesters,
+    }
 
 
 def _ensure_known_degree(degree_id: str) -> None:

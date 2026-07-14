@@ -13,7 +13,7 @@ from app.main import app
 
 def test_registry_contains_known_degrees():
     degree_ids = {degree.id for degree in list_degrees()}
-    assert {"msc_informatik", "msc_data_science"} <= degree_ids
+    assert {"msc_informatik", "msc_data_science", "bsc_informatik"} <= degree_ids
     assert DEFAULT_DEGREE_ID == "msc_informatik"
 
 
@@ -62,6 +62,21 @@ def test_data_science_program_rules_endpoint():
         "grundlagenbereich",
         "profile-life-sciences",
         "profile-technologies",
+    }
+
+
+def test_bsc_informatik_program_rules_endpoint():
+    response = TestClient(app).get("/api/program-rules", params={"degree": "bsc_informatik"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["degree_program"] == "FU Berlin B.Sc. Informatik"
+    assert {section["id"] for section in body["sections"]} >= {
+        "overall-structure",
+        "compulsory-modules",
+        "compulsory-elective-modules",
+        "abv",
+        "bachelorarbeit",
     }
 
 

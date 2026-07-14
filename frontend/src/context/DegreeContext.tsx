@@ -28,6 +28,11 @@ const FALLBACK_DEGREES: DegreeInfo[] = [
     display_name: "M.Sc. Data Science",
     regulation: "2021 Studien- und Pruefungsordnung (FU-Mitteilungen 18/2021)",
   },
+  {
+    id: "bsc_informatik",
+    display_name: "B.Sc. Informatik",
+    regulation: "2023 Studien- und Pruefungsordnung (FU-Mitteilungen 23/2023)",
+  },
 ];
 
 type DegreeContextValue = {

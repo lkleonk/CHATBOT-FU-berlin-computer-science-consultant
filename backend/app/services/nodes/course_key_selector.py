@@ -51,11 +51,16 @@ AREA_TERMS = {
     "practical": ["practical", "praktisch", "praktische", "praktischen"],
     "theoretical": ["theoretical", "theoretisch", "theoretische", "theoretischen"],
     "application": ["application", "anwendungsbereich", "nebenfach"],
+    "compulsory": ["compulsory", "pflichtbereich", "pflicht"],
+    "compulsory_elective": ["compulsory elective", "pflichtwahl", "pflichtwahlbereich"],
+    "free_elective": ["free elective", "freier wahlbereich", "freies wahlfach", "wahlfach"],
+    "abv": ["abv", "allgemeine berufsvorbereitung"],
 }
 
 COURSE_TYPE_TERMS = {
     "vl": ["vl", "vorlesung", "vorlesungen", "lecture", "lectures"],
     "swp": ["swp", "softwareprojekt", "softwareprojekte", "software project", "software projects"],
+    "praktikum": ["praktikum", "praktika", "practical course"],
     "seminar": ["seminar", "seminare", "wissenschaftliches arbeiten", "scientific work"],
 }
 

@@ -13,7 +13,9 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useState } from "react";
 
+import { getDummyStudyPlan } from "@/app/consultant/dummy_data/studyPlan";
 import { useDegree } from "@/context/DegreeContext";
+import { useSettings } from "@/context/SettingsContext";
 import { createSession } from "@/services/api";
 import type {
   ModuleArea,
@@ -277,10 +279,15 @@ export function StudyPlanTab({
   onStudyPlan,
 }: StudyPlanTabProps) {
   const { effectiveDegreeId } = useDegree();
+  const { studyPlanPreviewEnabled } = useSettings();
   const [generatedAt, setGeneratedAt] = useState(() => formatGeneratedAt());
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const modules = latestStudyPlan?.modules ?? [];
-  const specialization = latestStudyPlan?.specialization_area ?? null;
+  const dummyStudyPlan = studyPlanPreviewEnabled ? getDummyStudyPlan(effectiveDegreeId) : null;
+  const displayedStudyPlan = dummyStudyPlan ?? latestStudyPlan;
+  const isDummyStudyPlan = dummyStudyPlan !== null;
+  const isUnavailableDummyPreview = studyPlanPreviewEnabled && !dummyStudyPlan;
+  const modules = displayedStudyPlan?.modules ?? [];
+  const specialization = displayedStudyPlan?.specialization_area ?? null;
   const totalLp = sumLp(modules);
   const scientificCount = modules.filter((m) => m.is_scientific_work).length;
   const softwareProjectCount = modules.filter((m) => m.is_software_project).length;
@@ -348,7 +355,11 @@ export function StudyPlanTab({
               Study Plan
             </Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {latestStudyPlan
+              {isDummyStudyPlan
+                ? "Developer preview of a partial demo transcript."
+                : isUnavailableDummyPreview
+                  ? "The partial transcript demo is available for M.Sc. Informatik only."
+                : latestStudyPlan
                 ? "Latest extracted plan from your chat messages."
                 : "Paste your modules into the Chat tab to extract a plan."}
             </Typography>
@@ -359,13 +370,15 @@ export function StudyPlanTab({
             data-print-hidden="true"
             sx={{ alignSelf: { xs: "flex-start", sm: "center" }, flexShrink: 0 }}
           >
-            <TranscriptUpload
-              ensureSession={ensureSession}
-              onUploaded={handleTranscriptUploaded}
-              onError={setUploadError}
-              variant="button"
-            />
-            {latestStudyPlan && (
+            {!isDummyStudyPlan && (
+              <TranscriptUpload
+                ensureSession={ensureSession}
+                onUploaded={handleTranscriptUploaded}
+                onError={setUploadError}
+                variant="button"
+              />
+            )}
+            {displayedStudyPlan && (
               <Button
                 variant="outlined"
                 startIcon={<PrintOutlinedIcon />}
@@ -377,7 +390,19 @@ export function StudyPlanTab({
           </Stack>
         </Stack>
 
-        {latestStudyPlan && (
+        {isDummyStudyPlan && (
+          <Alert severity="warning" variant="outlined">
+            Developer preview active. This is a six-module subset from the local Max Mustermann demo transcript, not a complete transcript or a backend rule check.
+          </Alert>
+        )}
+
+        {isUnavailableDummyPreview && (
+          <Alert severity="info" variant="outlined">
+            Switch the selected degree to M.Sc. Informatik to view the partial transcript demo.
+          </Alert>
+        )}
+
+        {displayedStudyPlan && (
           <Paper variant="outlined" sx={{ p: 1.5, bgcolor: "background.paper" }}>
             <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
               <Chip label={`Total: ${totalLp} LP`} color="primary" />
@@ -397,7 +422,7 @@ export function StudyPlanTab({
           </Paper>
         )}
 
-        {latestStudyPlan ? (
+        {displayedStudyPlan ? (
           <Box
             data-study-plan-grid="true"
             sx={{
@@ -431,7 +456,7 @@ export function StudyPlanTab({
           </Alert>
         )}
 
-        {latestRuleCheck && <RuleCheckPanel result={latestRuleCheck} />}
+        {!isDummyStudyPlan && latestRuleCheck && <RuleCheckPanel result={latestRuleCheck} />}
       </Stack>
 
       <Snackbar

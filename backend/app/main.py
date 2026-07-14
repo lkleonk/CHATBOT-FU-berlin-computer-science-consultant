@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import (
+    course_offerings_router,
     degrees_router,
     health_router,
     program_rules_router,
@@ -69,6 +70,7 @@ app.add_middleware(
 
 app.include_router(session_router)
 app.include_router(program_rules_router)
+app.include_router(course_offerings_router)
 app.include_router(degrees_router)
 app.include_router(usage_router)
 app.include_router(tracing_router)

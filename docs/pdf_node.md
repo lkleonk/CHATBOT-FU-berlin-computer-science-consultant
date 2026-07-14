@@ -129,12 +129,13 @@ The attachment service should own:
 
 ## PDF Text Extraction
 
-Use an algorithmic extractor first. Good candidates:
-
-- `pypdf`
-- `PyMuPDF`
-
-`PyMuPDF` is usually stronger for layout-heavy PDFs, but it adds a native dependency. `pypdf` is simpler to add and may be enough for a first version.
+Use an algorithmic extractor first. The implementation uses **`pypdf`** (already
+in `requirements.txt`). It was chosen over `PyMuPDF` — which is usually stronger
+for layout-heavy PDFs but adds a native dependency — deliberately to avoid the
+AGPL license. The `PDFExtractor` interface keeps the choice swappable, so a
+future OCR or PyMuPDF extractor can subclass it and be passed to
+`extract_and_validate(extractor=...)` without changing cleaning, validation,
+parsing, storage, or LLM integration.
 
 Extraction flow:
 
@@ -344,7 +345,6 @@ Frontend tests or manual checks should cover:
 
 ## Open Decisions
 
-- Whether to use `pypdf` first or start with `PyMuPDF`.
 - Whether the message endpoint should use all session attachments or explicit `attachment_ids`.
 - Exact file-size and page-count limits.
 - Whether extracted text should be stored inside LangGraph state or in a separate session attachment store referenced by state.

@@ -26,6 +26,41 @@ class DegreeInfo(BaseModel):
     regulation: str
 
 
+class CourseOfferingItem(BaseModel):
+    title: str
+    module_catalog_name: str | None = None
+    lp: int | None = None
+    schedule: str | None = None
+    description: str | None = None
+    url: str | None = None
+    is_bachelor_module: bool | None = None
+
+
+class CourseOfferingType(BaseModel):
+    id: str
+    label: str
+    courses: list[CourseOfferingItem]
+
+
+class CourseOfferingArea(BaseModel):
+    id: str
+    label: str
+    course_types: list[CourseOfferingType]
+
+
+class CourseOfferingSemester(BaseModel):
+    id: str
+    label: str
+    areas: list[CourseOfferingArea]
+
+
+class CourseOfferingsCatalogue(BaseModel):
+    degree_program: str
+    regulation: str
+    source_note: str
+    semesters: list[CourseOfferingSemester]
+
+
 class UsageResponse(BaseModel):
     limit: int
     used: int
