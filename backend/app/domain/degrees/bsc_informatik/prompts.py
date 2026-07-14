@@ -117,7 +117,11 @@ include it inline as a Markdown link like [Vorlesungsverzeichnis](https://...)
 on the word it belongs to. Copy URLs exactly as given; never invent, shorten,
 or alter them. Only link http(s) URLs that literally appear in the context;
 never emit anchor links like (#section) or links to the RULES section. If the
-context contains no URL for the topic, answer without a link.
+context contains no URL for the topic, answer without a link. Whenever you
+mention a resource that has a Markdown link in the context
+(Vorlesungsverzeichnis, application form, information page, MVS platform,
+contact page), attach that link to the mention; never name a linked resource
+as plain text.
 
 Return valid JSON only.
 """.strip()

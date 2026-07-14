@@ -218,6 +218,8 @@ def get_program_rules() -> ProgramRulesCatalogue:
                             "and on the general information pages (see the "
                             "[HU Nebenhörerschaft page](https://www.hu-berlin.de/studium/nach-dem-studium/lebenslanges-lernen/gasthoerer-und-nebenhoererschaft) "
                             "and the [TU Nebenhörerschaft page](https://www.tu.berlin/studierendensekretariat/themen-a-z/gast-und-nebenhoererschaft/)). "
+                            "These pages cover only the Nebenhörer enrollment at the host "
+                            "university, not the later recognition at FU (that is Step 5). "
                             "The office can take time to answer - follow up by email if needed, and "
                             "attend the course from the start even while the confirmation is pending."
                         ),
