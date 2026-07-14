@@ -273,12 +273,12 @@ export function ChatTab({
                   >
                     {isUser ? "You" : "Assistant"}
                   </Typography>
-                  <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+                  <Box sx={{ typography: "body1" }}>
                     <LinkifiedText
                       text={message.content}
                       linkColor={isUser ? "inherit" : undefined}
                     />
-                  </Typography>
+                  </Box>
                   {!isUser && <CitationList citations={message.citations ?? []} />}
                   {ruleCheckResult && ruleIssueCounts && (
                     <Box

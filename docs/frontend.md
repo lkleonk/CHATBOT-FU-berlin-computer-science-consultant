@@ -7,7 +7,9 @@ TypeScript, Material UI, and the App Router. Keep all frontend edits inside
 ## Tabs
 
 - `Chat`: session creation, message send, assistant response, citations, and
-  plan-check result summary.
+  plan-check result summary. Message content is rendered as GitHub-flavored
+  Markdown (including emphasis, lists, and safe inline links); raw HTML is not
+  rendered.
 - `Study Plan`: student-specific extracted plan, modules, LP totals, Wahlbereich
   data, and validation issues. Needs dedicated study-plan API endpoints before
   it can be complete.

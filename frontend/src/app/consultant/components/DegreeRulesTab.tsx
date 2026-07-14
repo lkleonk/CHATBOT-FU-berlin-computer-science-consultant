@@ -183,9 +183,9 @@ export function DegreeRulesTab() {
                               </Typography>
                               {range && <Chip label={range} size="small" variant="outlined" />}
                             </Stack>
-                            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                            <Box sx={{ typography: "body2", color: "text.secondary", mt: 0.5 }}>
                               <LinkifiedText text={item.text} />
-                            </Typography>
+                            </Box>
                           </Box>
                         );
                       })}
