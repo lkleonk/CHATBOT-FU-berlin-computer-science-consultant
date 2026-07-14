@@ -1,3 +1,4 @@
+import difflib
 import json
 import re
 from typing import Any
@@ -97,3 +98,45 @@ def parse_json_content(content: str) -> dict[str, Any]:
 def looks_german(text: str) -> bool:
     lowered = text.lower()
     return bool(re.search(r"\b(der|die|das|und|ich|ist|sind|module|vertiefung|prüf|pruef|lp)\b", lowered))
+
+
+_URL_RE = re.compile(r"https?://[^\s<>\"')\]]+")
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+# Markdown links first so their URLs are not re-matched as bare URLs.
+_REPLY_LINK_RE = re.compile(r"\[([^\]\n]+)\]\(([^)\s]+)\)|https?://[^\s<>\"')\]]+")
+_TRAILING_PUNCTUATION = ".,;:!?"
+
+
+def sanitize_reply_links(reply: str, context: str) -> str:
+    """Keep only links whose URLs actually appear in the LLM context.
+
+    Models copy long URLs imperfectly and occasionally invent plausible ones.
+    URLs close to a context URL are repaired to the exact original; links to
+    unknown URLs are reduced to their label text (Markdown) or removed (bare).
+    """
+
+    allowed_urls = set(_URL_RE.findall(context))
+    allowed_emails = set(_EMAIL_RE.findall(context))
+
+    def repaired_url(url: str) -> str | None:
+        if url in allowed_urls:
+            return url
+        close = difflib.get_close_matches(url, list(allowed_urls), n=1, cutoff=0.9)
+        return close[0] if close else None
+
+    def replace(match: re.Match) -> str:
+        label, target = match.group(1), match.group(2)
+        if label is None:
+            raw = match.group(0)
+            bare = raw.rstrip(_TRAILING_PUNCTUATION)
+            trailing = raw[len(bare):]
+            url = repaired_url(bare)
+            return f"{url}{trailing}" if url else trailing
+        if target.startswith("mailto:"):
+            return match.group(0) if target[len("mailto:"):] in allowed_emails else label
+        if target.startswith(("http://", "https://")):
+            url = repaired_url(target)
+            return f"[{label}]({url})" if url else label
+        return label
+
+    return _REPLY_LINK_RE.sub(replace, reply)

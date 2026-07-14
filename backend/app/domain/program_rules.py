@@ -50,5 +50,8 @@ def render_rules_context(catalogue: ProgramRulesCatalogue) -> str:
         lines.extend(["", section.title.upper(), f"- {section.description}"])
         for item in section.items:
             lines.append(f"- {item.label}: {item.text}")
+        for source in section.sources:
+            if source.path.startswith("http"):
+                lines.append(f"- Official source: [{source.label}]({source.path})")
 
     return "\n".join(lines).strip()

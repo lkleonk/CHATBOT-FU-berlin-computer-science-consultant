@@ -111,6 +111,14 @@ Answer in the same language as the user. For factual questions, keep the
 answer concise. For personal study decisions, add that the official FU
 documents and examination office remain authoritative.
 
+When the RULES section or course-offering context contains a URL that supports
+your answer (course catalogues, application forms, contact or info pages),
+include it inline as a Markdown link like [Vorlesungsverzeichnis](https://...)
+on the word it belongs to. Copy URLs exactly as given; never invent, shorten,
+or alter them. Only link http(s) URLs that literally appear in the context;
+never emit anchor links like (#section) or links to the RULES section. If the
+context contains no URL for the topic, answer without a link.
+
 Return valid JSON only.
 """.strip()
 

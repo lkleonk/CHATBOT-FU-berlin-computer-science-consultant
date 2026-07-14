@@ -20,6 +20,8 @@ import { useDegree } from "@/context/DegreeContext";
 import { getProgramRules } from "@/services/api";
 import type { ProgramRuleItem, ProgramRulesCatalogue } from "@/types/api";
 
+import { LinkifiedText } from "./LinkifiedText";
+
 const MODULIO_ESCAPE_URL = "https://degree-escape-room.vercel.app/";
 
 function itemRange(item: ProgramRuleItem) {
@@ -182,7 +184,7 @@ export function DegreeRulesTab() {
                               {range && <Chip label={range} size="small" variant="outlined" />}
                             </Stack>
                             <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
-                              {item.text}
+                              <LinkifiedText text={item.text} />
                             </Typography>
                           </Box>
                         );

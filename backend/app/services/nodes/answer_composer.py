@@ -10,6 +10,7 @@ from app.services.nodes.utils import (
     latest_user_message,
     parse_json_content,
     recent_messages,
+    sanitize_reply_links,
 )
 from app.services.states.consultant_state import ConsultantState
 from app.services.wizardflow_service import (
@@ -95,6 +96,7 @@ Deterministic rule-check result:
             raise
         raise AnswerGenerationError("The answer composer failed to generate a response.") from exc
 
+    reply = sanitize_reply_links(reply, f"{composer_prompt}\n{message}")
     result: ConsultantState = {
         "reply": reply,
         "messages": [{"role": "assistant", "content": reply}],

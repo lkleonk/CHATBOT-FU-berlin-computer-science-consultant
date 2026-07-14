@@ -28,6 +28,7 @@ import {
 } from "./chatMessages";
 import { CitationList } from "./CitationList";
 import { ChatErrorDialog, DEFAULT_CHAT_ERROR_MESSAGE } from "./ChatErrorDialog";
+import { LinkifiedText } from "./LinkifiedText";
 import { RuleCheckPanel } from "./RuleCheckPanel";
 import { TranscriptUpload } from "./TranscriptUpload";
 import { CHAT_MESSAGES_STORAGE_KEY, SESSION_ID_STORAGE_KEY } from "./storage";
@@ -273,7 +274,10 @@ export function ChatTab({
                     {isUser ? "You" : "Assistant"}
                   </Typography>
                   <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
-                    {message.content}
+                    <LinkifiedText
+                      text={message.content}
+                      linkColor={isUser ? "inherit" : undefined}
+                    />
                   </Typography>
                   {!isUser && <CitationList citations={message.citations ?? []} />}
                   {ruleCheckResult && ruleIssueCounts && (
