@@ -464,6 +464,118 @@
       "schedule": "Vorlesung: Mo 14:00-16:00 and Mi 08:00-10:00; zusätzliche Termine siehe LV-Details; Erster Termin: 13.04.2026; Ort: A6/SR 031 Seminarraum (Arnimallee 6)",
       "description": "FU module 0084dA1.8. Vorlesung 19200601 (Nicolas Perkowski). Übung 19200602 (Nicolas Perkowski), one group: Mo 12:00-14:00 or 16:00-18:00. First exercise: 13.04.2026; A3/SR 120 (Arnimallee 3-5). Listed as a free-elective candidate only; credit recognition and relevance require confirmation.",
       "url": null
+    },
+    {
+      "course_id": "data_science_in_life_sciences",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Seminaristischer Unterricht: Mo 10:00-14:00; Projektseminar: Mi 10:00-14:00; Erster Termin: 13.04.2026; Ort: T9/SR 006 Seminarraum (Takustr. 9)",
+      "description": "FU module 0590bB1.1. Seminaristischer Unterricht 19405606 and Projektseminar 19405612 (Katharina Jahn).",
+      "url": null
+    },
+    {
+      "course_id": "machine_learning_in_bioinformatics",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Mi 14:00-16:00; zusätzliche Termine siehe LV-Details; Erster Termin: 15.04.2026; Ort: A6/SR 025/026 Seminarraum (Arnimallee 6)",
+      "description": "FU module 0262cD1.7. Vorlesung 19405701 (Philipp Florian Benner, Hugues Richard). Übung 19405702: Mi 16:00-18:00.",
+      "url": null
+    },
+    {
+      "course_id": "machine_learning_and_ai_in_the_life_sciences",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Fr 08:00-12:00; Erster Termin: 17.04.2026; Ort: T9/049 Seminarraum (Takustr. 9)",
+      "description": "FU module 0262cD1.12 (Applied Machine Learning in Bioinformatics). Praxisseminar 19403613 (Tim Conrad, Christoph von Tycowicz).",
+      "url": null
+    },
+    {
+      "course_id": "computer_vision_for_biomedical_images",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Do 14:00-18:00; Erster Termin: 16.04.2026; Ort: A6/017 Frontalunterrichtsraum (Bioinf) (Arnimallee 6)",
+      "description": "FU module 0262cD1.12 (Applied Machine Learning in Bioinformatics). Praxisseminar 60103513 (Sören Lukassen).",
+      "url": null
+    },
+    {
+      "course_id": "complex_systems_in_bioinformatics",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Di 12:00-14:00; Erster Termin: 14.04.2026; Ort: A3/SR 120 (Arnimallee 3-5)",
+      "description": "FU module 0590bB1.7 (Ausgewählte Themen der Data Science in Life Sciences). Vorlesung 19405201 (Martin Vingron, Jana Wolf). Übung 19405202: Di 14:00-16:00.",
+      "url": null
+    },
+    {
+      "course_id": "complex_systems_in_bioinformatics",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Do 10:00-12:00; Erster Termin: 16.04.2026; Ort: A3/SR 120 (Arnimallee 3-5)",
+      "description": "FU module 0590bB1.6 (Masterseminar Data Science in Life Sciences). Seminar 19405211 (Martin Vingron, Jana Wolf).",
+      "url": null
+    },
+    {
+      "course_id": "topics_in_stochastic_processes_and_machine_learning",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Do 10:00-12:00; Erster Termin: 16.04.2026; Ort: A3/SR 119 (Arnimallee 3-5)",
+      "description": "Vorlesung 19234501 (Wei Zhang). Übung 19234502: Di 14:00-16:00; KöLu24-26/SR 006 Neuro/Mathe (Königin-Luise-Str. 24 / 26).",
+      "url": null
+    },
+    {
+      "course_id": "methodik_klinischer_studien",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Mi 14:00-16:00; Erster Termin: 15.04.2026; Ort: A6/SR 032 Seminarraum (Arnimallee 6)",
+      "description": "Vorlesung 60102001 (Pimrapat Gebert, Geraldine Rauch). Übung 60102002: Mi 16:00-18:00.",
+      "url": null
+    },
+    {
+      "course_id": "complex_data_analysis_in_physiology",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Zeit: -; Ort: keine Angabe",
+      "description": "Vorlesung 60102701 (Dorothee Günzel, Alexander Stahn, Katharina Brauns, Mathias Steinach).",
+      "url": null
+    },
+    {
+      "course_id": "deep_learning_for_biomedical_applications",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Mo 16:00-18:00; Erster Termin: 13.04.2026; Ort: T9/051 Seminarraum (Takustr. 9)",
+      "description": "FU module 0590bB1.6 (Masterseminar Data Science in Life Sciences). Seminar 19402311 (Vitaly Belik).",
+      "url": null
+    },
+    {
+      "course_id": "journal_club_computational_biology",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Mo 14:00-16:00; Erster Termin: 13.04.2026; Ort: T9/053 Seminarraum (Takustr. 9)",
+      "description": "FU module 0590bB1.6 (Masterseminar Data Science in Life Sciences). Seminar 19402911 (Knut Reinert).",
+      "url": null
+    },
+    {
+      "course_id": "journal_club_public_health_data_science",
+      "type": "seminar",
+      "lp": null,
+      "schedule": "Mi 10:00-12:00; Erster Termin: 22.04.2026; Ort: Online",
+      "description": "FU module 0590bB1.6 (Masterseminar Data Science in Life Sciences). Seminar 19406411 (Liuwei Wang).",
+      "url": null
+    },
+    {
+      "course_id": "datenbanksysteme_data_science",
+      "type": "vl",
+      "lp": null,
+      "schedule": "Di 14:00-16:00, Do 14:00-16:00; zusätzliche Termine siehe LV-Details; Erster Termin: 14.04.2026; Ort: T9/Gr. Hörsaal (Takustr. 9)",
+      "description": "FU module 0590bB2.9 (Datenbanksysteme Data Science). Vorlesung 19301501 (Agnès Voisard). Übung 19301502 (N.N.).",
+      "url": null
+    },
+    {
+      "course_id": "softwareprojekt_chat_search_and_summaries_llms",
+      "type": "swp",
+      "lp": null,
+      "schedule": "Do 12:00-14:00; Erster Termin: 16.04.2026; Ort: T9/049 Seminarraum (Takustr. 9)",
+      "description": "Projektseminar 19337112 (Tim Landgraf), selectable within Softwareprojekt Data Science A/B.",
+      "url": null
     }
   ]
 }

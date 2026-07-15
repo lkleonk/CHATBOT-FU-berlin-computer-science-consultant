@@ -10,7 +10,6 @@ bottom and read the relevant doc on demand rather than assuming.
 
 - Do not use Git, except for read-only operations like `git diff`, `git status`, `git log`, and `git show`.
 - Do not edit files outside `fu_berlin_cs_consultant/`.
-- Do not add a public ingestion endpoint. There must be no `POST /api/ingest` route.
 - Keep original files under `ressources/` untouched unless the user explicitly asks to update source material.
 - Frontend work is allowed only inside `fu_berlin_cs_consultant/frontend/`.
 

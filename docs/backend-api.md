@@ -19,8 +19,6 @@ POST /api/sessions/{session_id}/message
 POST /api/sessions/{session_id}/transcript
 ```
 
-There must be no `POST /api/ingest` route (see AGENTS.md Hard Rules).
-
 ## Sessions and degree binding
 
 `POST /api/sessions` accepts an optional JSON body with a `degree` id (default

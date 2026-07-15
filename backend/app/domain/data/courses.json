@@ -848,5 +848,65 @@
     "name": "Stochastik I",
     "lp": null,
     "aliases": []
+  },
+  {
+    "id": "topics_in_stochastic_processes_and_machine_learning",
+    "name": "Topics in Stochastic Processes and Machine Learning",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "methodik_klinischer_studien",
+    "name": "Methodik klinischer Studien",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "complex_data_analysis_in_physiology",
+    "name": "Complex Data Analysis in Physiology",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "complex_systems_in_bioinformatics",
+    "name": "Complex Systems in Bioinformatics",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "machine_learning_and_ai_in_the_life_sciences",
+    "name": "Machine Learning and AI in the Life Sciences: Methods and Applications",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "computer_vision_for_biomedical_images",
+    "name": "Computer vision for biomedical images",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "deep_learning_for_biomedical_applications",
+    "name": "Deep Learning for biomedical applications",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "journal_club_computational_biology",
+    "name": "Journal Club Computational Biology",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "journal_club_public_health_data_science",
+    "name": "Journal Club: Public Health Data Science",
+    "lp": null,
+    "aliases": []
+  },
+  {
+    "id": "softwareprojekt_chat_search_and_summaries_llms",
+    "name": "Softwareprojekt: Chat, Search and Summaries: Smarter Apps with LLMs",
+    "lp": null,
+    "aliases": []
   }
 ]

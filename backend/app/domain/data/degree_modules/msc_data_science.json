@@ -273,5 +273,185 @@
     }
   },
   "thesis_module_id": "masterarbeit_data_science",
-  "offering_credits": []
+  "offering_credits": [
+    {
+      "course_id": "human_centered_data_science",
+      "placements": [
+        { "module_id": "ethical_foundations_of_data_science", "area": "grundlagen" }
+      ]
+    },
+    {
+      "course_id": "data_science_in_life_sciences",
+      "placements": [
+        { "module_id": "data_science_in_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "machine_learning_in_bioinformatics",
+      "placements": [
+        { "module_id": "machine_learning_in_bioinformatics", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "machine_learning_and_ai_in_the_life_sciences",
+      "placements": [
+        { "module_id": "applied_machine_learning_in_bioinformatics", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "computer_vision_for_biomedical_images",
+      "placements": [
+        { "module_id": "applied_machine_learning_in_bioinformatics", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "complex_systems_in_bioinformatics",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "methodik_klinischer_studien",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "complex_data_analysis_in_physiology",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "deep_learning_for_biomedical_applications",
+      "placements": [
+        { "module_id": "masterseminar_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "journal_club_computational_biology",
+      "placements": [
+        { "module_id": "masterseminar_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "journal_club_public_health_data_science",
+      "placements": [
+        { "module_id": "masterseminar_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "seminar_netzwerke_dynamische_modelle_und_ml_fur_datenintegration_in_den_lebenswissenschaften",
+      "placements": [
+        { "module_id": "masterseminar_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "elektronische_krankenakten_und_ihre_nutzung_in_der_aktuellen_forschung",
+      "placements": [
+        { "module_id": "masterseminar_ds_life_sciences", "area": "life_sciences" }
+      ]
+    },
+    {
+      "course_id": "topics_in_stochastic_processes_and_machine_learning",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" },
+        { "module_id": "spezielle_aspekte_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "cybersecurity_and_ai_iv_angriffe",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" },
+        { "module_id": "spezielle_aspekte_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "advanced_data_visualization_for_artificial_intelligence",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" },
+        { "module_id": "spezielle_aspekte_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "markovketten",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_life_sciences", "area": "life_sciences" },
+        { "module_id": "spezielle_aspekte_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "bild_und_videocodierung",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "advanced_topics_on_post_quantum_cryptography",
+      "placements": [
+        { "module_id": "spezielle_aspekte_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "mobilkommunikation",
+      "placements": [
+        { "module_id": "mobilkommunikation", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "datenbanksysteme_data_science",
+      "placements": [
+        { "module_id": "datenbanksysteme_data_science", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_anwendungen_von_algorithmen",
+      "placements": [
+        { "module_id": "softwareprojekt_data_science_a", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_telematik",
+      "placements": [
+        { "module_id": "softwareprojekt_data_science_a", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_semantische_technologien",
+      "placements": [
+        { "module_id": "softwareprojekt_data_science_a", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_verteilte_systeme",
+      "placements": [
+        { "module_id": "softwareprojekt_data_science_a", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "softwareprojekt_chat_search_and_summaries_llms",
+      "placements": [
+        { "module_id": "softwareprojekt_data_science_a", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "projektseminar_probleme_bei_planungssystemen_der_nachsten_generation_mit_schwerpunkt_auf_navigationssystemen",
+      "placements": [
+        { "module_id": "masterseminar_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_new_trends_in_informationsystems_ntis",
+      "placements": [
+        { "module_id": "masterseminar_ds_technologies", "area": "technologies" }
+      ]
+    },
+    {
+      "course_id": "seminar_proseminar_how_to_startup",
+      "placements": [
+        { "module_id": "masterseminar_ds_life_sciences", "area": "life_sciences" },
+        { "module_id": "masterseminar_ds_technologies", "area": "technologies" }
+      ]
+    }
+  ]
 }

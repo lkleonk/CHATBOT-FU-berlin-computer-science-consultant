@@ -79,11 +79,21 @@ def test_markdown_style_urls_are_normalized_for_citations():
     assert any(citation["source"].endswith("course_offerings/sose26.json") for citation in citations)
 
 
-def test_degree_without_credit_mappings_has_no_offerings():
-    assert has_offerings(MSC)
-    assert not has_offerings("msc_data_science")
-    assert project_offerings("msc_data_science") == {}
-    assert "none" in build_available_semesters_note("msc_data_science")
+def test_data_science_offerings_are_projected():
+    assert has_offerings("msc_data_science")
+    tree = project_offerings("msc_data_science")
+    assert set(tree) == {"sose26"}
+    assert set(tree["sose26"]) == {"grundlagen", "life_sciences", "technologies"}
+
+    def titles(area, course_type):
+        return {course["title"] for course in tree["sose26"].get(area, {}).get(course_type, [])}
+
+    # Cross-area elective lecture appears in both profile areas.
+    assert "Markovketten" in titles("life_sciences", "vl")
+    assert "Markovketten" in titles("technologies", "vl")
+    # Named Technologies modules land in the technologies area.
+    assert "Datenbanksysteme Data Science" in titles("technologies", "vl")
+    assert "sose26" in build_available_semesters_note("msc_data_science")
 
 
 def test_projection_matches_pre_migration_master_buckets():

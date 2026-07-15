@@ -53,7 +53,8 @@ def test_course_offerings_endpoint_is_degree_scoped_and_read_only(monkeypatch):
     assert response.status_code == 200
     body = response.json()
     assert body["degree_program"] == "M.Sc. Data Science"
-    assert body["semesters"] == []
+    assert body["semesters"][0]["id"] == "sose26"
+    assert {area["id"] for area in body["semesters"][0]["areas"]} == {"grundlagen", "life_sciences", "technologies"}
 
 
 def test_course_offerings_endpoint_rejects_unknown_degree():

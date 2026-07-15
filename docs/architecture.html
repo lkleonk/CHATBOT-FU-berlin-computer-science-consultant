@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modulio System Architecture</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #d7dbe0;
+      --line: #9ca3af;
+      --accent: #4f46e5;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 48px 24px 56px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 650;
+    }
+
+    .subtitle {
+      margin: 0 0 32px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .diagram {
+      width: 100%;
+      overflow-x: auto;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 0;
+    }
+
+    svg {
+      display: block;
+      min-width: 1000px;
+      width: 100%;
+      height: auto;
+    }
+
+    .node rect {
+      fill: #ffffff;
+      stroke: var(--border);
+      stroke-width: 1.5;
+      rx: 10;
+      ry: 10;
+      filter: drop-shadow(0 1px 3px rgba(17, 24, 39, 0.07));
+    }
+
+    .node .title {
+      font-size: 16px;
+      font-weight: 600;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .node .sub {
+      font-size: 13px;
+      fill: var(--muted);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .edge {
+      stroke: var(--line);
+      stroke-width: 1.5;
+      fill: none;
+      marker-end: url(#arrow);
+    }
+
+    .label {
+      font-size: 12.5px;
+      fill: var(--muted);
+      text-anchor: middle;
+    }
+
+    .principle {
+      margin: 28px auto 0;
+      text-align: center;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .principle strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Modulio — Architecture</h1>
+  <p class="subtitle">FU Berlin study consultant · cs-modulio.com</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1100 360" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="High-level architecture: browser to Caddy to FastAPI backend to LLM provider, with static frontend and degree data below">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/>
+        </marker>
+      </defs>
+
+      <!-- main flow -->
+      <g class="node">
+        <rect x="40" y="70" width="200" height="100"/>
+        <text x="140" y="110" class="title">Browser</text>
+        <text x="140" y="134" class="sub">static Next.js UI</text>
+      </g>
+
+      <g class="node">
+        <rect x="320" y="70" width="200" height="100"/>
+        <text x="420" y="110" class="title">Caddy</text>
+        <text x="420" y="134" class="sub">HTTPS edge</text>
+      </g>
+
+      <g class="node">
+        <rect x="600" y="70" width="200" height="100"/>
+        <text x="700" y="110" class="title">FastAPI backend</text>
+        <text x="700" y="134" class="sub">LangGraph agent</text>
+      </g>
+
+      <g class="node">
+        <rect x="880" y="70" width="200" height="100"/>
+        <text x="980" y="110" class="title">LLM provider</text>
+        <text x="980" y="134" class="sub">parse &amp; explain only</text>
+      </g>
+
+      <path class="edge" d="M240,120 L320,120"/>
+      <text x="280" y="106" class="label">HTTPS</text>
+      <path class="edge" d="M520,120 L600,120"/>
+      <text x="560" y="106" class="label">/api</text>
+      <path class="edge" d="M800,120 L880,120"/>
+      <text x="840" y="106" class="label">chat</text>
+
+      <!-- supporting boxes -->
+      <g class="node">
+        <rect x="320" y="240" width="200" height="90"/>
+        <text x="420" y="275" class="title">Static frontend</text>
+        <text x="420" y="299" class="sub">frontend/out</text>
+      </g>
+
+      <g class="node">
+        <rect x="600" y="240" width="200" height="90"/>
+        <text x="700" y="275" class="title">Degree rules &amp; data</text>
+        <text x="700" y="299" class="sub">deterministic Python</text>
+      </g>
+
+      <path class="edge" d="M420,170 L420,240"/>
+      <text x="432" y="209" class="label" style="text-anchor: start">serves</text>
+      <path class="edge" d="M700,170 L700,240"/>
+      <text x="712" y="209" class="label" style="text-anchor: start">validate · lookup</text>
+    </svg>
+  </div>
+
+  <p class="principle">
+    <strong>LLM parses → Python validates → LLM explains</strong> — the LLM never
+    owns final validation.
+  </p>
+</main>
+</body>
+</html>
