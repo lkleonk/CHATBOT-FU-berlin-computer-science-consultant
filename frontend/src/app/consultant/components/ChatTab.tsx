@@ -1,5 +1,7 @@
 "use client";
 
+import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Box from "@mui/material/Box";
@@ -39,6 +41,8 @@ type ChatTabProps = {
   onRuleCheckResult: (result: RuleCheckResult | null) => void;
   onStudyPlan: (plan: StudyPlan | null) => void;
   onMessagesChange: (messages: ChatMessage[]) => void;
+  onOpenUsage: () => void;
+  onDownloadChat: () => void;
 };
 
 function formatResetTime(value: string) {
@@ -46,6 +50,10 @@ function formatResetTime(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function formatResetTimeShort(value: string) {
+  return new Intl.DateTimeFormat(undefined, { timeStyle: "short" }).format(new Date(value));
 }
 
 function countRuleIssues(result: RuleCheckResult) {
@@ -61,6 +69,8 @@ export function ChatTab({
   onRuleCheckResult,
   onStudyPlan,
   onMessagesChange,
+  onOpenUsage,
+  onDownloadChat,
 }: ChatTabProps) {
   const { usage, updateQuota } = useUsage();
   const { effectiveDegreeId } = useDegree();
@@ -205,6 +215,60 @@ export function ChatTab({
 
   return (
     <Box sx={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column" }}>
+      <Box
+        sx={{
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 1,
+          px: { xs: 1.5, md: 3 },
+          py: 0.75,
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+        }}
+      >
+        <Tooltip title="Your chat isn't saved. Download it if you want to keep a copy.">
+          <span>
+            <Button
+              size="small"
+              variant="text"
+              startIcon={<DownloadOutlinedIcon fontSize="small" />}
+              disabled={messages.length === 0}
+              onClick={onDownloadChat}
+            >
+              Download
+            </Button>
+          </span>
+        </Tooltip>
+        <Tooltip
+          title={
+            usage
+              ? `${usage.remaining} of ${usage.limit} daily requests left`
+              : "Daily request allowance"
+          }
+        >
+          <Chip
+            icon={<DataUsageOutlinedIcon />}
+            label={
+              usage
+                ? `Usage: ${usage.remaining}/${usage.limit} requests · resets ${formatResetTimeShort(usage.reset_at)}`
+                : "Usage —"
+            }
+            color={
+              usage && usage.remaining <= 0
+                ? "error"
+                : usage && usage.remaining <= 10
+                  ? "warning"
+                  : "default"
+            }
+            onClick={onOpenUsage}
+            clickable
+            size="small"
+          />
+        </Tooltip>
+      </Box>
       <Box
         ref={scrollRef}
         sx={{

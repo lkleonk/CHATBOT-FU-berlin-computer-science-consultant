@@ -1,22 +1,17 @@
 "use client";
 
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
-import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import NextLink from "next/link";
 import { useEffect, useState } from "react";
@@ -278,14 +273,14 @@ export function ConsultantShell() {
         <Box
           sx={{
             px: { xs: 1.5, md: 3 },
-            py: 1.25,
             display: "flex",
+            flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 1.5,
+            columnGap: 1.5,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}>
             <SchoolOutlinedIcon color="primary" />
             <Box>
               <Typography variant="h1">Modulio</Typography>
@@ -315,79 +310,52 @@ export function ConsultantShell() {
               )}
             </Box>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {activeTab === 0 && (
-              <Tooltip title="Download chat">
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Download chat"
-                    disabled={chatMessages.length === 0}
-                    onClick={() => openChatExport()}
-                  >
-                    <DownloadOutlinedIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            )}
-            <Chip
-              icon={<DataUsageOutlinedIcon />}
-              label={
-                <>
-                  <Box component="span" sx={{ display: { xs: "inline", sm: "none" } }}>
-                    {usage?.remaining ?? "—"}
-                  </Box>
+          <Tabs
+            value={activeTab}
+            onChange={(_, nextTab) => setActiveTab(nextTab)}
+            sx={{
+              order: { xs: 3, lg: 0 },
+              width: { xs: "100%", lg: "auto" },
+              flex: { lg: "1 1 auto" },
+              alignSelf: { lg: "stretch" },
+              minHeight: { xs: 44, sm: 52 },
+              "& .MuiTabs-scroller": {
+                height: "100%",
+              },
+              "& .MuiTabs-list": {
+                height: "100%",
+              },
+              "& .MuiTab-root": {
+                flex: 1,
+                height: "100%",
+              },
+            }}
+          >
+            {tabs.map((tab) => (
+              <Tab
+                key={tab.id}
+                icon={tab.icon}
+                iconPosition="start"
+                label={
                   <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                    {usage ? `${usage.remaining} requests left` : "Daily request allowance"}
+                    {tab.label}
                   </Box>
-                </>
-              }
-              color={usage && usage.remaining <= 10 ? "warning" : "default"}
-              onClick={() => setUsageDialogOpen(true)}
-              clickable
-              size="small"
-            />
-            <Chip
-              label={sessionId ? "Session active" : "No session"}
-              color={sessionId ? "success" : "default"}
-              size="small"
-              sx={{ display: { xs: "none", md: "inline-flex" } }}
-            />
-          </Box>
+                }
+                id={`${tab.id}-tab`}
+                aria-label={tab.label}
+                aria-controls={`${tab.id}-panel`}
+                sx={{
+                  minWidth: 0,
+                  minHeight: { xs: 44, sm: 52 },
+                  px: { xs: 0.75, sm: 2 },
+                  "& .MuiTab-iconWrapper": {
+                    mr: { xs: 0, sm: 1 },
+                  },
+                }}
+              />
+            ))}
+          </Tabs>
         </Box>
-        <Tabs
-          value={activeTab}
-          onChange={(_, nextTab) => setActiveTab(nextTab)}
-          variant="fullWidth"
-          sx={{
-            minHeight: { xs: 44, sm: 52 },
-            px: { xs: 0.5, md: 2 },
-          }}
-        >
-          {tabs.map((tab) => (
-            <Tab
-              key={tab.id}
-              icon={tab.icon}
-              iconPosition="start"
-              label={
-                <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                  {tab.label}
-                </Box>
-              }
-              id={`${tab.id}-tab`}
-              aria-label={tab.label}
-              aria-controls={`${tab.id}-panel`}
-              sx={{
-                minWidth: 0,
-                minHeight: { xs: 44, sm: 52 },
-                px: { xs: 0.75, sm: 2 },
-                "& .MuiTab-iconWrapper": {
-                  mr: { xs: 0, sm: 1 },
-                },
-              }}
-            />
-          ))}
-        </Tabs>
       </Box>
 
       <Box component="main" sx={{ flex: 1, minHeight: 0 }}>
@@ -406,6 +374,8 @@ export function ConsultantShell() {
               onRuleCheckResult={setLatestRuleCheck}
               onStudyPlan={setLatestStudyPlan}
               onMessagesChange={setChatMessages}
+              onOpenUsage={() => setUsageDialogOpen(true)}
+              onDownloadChat={() => openChatExport()}
             />
           )}
         </Box>

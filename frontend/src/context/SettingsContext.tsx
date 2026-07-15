@@ -1,5 +1,6 @@
 "use client";
 
+import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import {
   createContext,
@@ -97,6 +98,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   return (
     <SettingsContext.Provider value={value}>
       <ThemeProvider theme={theme}>
+        <CssBaseline enableColorScheme />
         {children}
       </ThemeProvider>
     </SettingsContext.Provider>

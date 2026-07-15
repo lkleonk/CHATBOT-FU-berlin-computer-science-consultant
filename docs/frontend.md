@@ -79,10 +79,21 @@ immediately without the dialog.
 
 ## Request Allowance
 
-The header chip opens `RequestUsageDialog`. Chat and transcript responses update
-the context from `X-RateLimit-*` headers with scope `user_action`; the global LLM
-quota is intentionally not displayed as a user's allowance. A warning dialog is
-shown once per reset period when between one and ten requests remain.
+The usage indicator (a `Usage: remaining/limit requests · resets <time>` chip
+with a data-usage icon) and the chat download action live together in a
+slim, non-scrolling strip at the top of the Chat tab, since chat and
+transcript actions are what consume the allowance; clicking the chip opens
+`RequestUsageDialog`. The download action is a labeled `Download` button
+(not icon-only) whose tooltip states that the chat is not persisted and must
+be downloaded to keep a copy, since session chat only lives in
+`sessionStorage`. The global header holds only the logo/degree switcher and
+the tab strip, which fills the remaining bar width edge to edge (each tab
+sharing equal width); on smaller screens the tabs wrap to their own
+full-width row below the logo. Chat and transcript responses update the
+context from `X-RateLimit-*` headers with scope `user_action`; the global
+LLM quota is intentionally not displayed as a user's allowance. A warning
+dialog is shown once per reset period when between one and ten requests
+remain.
 
 When the allowance is fully exhausted (`remaining <= 0`), `QuotaExhaustedDialog`
 is shown once per reset period. It explains that chat and transcript checks are

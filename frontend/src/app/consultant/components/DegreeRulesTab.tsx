@@ -77,10 +77,23 @@ export function DegreeRulesTab() {
           }}
         >
           <Box>
-            <Typography variant="h2">Degree Rules</Typography>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+              <Typography variant="h2">Degree Rules</Typography>
+              {catalogue && (
+                <Chip label={catalogue.catalogue_version} size="small" variant="outlined" />
+              )}
+            </Stack>
             {catalogue && (
               <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
                 {catalogue.degree_program} - {catalogue.regulation}
+              </Typography>
+            )}
+            {catalogue && (
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", display: "block", mt: 0.5 }}
+              >
+                {catalogue.source_note}
               </Typography>
             )}
           </Box>
@@ -94,28 +107,23 @@ export function DegreeRulesTab() {
             aria-label="Degree escape room"
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              alignItems: { xs: "flex-start", sm: "center" },
-              justifyContent: "space-between",
-              gap: 1.5,
-              px: 2,
-              py: 1.5,
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 1,
+              px: 1.5,
+              py: 0.75,
               border: 1,
               borderColor: "divider",
               borderRadius: 2,
               bgcolor: "background.paper",
             }}
           >
-            <Stack direction="row" spacing={1.25} sx={{ alignItems: "flex-start" }}>
-              <SportsEsportsOutlinedIcon color="primary" sx={{ mt: 0.25 }} />
-              <Box>
-                <Typography variant="h3">Learn the degree through play</Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
-                  Explore the degree structure in Modulio&apos;s external escape room.
-                </Typography>
-              </Box>
-            </Stack>
+            <SportsEsportsOutlinedIcon color="primary" fontSize="small" />
+            <Typography variant="body2" sx={{ flexGrow: 1, color: "text.secondary" }}>
+              Learn the degree through play in Modulio&apos;s external escape room.
+            </Typography>
             <Button
+              size="small"
               variant="outlined"
               endIcon={<LaunchOutlinedIcon />}
               href={MODULIO_ESCAPE_URL}
@@ -137,94 +145,84 @@ export function DegreeRulesTab() {
         {error && <Alert severity="error">{error}</Alert>}
 
         {catalogue && (
-          <>
-            <Alert severity="info" variant="outlined">
-              {catalogue.source_note}
-            </Alert>
-            <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
-              <Chip label={catalogue.catalogue_version} size="small" />
-              <Chip label={`${catalogue.sections.length} sections`} size="small" />
-            </Stack>
-
-            <Stack spacing={1}>
-              {catalogue.sections.map((section) => (
-                <Accordion key={section.id} disableGutters variant="outlined">
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box>
-                      <Typography variant="h3">{section.title}</Typography>
-                      <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
-                        {section.description}
-                      </Typography>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Stack spacing={1.5}>
-                      {section.items.map((item) => {
-                        const range = itemRange(item);
-                        return (
-                          <Box
-                            key={`${section.id}-${item.label}`}
+          <Stack spacing={1}>
+            {catalogue.sections.map((section) => (
+              <Accordion key={section.id} disableGutters variant="outlined">
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Box>
+                    <Typography variant="h3">{section.title}</Typography>
+                    <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                      {section.description}
+                    </Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Stack spacing={1.5}>
+                    {section.items.map((item) => {
+                      const range = itemRange(item);
+                      return (
+                        <Box
+                          key={`${section.id}-${item.label}`}
+                          sx={{
+                            borderTop: 1,
+                            borderColor: "divider",
+                            pt: 1.25,
+                          }}
+                        >
+                          <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={1}
                             sx={{
-                              borderTop: 1,
-                              borderColor: "divider",
-                              pt: 1.25,
+                              alignItems: { xs: "flex-start", sm: "center" },
+                              justifyContent: "space-between",
                             }}
                           >
-                            <Stack
-                              direction={{ xs: "column", sm: "row" }}
-                              spacing={1}
-                              sx={{
-                                alignItems: { xs: "flex-start", sm: "center" },
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                                {item.label}
-                              </Typography>
-                              {range && <Chip label={range} size="small" variant="outlined" />}
-                            </Stack>
-                            <Box sx={{ typography: "body2", color: "text.secondary", mt: 0.5 }}>
-                              <LinkifiedText text={item.text} />
-                            </Box>
+                            <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                              {item.label}
+                            </Typography>
+                            {range && <Chip label={range} size="small" variant="outlined" />}
+                          </Stack>
+                          <Box sx={{ typography: "body2", color: "text.secondary", mt: 0.5 }}>
+                            <LinkifiedText text={item.text} />
                           </Box>
-                        );
-                      })}
+                        </Box>
+                      );
+                    })}
 
-                      {section.sources.length > 0 && (
-                        <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
-                          {section.sources.map((source) => (
-                            <Chip
-                              key={`${section.id}-${source.label}`}
-                              label={source.label}
-                              size="small"
-                              variant="outlined"
-                              {...(source.path.startsWith("http")
-                                ? {
-                                    component: "a",
-                                    href: source.path,
-                                    target: "_blank",
-                                    rel: "noreferrer",
-                                    clickable: true,
-                                  }
-                                : {})}
-                            />
-                          ))}
-                        </Stack>
-                      )}
+                    {section.sources.length > 0 && (
+                      <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
+                        {section.sources.map((source) => (
+                          <Chip
+                            key={`${section.id}-${source.label}`}
+                            label={source.label}
+                            size="small"
+                            variant="outlined"
+                            {...(source.path.startsWith("http")
+                              ? {
+                                  component: "a",
+                                  href: source.path,
+                                  target: "_blank",
+                                  rel: "noreferrer",
+                                  clickable: true,
+                                }
+                              : {})}
+                          />
+                        ))}
+                      </Stack>
+                    )}
 
-                      {section.related_issue_codes.length > 0 && (
-                        <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
-                          {section.related_issue_codes.map((code) => (
-                            <Chip key={`${section.id}-${code}`} label={code} size="small" />
-                          ))}
-                        </Stack>
-                      )}
-                    </Stack>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Stack>
-          </>
+                    {section.related_issue_codes.length > 0 && (
+                      <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
+                        {section.related_issue_codes.map((code) => (
+                          <Chip key={`${section.id}-${code}`} label={code} size="small" />
+                        ))}
+                      </Stack>
+                    )}
+                  </Stack>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Stack>
         )}
       </Stack>
     </Box>
