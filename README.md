@@ -2,7 +2,7 @@
 
 Website: [cs-modulio.com](https://cs-modulio.com)
 
-# LeoPunkt — FU Berlin CS Consultant
+# Modulio — FU Berlin CS Consultant
 
 Full-stack prototype for a FU Berlin computer-science study consultant, named **LeoPunkt** (a nod to *Leistungspunkte* — the LP credits it helps you track).
 
