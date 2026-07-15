@@ -4,7 +4,7 @@ Website: [cs-modulio.com](https://cs-modulio.com)
 
 # Modulio — FU Berlin CS Consultant
 
-Full-stack prototype for a FU Berlin computer-science study consultant, named **LeoPunkt** (a nod to *Leistungspunkte* — the LP credits it helps you track).
+Full-stack prototype for a FU Berlin computer-science study consultant, named **Modulio** (a nod to *Leistungspunkte* — the LP credits it helps you track).
 
 The app supports multiple degree programs through a backend degree registry — currently the M.Sc. Informatik (SPO 2014), the M.Sc. Data Science (FU-Mitteilungen 18/2021), and the B.Sc. Informatik (FU-Mitteilungen 23/2023). Users pick their degree in the welcome dialog and can switch later from the header; each session is bound to one degree. The app answers questions from local resources, offers a read-only Course Registry of locally listed semester offerings, and can check a proposed study plan against deterministic per-degree rules. The B.Sc. Informatik includes its 2023 degree rules and locally supplied SoSe 2026 offerings; availability in other semesters is unknown, 0084d maths courses are free-elective candidates only, and deterministic plan validation is still pending. It includes a standalone Next.js frontend and a FastAPI backend. It reuses architecture patterns from the parent `llm_chatbot` project, but all code lives inside `fu_berlin_cs_consultant/`.
 
