@@ -279,7 +279,7 @@ export function ChatTab({
           py: 2,
         }}
       >
-        <Stack spacing={1.5} sx={{ maxWidth: 980, mx: "auto" }}>
+        <Stack spacing={1.5}>
           {messages.length === 0 && (
             <Paper variant="outlined" sx={{ p: 2, bgcolor: "background.paper" }}>
               <Typography variant="h2" sx={{ mb: 0.75 }}>
@@ -310,7 +310,7 @@ export function ChatTab({
                   variant="outlined"
                   sx={{
                     p: 1.5,
-                    maxWidth: "min(780px, 100%)",
+                    maxWidth: { xs: "90%", md: "75%" },
                     bgcolor: (theme) =>
                       isUser
                         ? theme.palette.mode === "dark"
@@ -430,7 +430,7 @@ export function ChatTab({
           py: 1.5,
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ maxWidth: 980, mx: "auto", alignItems: "flex-end" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "flex-end" }}>
           <TranscriptUpload
             ensureSession={ensureSession}
             onUploaded={handleTranscriptUploaded}
@@ -479,8 +479,6 @@ export function ChatTab({
           direction="row"
           spacing={0.75}
           sx={{
-            maxWidth: 980,
-            mx: "auto",
             mt: 1,
             alignItems: "flex-start",
             justifyContent: "center",
