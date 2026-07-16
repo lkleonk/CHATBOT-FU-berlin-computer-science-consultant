@@ -39,9 +39,8 @@ def extract_and_validate(
 
     readability = validate_pdf_readability(cleaned_document)
     if not readability.is_readable:
-        logger.info(
-            "Rejected unreadable PDF %s: %s", cleaned_document.filename, readability.reason
-        )
+        # Filename omitted: uploaded names can identify the student.
+        logger.info("Rejected unreadable PDF: %s", readability.reason)
         raise PdfUnreadableError(readability)
 
     return cleaned_document

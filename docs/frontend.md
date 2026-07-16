@@ -90,10 +90,20 @@ be downloaded to keep a copy, since session chat only lives in
 the tab strip, which fills the remaining bar width edge to edge (each tab
 sharing equal width); on smaller screens the tabs wrap to their own
 full-width row below the logo. Chat and transcript responses update the
-context from `X-RateLimit-*` headers with scope `user_action`; the global
-LLM quota is intentionally not displayed as a user's allowance. A warning
-dialog is shown once per reset period when between one and ten requests
-remain.
+context from `X-RateLimit-*` headers with scope `user_action`; headers with any
+other scope are dropped by `parseUsageHeaders`, so a service-wide limit is never
+rendered as a user's own allowance. A warning dialog is shown once per reset
+period when between one and ten requests remain.
+
+The chip shows the caller's own allowance only. The shared service-wide budget
+(`GET /api/usage` -> `service`) appears one level in, in `RequestUsageDialog`
+under the personal figures: remaining count, a progress bar that turns amber past
+80% use, and — when it is exhausted — a warning that requests will fail even
+though the user still has their own allowance left. Both numbers count the same
+unit (one chat message or transcript upload), so they are directly comparable.
+The dialog refreshes usage on open, which is what keeps the service figure
+current; `updateQuota` only ever merges the caller's own quota from response
+headers and leaves `service` untouched.
 
 When the allowance is fully exhausted (`remaining <= 0`), `QuotaExhaustedDialog`
 is shown once per reset period. It explains that chat and transcript checks are
@@ -146,3 +156,23 @@ shows a `New Trace File` button. It calls `POST /api/tracing/reinit`, which
 rotates the backend's WizardFlow trace to a fresh timestamped file (keeping the
 graph and output configuration) and reports the new trace path. A disabled
 tracer returns HTTP 409 with `error_code == "tracing_disabled"`.
+
+## Diagnostic tracing opt-out
+
+`SettingsContext` holds `tracingEnabled`, persisted to `localStorage` under
+`TRACING_ENABLED_STORAGE_KEY` and defaulting to on — only a stored `"false"` opts
+out. `ChatTab` and `TranscriptUpload` read it and pass it to `sendMessage` /
+`uploadTranscript`, so a toggle applies to the next request without touching the
+session.
+
+It is a user-facing control, not a developer one, and is gated on
+`usage?.diagnostic_tracing_enabled` rather than `DEV_TOOLS_ENABLED`: a Checkbox in
+`WelcomeDialog` (consent framing, replacing the old warning caption) and a Switch
+in the `SettingsTab` `Diagnostic tracing` section (matching the other settings
+switches). When the deployment reports tracing off, neither renders at all —
+absent rather than disabled, because a control that cannot change anything implies
+the deployment might be tracing when it is not. A stored opt-out survives that and
+still applies if the deployment turns tracing back on.
+
+`CURRENT_WELCOME_VERSION` was bumped to `"3"` so returning users are shown the new
+consent control once.

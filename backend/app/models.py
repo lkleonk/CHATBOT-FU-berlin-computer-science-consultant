@@ -9,6 +9,8 @@ from app.domain.study_plan import StudyPlan
 
 class MessageRequest(BaseModel):
     content: str = Field(min_length=1)
+    # Client-side opt-out. WIZARDFLOW_ENABLED remains the deployment-level master.
+    tracing_enabled: bool = True
 
 
 class SessionCreateRequest(BaseModel):
@@ -61,11 +63,20 @@ class CourseOfferingsCatalogue(BaseModel):
     semesters: list[CourseOfferingSemester]
 
 
+class ServiceQuota(BaseModel):
+    """Service-wide daily allowance, in the same user-action unit as the per-IP one."""
+
+    limit: int
+    used: int
+    remaining: int
+
+
 class UsageResponse(BaseModel):
     limit: int
     used: int
     remaining: int
     reset_at: datetime
+    service: ServiceQuota
     session_inactivity_ttl_seconds: int
     diagnostic_tracing_enabled: bool
     quota_scope: Literal["client_ip"] = "client_ip"

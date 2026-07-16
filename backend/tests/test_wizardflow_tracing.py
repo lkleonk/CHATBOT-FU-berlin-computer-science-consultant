@@ -89,6 +89,38 @@ def test_session_service_adds_a_unique_wizardflow_id_to_graph_state(monkeypatch)
     assert ends == [(message_id, "How many LP?")]
 
 
+def test_session_service_writes_no_trace_payloads_when_the_client_opts_out(tmp_path, monkeypatch):
+    class FakeAgentApp:
+        async def ainvoke(self, state, config):
+            # Mirror a node: log through the real service using the state's id.
+            wizardflow_service.log_llm_input(
+                state["wizardflow_message_id"],
+                "scope_classifier",
+                "system prompt",
+                "user message",
+            )
+            return {"reply": "Answer", "message_type": "degree_question", "citations": []}
+
+    tracer = wizardflow.init(
+        output_dir=str(tmp_path),
+        nodes=["__start__", "scope_classifier", "__end__"],
+    )
+    monkeypatch.setattr(wizardflow_service, "tracer", tracer)
+    monkeypatch.setattr(
+        "app.services.session_service._get_agent_app",
+        lambda: FakeAgentApp(),
+    )
+
+    reply = asyncio.run(
+        SessionService().process_message("session-1", "How many LP?", tracing_enabled=False)
+    )
+
+    assert reply.reply == "Answer"
+    # An empty id disables tracing, so nothing was written and the lazily
+    # created trace file never came into existence.
+    assert not Path(tracer.current_path).exists()
+
+
 def _tracing_client() -> TestClient:
     app = FastAPI()
     app.include_router(tracing_router)

@@ -164,19 +164,22 @@ export async function deleteSession(sessionId: string): Promise<void> {
 export async function sendMessage(
   sessionId: string,
   content: string,
+  tracingEnabled = true,
 ): Promise<QuotaAwareResponse<ModelReply>> {
   return requestJsonWithMetadata<ModelReply>(`/api/sessions/${sessionId}/message`, {
     method: "POST",
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, tracing_enabled: tracingEnabled }),
   });
 }
 
 export async function uploadTranscript(
   sessionId: string,
   file: File,
+  tracingEnabled = true,
 ): Promise<QuotaAwareResponse<TranscriptUploadResponse>> {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("tracing_enabled", String(tracingEnabled));
 
   // No explicit Content-Type: the browser sets the multipart boundary itself.
   const response = await fetch(joinUrl(`/api/sessions/${sessionId}/transcript`), {

@@ -46,7 +46,8 @@ class PyPdfExtractor(PDFExtractor):
             try:
                 raw = page.extract_text() or ""
             except Exception:
-                logger.warning("Failed to extract text from page %s of %s", index, filename)
+                # Filename omitted: uploaded names can identify the student.
+                logger.warning("Failed to extract text from page %s of %s pages", index, len(reader.pages))
                 raw = ""
             pages.append(ExtractedPage(page=index, text=raw))
 

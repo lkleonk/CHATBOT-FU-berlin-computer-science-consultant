@@ -5,11 +5,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -22,6 +25,7 @@ import Typography from "@mui/material/Typography";
 import { useState } from "react";
 
 import { useDegree } from "@/context/DegreeContext";
+import { useSettings } from "@/context/SettingsContext";
 import { useUsage } from "@/context/UsageContext";
 
 type WelcomeDialogProps = {
@@ -33,6 +37,7 @@ type WelcomeDialogProps = {
 export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps) {
   const { usage } = useUsage();
   const { degreeId, degrees, effectiveDegreeId } = useDegree();
+  const { tracingEnabled, setTracingEnabled } = useSettings();
   const [pickedDegree, setPickedDegree] = useState<string | null>(null);
   // An explicit pick wins; otherwise preselect the previously stored choice.
   const selectedDegree = pickedDegree ?? degreeId;
@@ -130,9 +135,23 @@ export function WelcomeDialog({ open, onClose, onViewUsage }: WelcomeDialogProps
           </ListItem>
         </List>
         {usage?.diagnostic_tracing_enabled && (
-          <Typography variant="caption" sx={{ display: "block", color: "warning.main", mt: 1 }}>
-            Diagnostic tracing is enabled on this deployment and may retain unredacted prompts and transcript text separately from session state.
-          </Typography>
+          <Box sx={{ mt: 1, p: 1.5, border: 1, borderColor: "divider", borderRadius: 1.5 }}>
+            <FormControlLabel
+              sx={{ m: 0 }}
+              control={
+                <Checkbox
+                  checked={tracingEnabled}
+                  onChange={(_, checked) => setTracingEnabled(checked)}
+                />
+              }
+              label="Allow diagnostic tracing"
+            />
+            <Typography variant="caption" sx={{ display: "block", color: "text.secondary" }}>
+              This deployment can retain unredacted prompts and transcript text in local trace files
+              on the application server, separately from session state. Unticking this stops those
+              traces being written for your requests. You can change this later in Settings.
+            </Typography>
+          </Box>
         )}
       </DialogContent>
       <DialogActions>

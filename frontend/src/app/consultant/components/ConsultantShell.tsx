@@ -57,6 +57,7 @@ const DAILY_REQUEST_ALLOWANCE_PREVIEW: UsageResponse = {
   used: 13,
   remaining: 12,
   reset_at: "2026-07-13T00:00:00Z",
+  service: { limit: 150, used: 111, remaining: 39 },
   session_inactivity_ttl_seconds: 172800,
   diagnostic_tracing_enabled: false,
   quota_scope: "client_ip",

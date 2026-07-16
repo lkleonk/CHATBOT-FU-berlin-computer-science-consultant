@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile, status
+from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile, status
 
 from app.domain.course_offerings import (
     area_label,
@@ -73,7 +73,9 @@ async def send_message(
 ):
     quota = daily_quota.consume_user_action(_client_id(request))
     _set_quota_headers(response, quota)
-    return await get_session_service().process_message(session_id, message.content)
+    return await get_session_service().process_message(
+        session_id, message.content, tracing_enabled=message.tracing_enabled
+    )
 
 
 @session_router.post("/{session_id}/transcript", response_model=TranscriptUploadResponse)
@@ -82,10 +84,13 @@ async def upload_transcript(
     request: Request,
     response: Response,
     file: UploadFile = File(...),
+    tracing_enabled: bool = Form(True),
 ):
     quota = daily_quota.consume_user_action(_client_id(request))
     _set_quota_headers(response, quota)
-    return await get_session_service().process_transcript(session_id, file)
+    return await get_session_service().process_transcript(
+        session_id, file, tracing_enabled=tracing_enabled
+    )
 
 
 def _client_id(request: Request) -> str:
@@ -104,6 +109,7 @@ async def read_usage(request: Request):
     quota = daily_quota.user_action_status(_client_id(request))
     return {
         **quota,
+        "service": daily_quota.service_status(),
         "session_inactivity_ttl_seconds": settings.SESSIONS.INACTIVITY_TTL_SECONDS,
         "diagnostic_tracing_enabled": settings.WIZARDFLOW.ENABLED,
         "quota_scope": "client_ip",

@@ -77,6 +77,8 @@ export function SettingsTab({
   const {
     darkMode,
     toggleDarkMode,
+    tracingEnabled,
+    setTracingEnabled,
     courseRegistryPreviewEnabled,
     setCourseRegistryPreviewEnabled,
     studyPlanPreviewEnabled,
@@ -215,6 +217,32 @@ export function SettingsTab({
               Reset conversation
             </Button>
           </Box>
+
+          {usage?.diagnostic_tracing_enabled && (
+            <>
+              <Divider />
+              <Box>
+                <Typography variant="h3" sx={{ mb: 1 }}>
+                  Diagnostic tracing
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5 }}>
+                  This deployment can retain unredacted prompts and transcript text in local trace
+                  files on the application server, separately from session state. Turning this off
+                  stops those traces being written for your requests. Traces already written earlier
+                  are not removed.
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={tracingEnabled}
+                      onChange={(_, checked) => setTracingEnabled(checked)}
+                    />
+                  }
+                  label="Allow diagnostic tracing"
+                />
+              </Box>
+            </>
+          )}
 
           {DEV_TOOLS_ENABLED && (
             <>

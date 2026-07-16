@@ -18,6 +18,7 @@ import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useDegree } from "@/context/DegreeContext";
+import { useSettings } from "@/context/SettingsContext";
 import { useUsage } from "@/context/UsageContext";
 import { ApiError, createSession, sendMessage } from "@/services/api";
 import type { RuleCheckResult, StudyPlan, TranscriptUploadResponse } from "@/types/api";
@@ -74,6 +75,7 @@ export function ChatTab({
 }: ChatTabProps) {
   const { usage, updateQuota } = useUsage();
   const { effectiveDegreeId } = useDegree();
+  const { tracingEnabled } = useSettings();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -164,7 +166,7 @@ export function ChatTab({
 
     try {
       const activeSessionId = await ensureSession();
-      const response = await sendMessage(activeSessionId, content);
+      const response = await sendMessage(activeSessionId, content, tracingEnabled);
       updateQuota(response.usage);
       const reply = response.data;
       const assistantMessage: ChatMessage = {
@@ -198,6 +200,7 @@ export function ChatTab({
     onStudyPlan,
     quotaExhausted,
     showError,
+    tracingEnabled,
     updateQuota,
   ]);
 

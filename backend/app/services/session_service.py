@@ -52,12 +52,16 @@ class SessionService:
         logger.info("Created consultant session: %s (degree=%s)", session_id, degree_id)
         return session_id
 
-    async def process_message(self, session_id: str, message_content: str) -> ModelReply:
+    async def process_message(
+        self, session_id: str, message_content: str, tracing_enabled: bool = True
+    ) -> ModelReply:
         with self._lifecycle.activity(session_id):
-            return await self._process_message(session_id, message_content)
+            return await self._process_message(session_id, message_content, tracing_enabled)
 
-    async def _process_message(self, session_id: str, message_content: str) -> ModelReply:
-        wizardflow_message_id = str(uuid.uuid4())
+    async def _process_message(
+        self, session_id: str, message_content: str, tracing_enabled: bool = True
+    ) -> ModelReply:
+        wizardflow_message_id = _trace_message_id(tracing_enabled)
         title = _message_title(message_content)
         try:
             agent_app = _get_agent_app()
@@ -95,13 +99,13 @@ class SessionService:
             wizardflow_service.end_message(wizardflow_message_id, title=title)
 
     async def process_transcript(
-        self, session_id: str, file: UploadFile
+        self, session_id: str, file: UploadFile, tracing_enabled: bool = True
     ) -> TranscriptUploadResponse:
         with self._lifecycle.activity(session_id):
-            return await self._process_transcript(session_id, file)
+            return await self._process_transcript(session_id, file, tracing_enabled)
 
     async def _process_transcript(
-        self, session_id: str, file: UploadFile
+        self, session_id: str, file: UploadFile, tracing_enabled: bool = True
     ) -> TranscriptUploadResponse:
         filename = file.filename or "transcript.pdf"
         content_type = (file.content_type or "").lower()
@@ -146,7 +150,7 @@ class SessionService:
                 detail={"error_code": "pdf_unreadable", "message": UNREADABLE_MESSAGE},
             ) from exc
 
-        wizardflow_message_id = str(uuid.uuid4())
+        wizardflow_message_id = _trace_message_id(tracing_enabled)
         degree = self._session_degree(session_id)
         try:
             plan = await parse_study_plan(document.full_text, wizardflow_message_id, degree)
@@ -163,8 +167,9 @@ class SessionService:
             )
 
         # Persist only the validated plan into LangGraph state so chat follow-ups
-        # can reference it. Extracted text remains only in the local WizardFlow
-        # trace because transcript llm_input payloads are intentionally unredacted.
+        # can reference it. When tracing is on, extracted text also remains in the
+        # local WizardFlow trace because transcript llm_input payloads are
+        # intentionally unredacted.
         self._persist_plan(session_id, plan, rule_result, wizardflow_message_id)
 
         reply = self._summarize_transcript(document.filename, plan, rule_result)
@@ -216,6 +221,16 @@ class SessionService:
             f"Processed {filename}: extracted {module_count} module(s) totalling "
             f"{total_lp} LP. {rule_result.summary}"
         )
+
+
+def _trace_message_id(tracing_enabled: bool) -> str:
+    """Mint a WizardFlow message id, or an empty one when the client opted out.
+
+    Every ``wizardflow_service`` entry point short-circuits on a falsy message
+    id, so an empty id is what disables tracing for a single request without
+    touching the graph or the process-wide tracer.
+    """
+    return str(uuid.uuid4()) if tracing_enabled else ""
 
 
 def _message_title(message: str, max_length: int = 100) -> str:

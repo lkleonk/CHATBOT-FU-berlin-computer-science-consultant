@@ -135,13 +135,14 @@ AGENT_ANSWER_COMPOSER_HISTORY_TURNS=4
 Daily usage limits:
 
 ```env
-DAILY_LLM_INVOCATIONS=200
-DAILY_USER_ACTIONS=100
+DAILY_GLOBAL_ACTIONS=150
+DAILY_USER_ACTIONS=60
 ```
 
-The LLM limit is global. Every call made through `ModelService` consumes one
-invocation, so one chat action can consume multiple invocations. The user-action
-limit applies per client IP to chat messages and transcript uploads. Creating or
+Both limits count the same unit: one user action, meaning one chat message or
+transcript upload. `DAILY_GLOBAL_ACTIONS` is shared by every client;
+`DAILY_USER_ACTIONS` applies per client IP. Neither counts individual LLM calls,
+of which one action makes several. Creating or
 deleting a session, reading program rules or course offerings, and checking
 health do not consume user actions.
 

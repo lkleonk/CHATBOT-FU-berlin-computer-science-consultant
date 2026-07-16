@@ -41,8 +41,13 @@ class Settings(BaseModel):
         PROVIDER: str = os.getenv("LLM_PROVIDER", "academiccloud")
 
     class Quota(BaseModel):
-        DAILY_LLM_INVOCATIONS: int = int(os.getenv("DAILY_LLM_INVOCATIONS", "200"))
-        DAILY_USER_ACTIONS: int = int(os.getenv("DAILY_USER_ACTIONS", "30"))
+        # Both counters are denominated in user actions. DAILY_LLM_INVOCATIONS is
+        # the pre-rename name, honoured as a fallback; it used to count individual
+        # LLM calls, so a value carried over from then buys roughly 3x the work.
+        DAILY_GLOBAL_ACTIONS: int = int(
+            os.getenv("DAILY_GLOBAL_ACTIONS", os.getenv("DAILY_LLM_INVOCATIONS", "150"))
+        )
+        DAILY_USER_ACTIONS: int = int(os.getenv("DAILY_USER_ACTIONS", "60"))
 
     class Sessions(BaseModel):
         INACTIVITY_TTL_SECONDS: int = int(os.getenv("SESSION_INACTIVITY_TTL_SECONDS", "172800"))

@@ -34,57 +34,64 @@ class DailyQuotaExceeded(HTTPException):
                 "X-RateLimit-Remaining": "0",
                 "X-RateLimit-Reset": reset_at.isoformat(),
                 "X-RateLimit-Scope": (
-                    "llm_global" if error_code == "daily_llm_quota_exceeded" else "user_action"
+                    "service_global"
+                    if error_code == "daily_service_quota_exceeded"
+                    else "user_action"
                 ),
             },
         )
 
 
 class InMemoryDailyQuota:
-    """Process-local UTC-day counters for LLM calls and client actions."""
+    """Process-local UTC-day counters for client actions, per-IP and service-wide.
+
+    Both counters are denominated in the same unit -- one user action (a chat
+    message or a transcript upload) -- so the two limits are directly comparable.
+    Neither counts individual LLM calls, of which one action makes several.
+    """
 
     def __init__(
         self,
         *,
-        llm_invocation_limit: int,
+        global_action_limit: int,
         user_action_limit: int,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
-        self.llm_invocation_limit = llm_invocation_limit
+        self.global_action_limit = global_action_limit
         self.user_action_limit = user_action_limit
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._lock = threading.Lock()
         self._day: date | None = None
-        self._llm_invocations = 0
+        self._global_actions = 0
         self._user_actions: dict[str, int] = defaultdict(int)
-
-    def consume_llm_invocation(self) -> None:
-        with self._lock:
-            now = self._utc_now()
-            self._roll_over_if_needed(now.date())
-            if self._llm_invocations >= self.llm_invocation_limit:
-                reset_at = self._next_reset(now.date())
-                raise DailyQuotaExceeded(
-                    error_code="daily_llm_quota_exceeded",
-                    message="The daily LLM usage limit has been reached. Please try again tomorrow.",
-                    limit=self.llm_invocation_limit,
-                    reset_at=reset_at,
-                )
-            self._llm_invocations += 1
 
     def consume_user_action(self, client_id: str) -> dict[str, int | datetime]:
         with self._lock:
             now = self._utc_now()
             self._roll_over_if_needed(now.date())
+            reset_at = self._next_reset(now.date())
+            # Check the caller's own limit first: when they are at it, that is the
+            # truthful reason they are blocked, whatever the service-wide state.
             if self._user_actions[client_id] >= self.user_action_limit:
-                reset_at = self._next_reset(now.date())
                 raise DailyQuotaExceeded(
                     error_code="daily_user_action_quota_exceeded",
                     message="Your daily action limit has been reached. Please try again tomorrow.",
                     limit=self.user_action_limit,
                     reset_at=reset_at,
                 )
+            if self._global_actions >= self.global_action_limit:
+                raise DailyQuotaExceeded(
+                    error_code="daily_service_quota_exceeded",
+                    message=(
+                        "The service-wide daily limit has been reached. Please try again tomorrow."
+                    ),
+                    limit=self.global_action_limit,
+                    reset_at=reset_at,
+                )
+            # Both checks pass before either counter moves, so a rejected action
+            # is never charged to the caller.
             self._user_actions[client_id] += 1
+            self._global_actions += 1
             return self._user_action_status_locked(client_id, now.date())
 
     def user_action_status(self, client_id: str) -> dict[str, int | datetime]:
@@ -92,6 +99,15 @@ class InMemoryDailyQuota:
             now = self._utc_now()
             self._roll_over_if_needed(now.date())
             return self._user_action_status_locked(client_id, now.date())
+
+    def service_status(self) -> dict[str, int]:
+        with self._lock:
+            self._roll_over_if_needed(self._utc_now().date())
+            return {
+                "limit": self.global_action_limit,
+                "used": self._global_actions,
+                "remaining": max(0, self.global_action_limit - self._global_actions),
+            }
 
     def _user_action_status_locked(
         self,
@@ -116,7 +132,7 @@ class InMemoryDailyQuota:
         if self._day == current_day:
             return
         self._day = current_day
-        self._llm_invocations = 0
+        self._global_actions = 0
         self._user_actions.clear()
 
     @staticmethod
@@ -125,6 +141,6 @@ class InMemoryDailyQuota:
 
 
 daily_quota = InMemoryDailyQuota(
-    llm_invocation_limit=settings.QUOTA.DAILY_LLM_INVOCATIONS,
+    global_action_limit=settings.QUOTA.DAILY_GLOBAL_ACTIONS,
     user_action_limit=settings.QUOTA.DAILY_USER_ACTIONS,
 )

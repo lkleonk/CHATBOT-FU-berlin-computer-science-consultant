@@ -80,7 +80,15 @@ export type UsageQuota = {
   reset_at: string;
 };
 
+/** Service-wide allowance, in the same user-action unit as UsageQuota. */
+export type ServiceQuota = {
+  limit: number;
+  used: number;
+  remaining: number;
+};
+
 export type UsageResponse = UsageQuota & {
+  service: ServiceQuota;
   session_inactivity_ttl_seconds: number;
   diagnostic_tracing_enabled: boolean;
   quota_scope: "client_ip";

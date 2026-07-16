@@ -78,8 +78,8 @@ export default function DatenschutzPage() {
           das Ergebnis der regelbasierten Prüfung weitergeführt, nicht der rohe extrahierte
           PDF-Text. Ist die diagnostische WizardFlow-Aufzeichnung aktiviert, kann der
           unredigierte extrahierte Text jedoch zusätzlich in einer lokalen Trace-Datei auf dem
-          Anwendungsserver gespeichert werden. Der Nutzungsdialog zeigt an, ob diese Aufzeichnung
-          aktiviert ist.
+          Anwendungsserver gespeichert werden. Diese Aufzeichnung lässt sich im Willkommensdialog
+          und unter „Settings“ abschalten; siehe Abschnitt 7.
         </p>
       </LegalSection>
 
@@ -117,6 +117,15 @@ export default function DatenschutzPage() {
           unredigierten Transkripttext enthalten und unterliegen nicht automatisch der
           48-stündigen Sitzungslöschung. Der Betreiber muss für die konkrete Bereitstellung einen
           Zugriffsschutz und eine Löschfrist festlegen.
+        </p>
+        <p>
+          Ist die Aufzeichnung in dieser Bereitstellung aktiviert, kann ihr im Willkommensdialog
+          oder jederzeit unter „Settings“ widersprochen werden. Nach dem Abschalten werden für
+          Anfragen dieses Browsers keine Trace-Daten mehr geschrieben; bereits zuvor
+          geschriebene Trace-Dateien werden dadurch nicht entfernt. Die Auswahl wird im
+          <code>localStorage</code> des Browsers gespeichert und gilt daher pro Browser. Ist die
+          Aufzeichnung serverseitig deaktiviert, entfällt die Auswahlmöglichkeit, weil keine
+          Trace-Daten entstehen.
         </p>
       </LegalSection>
 

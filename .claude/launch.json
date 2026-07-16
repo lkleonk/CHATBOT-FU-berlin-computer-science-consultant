@@ -13,6 +13,13 @@
       "autoPort": true
     },
     {
+      "name": "static-out",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npx serve out -l 3005"],
+      "cwd": "frontend",
+      "port": 3005
+    },
+    {
       "name": "backend",
       "runtimeExecutable": "cmd",
       "runtimeArgs": [
