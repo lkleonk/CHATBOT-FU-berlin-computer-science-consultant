@@ -177,6 +177,10 @@ const PRINT_STYLES = {
       backgroundColor: "#fde8e8 !important",
       color: "#9b1c1c !important",
     },
+    '[data-study-plan-print-root="true"] [data-rule-issue-chip="true"]': {
+      backgroundColor: "#ffedd5 !important",
+      color: "#9a3412 !important",
+    },
     '[data-study-plan-print-root="true"] .MuiAlert-root': {
       backgroundColor: "#ffffff !important",
       color: "#17211e !important",

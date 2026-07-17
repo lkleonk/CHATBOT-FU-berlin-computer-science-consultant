@@ -1,7 +1,14 @@
+import type { RuleIssue } from "@/types/api";
+
 import type { ChatMessage } from "./chatMessages";
 import { loadStoredChatMessages } from "./chatMessages";
 
 export type ChatExportFormat = "markdown" | "text";
+
+/** Blocking issues carry severity "error" in the API; users only ever see "issue". */
+function severityLabel(severity: RuleIssue["severity"]): string {
+  return severity === "error" ? "ISSUE" : "WARNING";
+}
 
 function renderMessage(message: ChatMessage): string {
   const lines = [`## ${message.role === "user" ? "You" : "Assistant"}`, "", message.content];
@@ -21,7 +28,7 @@ function renderMessage(message: ChatMessage): string {
     if (message.ruleCheckResult.issues.length) {
       lines.push("");
       for (const issue of message.ruleCheckResult.issues) {
-        lines.push(`- **${issue.severity.toUpperCase()} — ${issue.code}:** ${issue.message}`);
+        lines.push(`- **${severityLabel(issue.severity)} — ${issue.code}:** ${issue.message}`);
       }
     }
   }
@@ -45,7 +52,7 @@ function renderTextMessage(message: ChatMessage): string {
   if (message.ruleCheckResult) {
     lines.push("", "Rule check:", message.ruleCheckResult.summary);
     for (const issue of message.ruleCheckResult.issues) {
-      lines.push(`- ${issue.severity.toUpperCase()} - ${issue.code}: ${issue.message}`);
+      lines.push(`- ${severityLabel(issue.severity)} - ${issue.code}: ${issue.message}`);
     }
   }
 

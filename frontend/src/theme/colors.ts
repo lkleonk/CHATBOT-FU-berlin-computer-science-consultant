@@ -7,6 +7,7 @@ export const colors = {
   paperMuted: "#f5f7f6",
   border: "#d8dfdc",
   warning: "#b7791f",
+  issue: "#c2410c",
   danger: "#b3261e",
   success: "#157347",
   info: "#2f5f98",

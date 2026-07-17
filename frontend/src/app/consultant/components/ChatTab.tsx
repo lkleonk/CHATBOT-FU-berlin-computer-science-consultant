@@ -32,7 +32,7 @@ import {
 import { CitationList } from "./CitationList";
 import { ChatErrorDialog, DEFAULT_CHAT_ERROR_MESSAGE } from "./ChatErrorDialog";
 import { LinkifiedText } from "./LinkifiedText";
-import { RuleCheckPanel } from "./RuleCheckPanel";
+import { issueChipSx, RuleCheckPanel } from "./RuleCheckPanel";
 import { TranscriptUpload } from "./TranscriptUpload";
 import { CHAT_MESSAGES_STORAGE_KEY, SESSION_ID_STORAGE_KEY } from "./storage";
 
@@ -59,7 +59,7 @@ function formatResetTimeShort(value: string) {
 
 function countRuleIssues(result: RuleCheckResult) {
   return {
-    errors: result.issues.filter((issue) => issue.severity === "error").length,
+    issues: result.issues.filter((issue) => issue.severity === "error").length,
     warnings: result.issues.filter((issue) => issue.severity === "warning").length,
   };
 }
@@ -372,13 +372,14 @@ export function ChatTab({
                           </Typography>
                           <Chip
                             label={ruleCheckResult.is_valid ? "Valid" : "Needs changes"}
-                            color={ruleCheckResult.is_valid ? "success" : "error"}
+                            color={ruleCheckResult.is_valid ? "success" : "default"}
                             size="small"
+                            sx={ruleCheckResult.is_valid ? undefined : issueChipSx}
                           />
                           <Chip
-                            label={`${ruleIssueCounts.errors} errors`}
-                            color={ruleIssueCounts.errors ? "error" : "default"}
+                            label={`${ruleIssueCounts.issues} issues`}
                             size="small"
+                            sx={ruleIssueCounts.issues ? issueChipSx : undefined}
                           />
                           <Chip
                             label={`${ruleIssueCounts.warnings} warnings`}

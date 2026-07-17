@@ -13,6 +13,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
+import { colors } from "@/theme/colors";
 import type { RuleCheckResult, RuleIssue } from "@/types/api";
 
 type RuleCheckPanelProps = {
@@ -20,20 +21,31 @@ type RuleCheckPanelProps = {
   compact?: boolean;
 };
 
+/**
+ * Blocking rule issues are shown in orange rather than the theme's `error` red,
+ * which stays reserved for application failures (failed uploads, chat errors).
+ */
+export const issueChipSx = {
+  bgcolor: colors.issue,
+  color: "#ffffff",
+} as const;
+
+export const ISSUE_CHIP_MARKER = { "data-rule-issue-chip": "true" } as const;
+
 function formatKey(key: string) {
   return key.replace(/_/g, " ");
 }
 
 function issueIcon(issue: RuleIssue) {
   return issue.severity === "error" ? (
-    <ErrorOutlineIcon color="error" fontSize="small" />
+    <ErrorOutlineIcon fontSize="small" sx={{ color: colors.issue }} />
   ) : (
     <WarningAmberOutlinedIcon color="warning" fontSize="small" />
   );
 }
 
 export function RuleCheckPanel({ result, compact = false }: RuleCheckPanelProps) {
-  const errors = result.issues.filter((issue) => issue.severity === "error").length;
+  const issues = result.issues.filter((issue) => issue.severity === "error").length;
   const warnings = result.issues.filter((issue) => issue.severity === "warning").length;
   const totals = Object.entries(result.totals);
 
@@ -64,10 +76,17 @@ export function RuleCheckPanel({ result, compact = false }: RuleCheckPanelProps)
           <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap" }}>
             <Chip
               label={result.is_valid ? "Valid" : "Needs changes"}
-              color={result.is_valid ? "success" : "error"}
+              color={result.is_valid ? "success" : "default"}
               size="small"
+              sx={result.is_valid ? undefined : issueChipSx}
+              {...(result.is_valid ? {} : ISSUE_CHIP_MARKER)}
             />
-            <Chip label={`${errors} errors`} color={errors ? "error" : "default"} size="small" />
+            <Chip
+              label={`${issues} issues`}
+              size="small"
+              sx={issues ? issueChipSx : undefined}
+              {...(issues ? ISSUE_CHIP_MARKER : {})}
+            />
             <Chip
               label={`${warnings} warnings`}
               color={warnings ? "warning" : "default"}
